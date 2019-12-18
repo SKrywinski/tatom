@@ -104,7 +104,7 @@ Here are a number of examples of tokenizing functions:
     tokenizer.tokenize(text)
     tokenizer.tokenize(text_fr)
 
-    # use of makettrans to tokenize on spaces, stripping punctuation
+    # use of maketrans to tokenize on spaces, stripping punctuation
     # see python documentation for string.translate
     # string.punctuation is simply a list of punctuation
     import string
@@ -138,7 +138,7 @@ Snowball stemmer:
     stemmer = GermanStemmer()
 
     # note that the stem function works one word at a time
-    words = ["Wald", "Walde", "Wälder", "Wäldern", "Waldes","Walds"]
+    words = ["Wald", "Walde", "Wälder", "Wäldern", "Waldes", "Walds"]
 
     [stemmer.stem(w) for w in words]
 
