@@ -7,4 +7,7 @@ source/_static/
 source/generated
 source/cache
 datasets.zip
+
 notes*
+venv/
+.idea/
