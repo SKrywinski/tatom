@@ -11,4 +11,4 @@ datasets.zip
 notes*
 venv/
 .idea/
-jupinx-tatom/
+source/.ipynb_checkpoints
