@@ -99,8 +99,8 @@ Here are a number of examples of tokenizing functions:
     word_tokenize(text_fr)
 
     # nltk PunktWordTokenizer
-    from nltk.tokenize.punkt import PunktWordTokenizer
-    tokenizer = PunktWordTokenizer()
+    from nltk.tokenize import WordPunctTokenizer
+    tokenizer = WordPunctTokenizer()
     tokenizer.tokenize(text)
     tokenizer.tokenize(text_fr)
 
