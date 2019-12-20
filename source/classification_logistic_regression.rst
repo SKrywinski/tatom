@@ -47,7 +47,7 @@ percentage with the corresponding percentage for comedies. As usual, in order to
 have a better sense of the variability of language in French classical theatre,
 we have split the plays into approximately 1,000-word sections.
 
-.. ipython:: python
+.. code-block:: python3
 
     import os
 
@@ -79,7 +79,7 @@ we have split the plays into approximately 1,000-word sections.
 Having assembled the corpus, it is easy to calculate the number of play sections
 in which 'ennemis' occurs.
 
-.. ipython:: python
+.. code-block:: python3
 
     word = "ennemis"
     tragedy_counts = dtm[genre == 'tragedy', vocab == word]
@@ -175,7 +175,7 @@ First we will fit the logistic regression model using the ``statsmodels``
 package and then, converting from log odds to the more familiar scale of
 probability, we will plot this estimated relationship.
 
-.. ipython:: python
+.. code-block:: python3
 
     import statsmodels.api as sm
 
@@ -208,7 +208,7 @@ Using the fitted parameters of the model we can make a prediction for any given
 word frequency. For example, the probability of a section in which 'ennemis'
 occurs twice given by
 
-.. ipython:: python
+.. code-block:: python3
 
     def invlogit(x):
         """Convert from log odds to probability"""
@@ -223,7 +223,7 @@ the model's estimate of the probability of a section being from a tragedy.  The
 points on the figure mark the observations in the corpus. (The points have been
 jittered to improve readability.)
 
-.. ipython:: python
+.. code-block:: python3
 
     xs = np.arange(min(wordfreq), max(wordfreq) + 1, 0.1)
     ys = np.array([invlogit(x) for x in xs])
@@ -261,7 +261,7 @@ easy, provided we use its version of logistic regression, which is designed for
 large datasets and differs slightly from the version provided by R and
 statsmodels. [#fn_sklearn_logisticregression]_
 
-.. ipython:: python
+.. code-block:: python3
 
     from sklearn import cross_validation
     from sklearn import linear_model
@@ -278,7 +278,7 @@ would be expected to achieve 52% accuracy, as sections from tragedies make up 52
 Of course, if we give the model access to all the word frequencies in the corpus
 (not just 'ennemis') and ask it to make predictions it does much better:
 
-.. ipython:: python
+.. code-block:: python3
 
     clf = linear_model.LogisticRegression()
     cross_validation.cross_val_score(clf, dtm, genre == 'tragedy')

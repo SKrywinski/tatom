@@ -38,7 +38,7 @@ arguments.)
 First we need to import the functions and classes we intend to use, along with
 the customary abbreviation for functions in the ``numpy`` package.
 
-.. ipython:: python
+.. code-block:: python3
 
     import numpy as np  # a conventional alias
     from sklearn.feature_extraction.text import CountVectorizer
@@ -65,7 +65,7 @@ parameter. Other important parameters include:
 For this example we will use texts by Jane Austen and Charlotte Brontë. These
 texts are available in :ref:`datasets`.
 
-.. ipython:: python
+.. code-block:: python3
 
     filenames = ['data/austen-brontë/Austen_Emma.txt',
                  'data/austen-brontë/Austen_Pride.txt',
@@ -87,7 +87,7 @@ array. We will also convert the Python list storing our vocabulary, ``vocab``,
 into a NumPy array, as an array supports a greater variety of operations than
 a list.
 
-.. ipython:: python
+.. code-block:: python3
 
     # for reference, note the current class of `dtm`
     type(dtm)
@@ -112,7 +112,7 @@ With this preparatory work behind us, querying the document-term matrix is
 simple. For example, the following demonstrate two ways finding how many times
 the word 'house' occurs in the first text, *Emma*:
 
-.. ipython:: python
+.. code-block:: python3
 
     # the first file, indexed by 0 in Python, is *Emma*
     filenames[0] == 'data/austen-brontë/Austen_Emma.txt'
@@ -142,7 +142,7 @@ matrix product :math:`XY`.)
 Just so we have a sense of what we have just created, here is a section of the
 document-term matrix for a handful of selected words:
 
-.. ipython:: python
+.. code-block:: python3
     :suppress:
 
     import os
@@ -217,7 +217,7 @@ Since two novels in our corpus now have an expression as vectors, we can
 calculate the Euclidean distance between them. We can do this by hand or we can
 avail ourselves of the ``scikit-learn`` function ``euclidean_distances``.
 
-.. ipython:: python
+.. code-block:: python3
 
     # "by hand"
     n, _ = dtm.shape
@@ -259,7 +259,7 @@ need to "flip" the measure so that a larger angle receives a larger value. The
 distance measure derived from cosine similarity is therefore one minus the
 cosine similarity between two vectors.
 
-.. ipython:: python
+.. code-block:: python3
 
     from sklearn.metrics.pairwise import cosine_similarity
     dist = 1 - cosine_similarity(dtm)
@@ -276,7 +276,7 @@ cosine similarity between two vectors.
 Those interested in doing the calculation for themselves can use the following
 steps:
 
-.. ipython:: python
+.. code-block:: python3
 
     norms = np.sqrt(np.sum(dtm * dtm, axis=1, keepdims=True))  # multiplication between arrays is element-wise
     dtm_normed = dtm / norms
@@ -285,7 +285,7 @@ steps:
     # similarities between *Pride and Prejudice* and *Jane Eyre* is
     similarities[1, 3]
 
-.. ipython:: python
+.. code-block:: python3
     :suppress:
 
     import os
@@ -313,7 +313,7 @@ that it has a name, "`multidimensional scaling
 <https://en.wikipedia.org/wiki/Multidimensional_scaling>`_" (MDS) and family of
 functions in ``scikit-learn`` (and R too, see ``mdscale``).
 
-.. ipython:: python
+.. code-block:: python3
 
     import os  # for os.path.basename
     import matplotlib.pyplot as plt
@@ -325,7 +325,7 @@ functions in ``scikit-learn`` (and R too, see ``mdscale``).
     mds = MDS(n_components=2, dissimilarity="precomputed", random_state=1)
     pos = mds.fit_transform(dist)  # shape (n_components, n_samples)
 
-.. ipython:: python
+.. code-block:: python3
 
     xs, ys = pos[:, 0], pos[:, 1]
     # short versions of filenames:
@@ -345,7 +345,7 @@ functions in ``scikit-learn`` (and R too, see ``mdscale``).
 
 We can also do MDS in three dimensions:
 
-.. ipython:: python
+.. code-block:: python3
 
     # après Jeremy M. Stober, Tim Vieira
     # https://github.com/timvieira/viz/blob/master/mds.py
@@ -353,7 +353,7 @@ We can also do MDS in three dimensions:
     mds = MDS(n_components=3, dissimilarity="precomputed", random_state=1)
     pos = mds.fit_transform(dist)
 
-.. ipython:: python
+.. code-block:: python3
 
     from mpl_toolkits.mplot3d import Axes3D
     fig = plt.figure()
@@ -402,7 +402,7 @@ The function `scipy.cluster.hierarchy.ward
 this algorithm and returns a tree of cluster-merges. The hierarchy of clusters
 can be visualized using ``scipy.cluster.hierarchy.dendrogram``.
 
-.. ipython:: python
+.. code-block:: python3
 
     from scipy.cluster.hierarchy import ward, dendrogram
 
@@ -437,7 +437,7 @@ Exercises
    with the ``input='content'`` parameter, create a document-term matrix.
    Apart from the ``input`` parameter, use the default settings.
 
-.. ipython:: python
+.. code-block:: python3
 
     text1 = "Indeed, she had a rather kindly disposition."
     text2 = "The real evils, indeed, of Emma's situation were the power of having rather too much her own way, and a disposition to think a little too well of herself;"
@@ -449,7 +449,7 @@ Exercises
    distance (rather than similarity). Are our intuitions about which texts are
    most similar reflected in the measurements of distance?
 
-.. ipython:: python
+.. code-block:: python3
     :suppress:
 
     # SOLUTIONS

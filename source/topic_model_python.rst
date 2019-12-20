@@ -5,7 +5,7 @@
  Topic modeling in Python
 ==========================
 
-.. ipython:: python
+.. code-block:: python3
     :suppress:
 
     import numpy as np; np.set_printoptions(precision=2)
@@ -39,13 +39,13 @@ making the substitution of NMF for LDA where appropriate.
 This section uses the novels by Brontë and Austen. These novels are divided into
 parts as follows:
 
-.. ipython:: python
+.. code-block:: python3
 
     import os
     CORPUS_PATH = os.path.join('data', 'austen-brontë-split')
     filenames = sorted([os.path.join(CORPUS_PATH, fn) for fn in os.listdir(CORPUS_PATH)])
 
-.. ipython:: python
+.. code-block:: python3
 
     # files are located in data/austen-brontë-split
     len(filenames)
@@ -57,7 +57,7 @@ Using Non-negative matrix factorization
 As always we need to give Python access to our corpus. In this case we will work
 with our familiar document-term matrix.
 
-.. ipython:: python
+.. code-block:: python3
     :okwarning:
 
     import numpy as np  # a conventional alias
@@ -75,7 +75,7 @@ will also be referred to as "components") and a list of top words for each
 topic. We will make analogy clear by using the same variable names:
 ``doctopic`` and ``topic_words``
 
-.. ipython:: python
+.. code-block:: python3
 
     from sklearn import decomposition
 
@@ -86,7 +86,7 @@ topic. We will make analogy clear by using the same variable names:
 
     # this next step may take some time
 
-.. ipython:: python
+.. code-block:: python3
     :suppress:
 
     # suppress this
@@ -111,7 +111,7 @@ topic. We will make analogy clear by using the same variable names:
 
    doctopic = clf.fit_transform(dtm)
 
-.. ipython:: python
+.. code-block:: python3
 
     # print words associated with topics
     topic_words = []
@@ -123,14 +123,14 @@ To make the analysis and visualization of NMF components similar to that of
 LDA's topic proportions, we will scale the document-component matrix such that
 the component values associated with each document sum to one.
 
-.. ipython:: python
+.. code-block:: python3
 
     doctopic = doctopic / np.sum(doctopic, axis=1, keepdims=True)
 
 Now we will average those topic shares associated with the same novel together
 --- just as we did with the topic shares from MALLET.
 
-.. ipython:: python
+.. code-block:: python3
 
     novel_names = []
     for fn in filenames:
@@ -160,7 +160,7 @@ Now we will average those topic shares associated with the same novel together
     docnames = sorted(set(novel_names))
 
 
-.. ipython:: python
+.. code-block:: python3
     :suppress:
 
     import pandas as pd
@@ -183,7 +183,7 @@ Inspecting the NMF fit
 
 The topics (or components) of the NMF fit preserve the distances between novels (see the figures below).
 
-.. ipython:: python
+.. code-block:: python3
     :suppress:
 
     # COSINE SIMILARITY
@@ -196,7 +196,7 @@ The topics (or components) of the NMF fit preserve the distances between novels 
     mds = MDS(n_components=2, dissimilarity="precomputed", random_state=1)
     pos = mds.fit_transform(dist)  # shape (n_components, n_samples)
 
-.. ipython:: python
+.. code-block:: python3
     :suppress:
 
     assert dtm.shape[0] == doctopic_orig.shape[0]
@@ -213,7 +213,7 @@ The topics (or components) of the NMF fit preserve the distances between novels 
     @savefig plot_nmf_section_austen_brontë_cosine_mds.png width=7in
     plt.show()
 
-.. ipython:: python
+.. code-block:: python3
     :suppress:
 
     # NMF
@@ -226,7 +226,7 @@ The topics (or components) of the NMF fit preserve the distances between novels 
     mds = MDS(n_components=2, dissimilarity="precomputed", random_state=1)
     pos = mds.fit_transform(dist)  # shape (n_components, n_samples)
 
-.. ipython:: python
+.. code-block:: python3
     :suppress:
 
     # NOTE: the IPython directive seems less prone to errors when these blocks are split up
@@ -249,7 +249,7 @@ As we did in the previous section, let us identify the most significant topics
 for each text in the corpus.  This procedure does not differ in essence from the
 procedure for identifying the most frequent words in each text.
 
-.. ipython:: python
+.. code-block:: python3
 
     novels = sorted(set(novel_names))
     print("Top NMF topics in...")
@@ -261,7 +261,7 @@ procedure for identifying the most frequent words in each text.
 And we already have lists of words (``topic_words``) most strongly associated
 with the components. For reference, we will display them again:
 
-.. ipython:: python
+.. code-block:: python3
 
     # show the top 15 words
     for t in range(len(topic_words)):
@@ -278,7 +278,7 @@ Consider the task of finding the topics that are distinctive of Austen using the
 NMF "topics". Using the simple difference-in-averages we can find topics that to
 be associated with Austen's novels rather than Brontë's.
 
-.. ipython:: python
+.. code-block:: python3
 
     austen_indices, cbronte_indices = [], []
     for index, fn in enumerate(sorted(set(novel_names))):
@@ -295,7 +295,7 @@ be associated with Austen's novels rather than Brontë's.
     # distinctive topics:
     ranking[:10]
 
-.. ipython:: python
+.. code-block:: python3
     :suppress:
 
     N_WORDS_DISPLAY = 10

@@ -5,7 +5,7 @@
  Preprocessing
 ===============
 
-.. ipython:: python
+.. code-block:: python3
     :suppress:
 
     import numpy as np; np.set_printoptions(precision=3)
@@ -74,7 +74,7 @@ there are a number of tokenization strategies in circulation.
 
 Here are a number of examples of tokenizing functions:
 
-.. ipython:: python
+.. code-block:: python3
 
     # note: there are three spaces between "at" and "her" to make the example more
     # realistic (texts are frequently plagued by such idiosyncracies)
@@ -131,7 +131,7 @@ NLTK offers stemming for a variety of languages in the `nltk.stem package
 <http://nltk.org/api/nltk.stem.html>`_. The following code illustrates the use of the popular
 Snowball stemmer:
 
-.. ipython:: python
+.. code-block:: python3
 
     from nltk.stem.snowball import GermanStemmer
 
@@ -164,7 +164,7 @@ To demonstrate how to divide a large text into smaller chunks, we will be
 working with the :ref:`corpus of French tragedies <datasets>`. The following
 shows the first plays in the corpus:
 
-.. ipython:: python
+.. code-block:: python3
 
     import os
     import numpy as np
@@ -199,7 +199,7 @@ One way to split a text is to read through it and create a chunk every *n*
 words, where *n* is a number such as 500, 1,000 or 10,000. The following
 function accomplishes this:
 
-.. ipython:: python
+.. code-block:: python3
 
     def split_text(filename, n_words):
         """Split a text into chunks approximately `n_words` words in length."""
@@ -232,7 +232,7 @@ collect them in a list of Python `dictionaries
 will be one dictionary for each chunk, containing the original filename,
 a number for the chunk, and the text of the chunk.
 
-.. ipython:: python
+.. code-block:: python3
     :okwarning:
 
     tragedy_filenames = [os.path.join(corpus_path, fn) for fn in sorted(os.listdir(corpus_path))]
@@ -264,7 +264,7 @@ a number for the chunk, and the text of the chunk.
     dtm = vectorizer.fit_transform([c['text'] for c in chunks])
     vocab = np.array(vectorizer.get_feature_names())
 
-.. ipython:: python
+.. code-block:: python3
     :suppress:
 
     OUTPUT_HTML_PATH = os.path.join('source', 'generated')
@@ -278,7 +278,7 @@ a number for the chunk, and the text of the chunk.
     rownames = [c['filename'] + str(c['number']) for c in chunks[0:N_DOCS_DISPLAY]]
     html = pd.DataFrame(arr, index=rownames, columns=colnames).to_html()
 
-.. ipython:: python
+.. code-block:: python3
     :suppress:
 
     # splitting up these blocks seems to help reduce strange ipython directive
@@ -295,7 +295,7 @@ Writing chunks to a directory
 These chunks may be saved in a directory for reference or for analysis in
 another program (such as MALLET or R).
 
-.. ipython:: python
+.. code-block:: python3
 
     # make sure the directory exists
     output_dir = '/tmp/'
@@ -323,7 +323,7 @@ paragraphs. That is, if the text of *Jane Eyre* is contained in the variable
 ``text`` then the following sequence will split the document into
 paragraphs:
 
-.. ipython:: python
+.. code-block:: python3
 
     text = "There was no possibility of taking a walk that day. We had been wandering, indeed, in the leafless shrubbery an hour in the morning; but since dinner (Mrs. Reed, when there was no company, dined early) the cold winter wind had brought with it clouds so sombre, and a rain so penetrating, that further out-door exercise was now out of the question.\nI was glad of it: I never liked long walks, especially on chilly afternoons: dreadful to me was the coming home in the raw twilight, with nipped fingers and toes, and a heart saddened by the chidings of Bessie, the nurse, and humbled by the consciousness of my physical inferiority to Eliza, John, and Georgiana Reed."
     text
@@ -335,7 +335,7 @@ By contrast, in the `Project Gutenberg edition of Brontë's novel
 by two newlines in sequence. We still use the ``split`` method but we will use
 two newlines ``\n\n`` as our delimiter:
 
-.. ipython:: python
+.. code-block:: python3
 
     text = "There was no possibility of taking a walk that day.  We had been\nwandering, indeed, in the leafless shrubbery an hour in the morning; but\nsince dinner (Mrs. Reed, when there was no company, dined early) the cold\nwinter wind had brought with it clouds so sombre, and a rain so\npenetrating, that further out-door exercise was now out of the question.\n\nI was glad of it: I never liked long walks, especially on chilly\nafternoons: dreadful to me was the coming home in the raw twilight, with\nnipped fingers and toes, and a heart saddened by the chidings of Bessie,\nthe nurse, and humbled by the consciousness of my physical inferiority to\nEliza, John, and Georgiana Reed."
 
@@ -364,7 +364,7 @@ corpus. So our first step will be to associate each text (the contents of each
 file) with the name of its author. As before we will use a list of dictionaries
 to manage our data.
 
-.. ipython:: python
+.. code-block:: python3
 
     # in every filename the author's last name is followed by an underscore ('_'),
     # for example: Voltaire_TR-V-1764-Olympie.txt
@@ -408,7 +408,7 @@ comfortable with R or Octave/Matlab. (Those for whom this method is unfamiliar
 will benefit from reviewing the introductions to NumPy mentioned in
 :ref:`getting-started`.)
 
-.. ipython:: python
+.. code-block:: python3
     :okwarning:
 
     # first get a document-term-matrix of word frequencies for our corpus
@@ -416,7 +416,7 @@ will benefit from reviewing the introductions to NumPy mentioned in
     dtm = vectorizer.fit_transform(tragedy_filenames).toarray()
     vocab = np.array(vectorizer.get_feature_names())
 
-.. ipython:: python
+.. code-block:: python3
 
     authors = np.array([os.path.basename(filename).split('_')[0] for filename in tragedy_filenames])
 
@@ -438,7 +438,7 @@ that there are packages devoted to making the work easier. For example, if you
 have the `pandas library <http://pandas.pydata.org>`_ installed, you can
 accomplish what we just did in two lines of code:
 
-.. ipython:: python
+.. code-block:: python3
 
     import pandas
     authors = [os.path.basename(filename).split('_')[0] for filename in tragedy_filenames]
@@ -456,7 +456,7 @@ function in the Python standard library `itertools
 advantage of being fast and memory efficient. As a warm-up exercise, we will
 group just the filenames by author using ``groupby`` function.
 
-.. ipython:: python
+.. code-block:: python3
 
     import itertools
     import operator
@@ -478,7 +478,7 @@ group just the filenames by author using ``groupby`` function.
     d['number']
     operator.itemgetter('number')(d)
 
-.. ipython:: python
+.. code-block:: python3
 
     grouped_data = {}
     for author, grouped in itertools.groupby(texts, key=operator.itemgetter('author')):
@@ -491,7 +491,7 @@ We use the same strategy of creating a collection of dictionaries with the
 information we want to aggregate and the key---the author's name---that
 identifies each group.
 
-.. ipython:: python
+.. code-block:: python3
     :okwarning:
 
     texts = []
@@ -519,7 +519,7 @@ Now that we have done the work of grouping these texts together, we can examine
 the relationships among the four authors using the exploratory techniques we
 learned in :ref:`working-with-text`.
 
-.. ipython:: python
+.. code-block:: python3
 
     import matplotlib
     import matplotlib.pyplot as plt
@@ -530,7 +530,7 @@ learned in :ref:`working-with-text`.
     mds = MDS(n_components=2, dissimilarity="precomputed")
     pos = mds.fit_transform(dist)  # shape (n_components, n_samples)
 
-.. ipython:: python
+.. code-block:: python3
 
     xs, ys = pos[:, 0], pos[:, 1]
     names = sorted(set(authors))
@@ -548,7 +548,7 @@ If, for instance, we had wanted to organize our texts into 50 year periods
 (1650-1699, 1700-1749, ...) rather than by author, we would begin by extracting
 the publication year from the filename.
 
-.. ipython:: python
+.. code-block:: python3
     :okwarning:
 
     # extract year from filename
@@ -567,7 +567,7 @@ the publication year from the filename.
 Then we would create a list of group identifiers based on the periods that
 interest us:
 
-.. ipython:: python
+.. code-block:: python3
     :okwarning:
 
     # all the texts are published between 1600 and 1800
@@ -594,7 +594,7 @@ interest us:
 Finally we would group the texts together using the same procedure as we did
 with authors.
 
-.. ipython:: python
+.. code-block:: python3
 
     periods_unique = sorted(set(periods))
     dtm_periods = np.zeros((len(periods_unique), len(vocab)))
@@ -621,7 +621,7 @@ Exercises
    kind of information that is lost by ignoring case. Provide another example of
    useful information lost when lowercasing all words.
 
-.. ipython:: python
+.. code-block:: python3
     :suppress:
 
     # SOLUTIONS

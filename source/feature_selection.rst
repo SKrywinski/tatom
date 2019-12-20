@@ -8,7 +8,7 @@
  Feature selection: finding distinctive words
 ==============================================
 
-.. ipython:: python
+.. code-block:: python3
     :suppress:
 
     import numpy as np; np.set_printoptions(precision=2)
@@ -37,7 +37,7 @@ of novels containing works by two authors: Jane Austen and Charlotte Brontë.
 This :ref:`corpus of six novels <datasets>` consists of the following text
 files:
 
-.. ipython:: python
+.. code-block:: python3
     :suppress:
 
     N_WORDS_DISPLAY = 11
@@ -54,7 +54,7 @@ files:
     CBRONTE_FILENAMES = ['CBronte_Jane.txt', 'CBronte_Professor.txt', 'CBronte_Villette.txt']
     filenames = AUSTEN_FILENAMES + CBRONTE_FILENAMES
 
-.. ipython:: python
+.. code-block:: python3
 
     filenames
 
@@ -88,7 +88,7 @@ other ways to account for document length---a procedure called
 appealing feature of word rates per 1,000 words is that readers are familiar
 with documents of this length (e.g., a newspaper article).
 
-.. ipython:: python
+.. code-block:: python3
     :okwarning:
 
     import os
@@ -115,7 +115,7 @@ with documents of this length (e.g., a newspaper article).
     # normalize counts to rates per 1000 words
     rates = 1000 * dtm / np.sum(dtm, axis=1, keepdims=True)
 
-.. ipython:: python
+.. code-block:: python3
     :suppress:
 
     assert rates.shape == dtm.shape
@@ -126,7 +126,7 @@ with documents of this length (e.g., a newspaper article).
     with open(os.path.join(OUTPUT_HTML_PATH, 'feature_selection_rates.txt'), 'w') as f:
         f.write(html)
 
-.. ipython:: python
+.. code-block:: python3
 
     # just examine a sample, those at offsets 100 to 105
     rates[:, 100:105]
@@ -156,7 +156,7 @@ A simple way of identifying words unique to one author would be to calculate the
 average rate of word use across all texts for each author and then to look for
 cases where the average rate is zero for one author.
 
-.. ipython:: python
+.. code-block:: python3
 
     # indices so we can refer to the rows for the relevant author
     austen_indices, cbronte_indices = [], []
@@ -183,7 +183,7 @@ cases where the average rate is zero for one author.
     ranking = np.argsort(austen_rates_avg[distinctive_indices] + cbronte_rates_avg[distinctive_indices])[::-1]  # from highest to lowest; [::-1] reverses order.
     vocab[distinctive_indices][ranking]
 
-.. ipython:: python
+.. code-block:: python3
     :suppress:
 
     arr = np.vstack([austen_rates_avg[distinctive_indices][ranking][0:N_WORDS_DISPLAY],
@@ -201,7 +201,7 @@ Now that we have identified these words, we will remove them from our corpus in
 order to focus on identifying distinctive words that appear in texts associated
 with every author.
 
-.. ipython:: python
+.. code-block:: python3
 
     dtm = dtm[:, np.invert(distinctive_indices)]
     rates = rates[:, np.invert(distinctive_indices)]
@@ -226,7 +226,7 @@ definition of distinctiveness (sometimes called "keyness") we will consider.
 Using this measure we can calculate the top ten distinctive words in the
 Austen-Brontë comparison as follows:
 
-.. ipython:: python
+.. code-block:: python3
 
     import numpy as np
 
@@ -237,7 +237,7 @@ Austen-Brontë comparison as follows:
     # print the top 10 words along with their rates and the difference
     vocab[ranking][0:10]
 
-.. ipython:: python
+.. code-block:: python3
     :suppress:
 
     arr = np.vstack([keyness[ranking][0:N_WORDS_DISPLAY],
@@ -274,7 +274,7 @@ by a large number will make that quantity smaller, our new distinctiveness score
 will tend to be lower for words that occur frequently. While this is merely
 a heuristic, it does move us in the right direction.
 
-.. ipython:: python
+.. code-block:: python3
 
     # we have already calculated the following quantities
     # austen_rates_avg
@@ -288,7 +288,7 @@ a heuristic, it does move us in the right direction.
     # print the top 10 words along with their rates and the difference
     vocab[ranking][0:10]
 
-.. ipython:: python
+.. code-block:: python3
     :suppress:
 
     arr = np.vstack([keyness[ranking][0:N_WORDS_DISPLAY],
@@ -407,7 +407,7 @@ We need to determine suitable values for the priors' parameters
 occur quite frequently, almost all words (>99%) occur less than four times per
 1,000 words:
 
-.. ipython:: python
+.. code-block:: python3
 
     np.mean(rates < 4)
 
@@ -454,7 +454,7 @@ a distribution of posterior values for :math:`\delta`, which is the variable we
 care about in this context as it characterizes our belief about the difference
 in authors' word usage.
 
-.. ipython:: python
+.. code-block:: python3
 
     def sample_posterior(y1, y2, mu0, sigma20, nu0, delta0, gamma20, tau20, S):
         """Draw samples from posterior distribution using Gibbs sampling
@@ -493,7 +493,7 @@ in authors' word usage.
             chains['sigma2'][s] = sigma2
         return chains
 
-.. ipython:: python
+.. code-block:: python3
 
     # data
     word = "green"
@@ -531,7 +531,7 @@ output of the Gibbs sampler. The following demonstrates the calculation of this
 probability for two different words, 'green' and 'dark', both words more
 characteristic of the Brontë novels than the Austen novels.
 
-.. ipython:: python
+.. code-block:: python3
 
     y1 = austen_rates[:, vocab == 'green']
     y2 = cbronte_rates[:, vocab == 'green']
@@ -547,7 +547,7 @@ characteristic of the Brontë novels than the Austen novels.
     np.mean(delta_dark < 0)
 
 
-.. ipython:: python
+.. code-block:: python3
 
     words = ['dark', 'green']
     ix = np.in1d(vocab, words)
@@ -557,7 +557,7 @@ characteristic of the Brontë novels than the Austen novels.
 
     keyness = np.asarray([np.mean(delta_dark < 0), np.mean(delta_green < 0)])
 
-.. ipython:: python
+.. code-block:: python3
     :suppress:
 
     arr = [keyness, austen_rates_avg[ix], cbronte_rates_avg[ix]]
@@ -578,7 +578,7 @@ occurring in the corpus, we need only write one short loop and make an
 adjustment for the fact that we don't care whether or not :math:`\delta` is
 positive or negative:
 
-.. ipython:: python
+.. code-block:: python3
 
     # fewer samples to speed things up, this may take several minutes to run
     S = 200
@@ -591,7 +591,7 @@ positive or negative:
         delta = chains['delta']
         return np.max([np.mean(delta < 0), np.mean(delta > 0)])
 
-.. ipython:: python
+.. code-block:: python3
     :suppress:
 
     # because this computation takes so long, we will try to cache it
@@ -607,14 +607,14 @@ positive or negative:
     # apply the function over all columns
     In [117]: keyness = np.apply_along_axis(delta_confidence, axis=0, arr=rates)
 
-.. ipython:: python
+.. code-block:: python3
 
     ranking = np.argsort(keyness)[::-1]  # from highest to lowest; [::-1] reverses order.
 
     # print the top 10 words along with their rates and the difference
     vocab[ranking][0:10]
 
-.. ipython:: python
+.. code-block:: python3
     :suppress:
 
     arr = np.vstack([keyness[ranking][0:N_WORDS_DISPLAY],
@@ -661,7 +661,7 @@ difference: picking a word from each author-specific corpus at random, one is te
 times more likely to find "green" in the Brontë corpus. To summarize the
 appearance of the word "green" we may assemble a table with the following code:
 
-.. ipython:: python
+.. code-block:: python3
 
     green_austen = np.sum(dtm[austen_indices, vocab == "green"])
     nongreen_austen = np.sum(dtm[austen_indices, :]) - green_austen
@@ -672,7 +672,7 @@ appearance of the word "green" we may assemble a table with the following code:
                             [green_cbronte, nongreen_cbronte]])
     green_table
 
-.. ipython:: python
+.. code-block:: python3
     :suppress:
 
     arr = green_table
@@ -692,7 +692,7 @@ unnecessary, that :math:`P(word = "green" | author = "Austen") = P(word
 anticipate seeing the following frequencies given the total number of words
 for each group of texts:
 
-.. ipython:: python
+.. code-block:: python3
 
     prob_green = np.sum(dtm[:, vocab == "green"]) / np.sum(dtm)
     prob_notgreen = 1 - prob_green
@@ -744,7 +744,7 @@ The log likelihood ratio is calculated as follows:
 where :math:`i` indexes the cells. (Note the similarity of this formula to the
 calculation of :ref:`mutual information <mutual_information>`.) In Python:
 
-.. ipython:: python
+.. code-block:: python3
 
     G = np.sum(green_table * np.log(green_table / expected_table))
 
@@ -757,7 +757,7 @@ calculate. The Python library ``scikit-learn`` provides a function
 ``sklearn.feature_selection.chi2`` that allows us to use this test statistic as
 a feature selection method:
 
-.. ipython:: python
+.. code-block:: python3
 
     from sklearn.feature_selection import chi2
     labels = []
@@ -771,7 +771,7 @@ a feature selection method:
     ranking = np.argsort(keyness)[::-1]
     vocab[ranking][0:10]
 
-.. ipython:: python
+.. code-block:: python3
     :suppress:
 
     arr = np.vstack([keyness[ranking][0:N_WORDS_DISPLAY],
@@ -796,7 +796,7 @@ a feature selection method:
     logarithm takes about twenty times longer than taking the square (simple
     multiplication):
 
-    .. ipython:: python
+    .. code-block:: python3
 
         import timeit
         time_log = timeit.timeit("import numpy as np; np.log(np.arange(40000))", number=100)
@@ -849,7 +849,7 @@ plotting the cosine distance among texts in the corpus before and after feature
 selection is applied. ``chi2`` is the feature selection used in the bottom
 figure and the top 50 words are used.
 
-.. ipython:: python
+.. code-block:: python3
     ::suppress::
 
     import matplotlib.pyplot as plt
@@ -859,7 +859,7 @@ figure and the top 50 words are used.
     mds = MDS(n_components=2, dissimilarity="precomputed")
     pos = mds.fit_transform(dist)  # shape (n_components, n_samples)
 
-.. ipython:: python
+.. code-block:: python3
     ::suppress::
 
     xs, ys = pos[:, 0], pos[:, 1]
@@ -873,7 +873,7 @@ figure and the top 50 words are used.
     plt.title("Before feature selection")
 
 
-.. ipython:: python
+.. code-block:: python3
     ::suppress::
 
     keyness, _ = chi2(dtm, names)
@@ -884,7 +884,7 @@ figure and the top 50 words are used.
     pos = mds.fit_transform(dist)  # shape (n_components, n_samples)
 
 
-.. ipython:: python
+.. code-block:: python3
     ::suppress::
 
     xs, ys = pos[:, 0], pos[:, 1]
@@ -907,7 +907,7 @@ Exercises
    characteristic words by the :math:`\chi^2` statistic. How do these
    compare with those you found in exercise 1?
 
-.. ipython:: python
+.. code-block:: python3
     ::suppress::
 
     import random
@@ -917,7 +917,7 @@ Exercises
     group_a = shuffled[:len(filenames)//2]
     group_b = shuffled[len(filenames)//2:]
 
-.. ipython:: python
+.. code-block:: python3
     ::suppress::
 
     group_a

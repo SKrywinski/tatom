@@ -5,7 +5,7 @@
  Topic modeling with MALLET
 ============================
 
-.. ipython:: python
+.. code-block:: python3
     :suppress:
 
     import numpy as np; np.set_printoptions(precision=2)
@@ -42,13 +42,13 @@ the results.
 This section uses six novels by Brontë and Austen. These novels are divided into
 parts as follows:
 
-.. ipython:: python
+.. code-block:: python3
 
     import os
     CORPUS_PATH = os.path.join('data', 'austen-brontë-split')
     filenames = sorted([os.path.join(CORPUS_PATH, fn) for fn in os.listdir(CORPUS_PATH)])
 
-.. ipython:: python
+.. code-block:: python3
 
     # files are located in data/austen-brontë-split
     len(filenames)
@@ -131,7 +131,7 @@ documentation in the Python library `itertools
 <http://docs.python.org/dev/library/itertools.html>`_ describes a function
 called ``grouper`` using ``itertools.izip_longest`` that solves our problem.
 
-.. ipython:: python
+.. code-block:: python3
     :suppress:
 
     import os
@@ -145,7 +145,7 @@ called ``grouper`` using ``itertools.izip_longest`` that solves our problem.
     if not os.path.exists(MALLET_INPUT):
         subprocess.check_call('mallet-2.0.7/bin/mallet import-dir --input data/austen-brontë-split/ --output {} --keep-sequence --remove-stopwords'.format(MALLET_INPUT), shell=True)
 
-.. ipython:: python
+.. code-block:: python3
     :suppress:
 
     # again, splitting up to help IPython parse
@@ -158,7 +158,7 @@ called ``grouper`` using ``itertools.izip_longest`` that solves our problem.
     shutil.copy(MALLET_KEYS,'/tmp/topic-keys-austen-brontë.txt')
 
 
-.. ipython:: python
+.. code-block:: python3
 
     import numpy as np
     import itertools
@@ -207,7 +207,7 @@ called ``grouper`` using ``itertools.izip_longest`` that solves our problem.
     @suppress
     doctopic_orig = doctopic.copy()
 
-.. ipython:: python
+.. code-block:: python3
     :suppress:
 
     assert len(doctopic_triples) % num_docs == 0
@@ -215,7 +215,7 @@ called ``grouper`` using ``itertools.izip_longest`` that solves our problem.
     assert len(doctopic) == len(filenames)
     assert np.allclose(np.sum(doctopic, axis=1), 1)
 
-.. ipython:: python
+.. code-block:: python3
 
     # The following method is considerably faster. It uses the itertools library which is part of the Python standard library.
     import itertools
@@ -224,7 +224,7 @@ called ``grouper`` using ``itertools.izip_longest`` that solves our problem.
     for i, (doc_name, triples) in enumerate(itertools.groupby(doctopic_triples, key=operator.itemgetter(0))):
         doctopic[i, :] = np.array([share for _, _, share in triples])
 
-.. ipython:: python
+.. code-block:: python3
     :suppress:
 
     assert np.all(doctopic > 0)
@@ -237,7 +237,7 @@ novel. Recall that we have been working with small sections of novels. The
 following step combines the topic shares for sections associated with the same
 novel.
 
-.. ipython:: python
+.. code-block:: python3
 
     novel_names = []
     for fn in filenames:
@@ -267,7 +267,7 @@ novel.
     docnames = sorted(set(novel_names))
 
 
-.. ipython:: python
+.. code-block:: python3
     :suppress:
 
     import pandas as pd
@@ -295,7 +295,7 @@ is good at dimensionality reduction: we have taken a matrix of dimensions 813 by
 and fashioned a representation that preserves important features in a matrix
 that is 813 by 20 (5% the size of the original).
 
-.. ipython:: python
+.. code-block:: python3
     :okwarning:
 
     from sklearn.feature_extraction.text import CountVectorizer
@@ -312,7 +312,7 @@ that is 813 by 20 (5% the size of the original).
     doctopic_orig.data.nbytes  # number of bytes document-topic shares take up
 
 
-.. ipython:: python
+.. code-block:: python3
     :suppress:
 
     # COSINE SIMILARITY
@@ -325,7 +325,7 @@ that is 813 by 20 (5% the size of the original).
     mds = MDS(n_components=2, dissimilarity="precomputed", random_state=1)
     pos = mds.fit_transform(dist)  # shape (n_components, n_samples)
 
-.. ipython:: python
+.. code-block:: python3
     :suppress:
 
     assert dtm.shape[0] == doctopic_orig.shape[0]
@@ -342,7 +342,7 @@ that is 813 by 20 (5% the size of the original).
     @savefig plot_topic_model_cosine_mds.png width=7in
     plt.show()
 
-.. ipython:: python
+.. code-block:: python3
     :suppress:
 
     # TOPIC-MODEL
@@ -355,7 +355,7 @@ that is 813 by 20 (5% the size of the original).
     mds = MDS(n_components=2, dissimilarity="precomputed", random_state=1)
     pos = mds.fit_transform(dist)  # shape (n_components, n_samples)
 
-.. ipython:: python
+.. code-block:: python3
     :suppress:
 
     # NOTE: the IPython directive seems less prone to errors when these blocks
@@ -381,7 +381,7 @@ First let us identify the most significant topics for each text in the corpus.
 This procedure does not differ in essence from the procedure for identifying the
 most frequent words in each text.
 
-.. ipython:: python
+.. code-block:: python3
 
     novels = sorted(set(novel_names))
     print("Top topics in...")
@@ -412,7 +412,7 @@ should resemble the following:
 We need to parse this file into something we can work with. Fortunately this
 task is not difficult.
 
-.. ipython:: python
+.. code-block:: python3
 
     with open('/tmp/topic-keys-austen-brontë.txt') as input:
         topic_keys_lines = input.readlines()
@@ -427,7 +427,7 @@ task is not difficult.
 
 Now we have everything we need to list the words associated with each topic.
 
-.. ipython:: python
+.. code-block:: python3
 
     N_WORDS_DISPLAY = 10
     for t in range(len(topic_words)):
@@ -451,7 +451,7 @@ Consider the task of finding the distinctive topics in Austen's novels. Here the
 simple difference-in-averages provides an easy way of finding topics that tend
 to be associated more strongly with Austen's novels than with Brontë's.
 
-.. ipython:: python
+.. code-block:: python3
 
     austen_indices, cbronte_indices = [], []
     for index, fn in enumerate(sorted(set(novel_names))):
@@ -468,7 +468,7 @@ to be associated more strongly with Austen's novels than with Brontë's.
     # distinctive topics:
     ranking[:10]
 
-.. ipython:: python
+.. code-block:: python3
     :suppress:
 
     N_WORDS_DISPLAY = 10

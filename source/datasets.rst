@@ -9,7 +9,7 @@
 ==========
 
 
-.. ipython:: python
+.. code-block:: python3
     :suppress:
 
     import shutil

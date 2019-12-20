@@ -33,7 +33,7 @@ texts in our corpus. If we have a document-term matrix available, the length in
 words may be calculated by summing the rows of the document-term matrix, as each
 row corresponds to one document.
 
-.. ipython:: python
+.. code-block:: python3
     :okwarning:
 
     import os
@@ -60,7 +60,7 @@ row corresponds to one document.
 Now that we have the texts' lengths stored in the array ``lengths`` we can
 create a histogram with the matplotlib function ``hist``.
 
-.. ipython:: python
+.. code-block:: python3
 
     import matplotlib.pyplot as plt
 
@@ -78,7 +78,7 @@ plot the distances between texts. We have already seen how to do this in
 length---and the histogram of lengths shows us that there is considerable
 variation---cosine distance is an appropriate choice for a measure of distance.
 
-.. ipython:: python
+.. code-block:: python3
 
     from sklearn.manifold import MDS
     from sklearn.metrics.pairwise import cosine_similarity
@@ -99,7 +99,7 @@ variation---cosine distance is an appropriate choice for a measure of distance.
         authors.append(author)
         names.append(author + year)
 
-.. ipython:: python
+.. code-block:: python3
 
     plt.figure(figsize=(11.3, 7))  # use a bigger canvas than usual
     xs, ys = pos[:, 0], pos[:, 1]
@@ -122,7 +122,7 @@ each often yielding different hierarchies. Right now we are interested in the
 dendrogram as a convenient summary of the multi-dimensional scaling plot shown
 above.
 
-.. ipython:: python
+.. code-block:: python3
 
     from scipy.cluster.hierarchy import ward, dendrogram
 
@@ -157,7 +157,7 @@ written by Racine. To display this chronology visually we may use a raster
 graph, coloring the outliers a distinct color. (This visualization has the added
 benefit of showing the nearly ten year gap between plays in the 1680s.)
 
-.. ipython:: python
+.. code-block:: python3
 
     @suppress
     plt.figure(figsize=(11.3, 5))  # reset figure size
@@ -203,7 +203,7 @@ NMF it is helpful to normalize each document by length. Here we will
 normalize and, additionally, use tf-idf weighting as the invocation is simple:
 we use ``TfidfVectorizer`` instead of ``CountVectorizer``.
 
-.. ipython:: python
+.. code-block:: python3
 
     data_dir = 'data/french-tragedy-split/'
 
@@ -218,7 +218,7 @@ we use ``TfidfVectorizer`` instead of ``CountVectorizer``.
     dtm = dtm.toarray()
     vocab = np.array(vectorizer.get_feature_names())
 
-.. ipython:: python
+.. code-block:: python3
 
     # fit NMF model
 
@@ -230,7 +230,7 @@ we use ``TfidfVectorizer`` instead of ``CountVectorizer``.
 
     # this next step may take some time
 
-.. ipython:: python
+.. code-block:: python3
     :suppress:
 
     # suppress this
@@ -258,7 +258,7 @@ In order to interpret and visualize the NMF components in a manner analogous to
 LDA topic proportions, we will scale the document-component matrix such that
 the component values associated with each document sum to one.
 
-.. ipython:: python
+.. code-block:: python3
 
     # to avoid division by 0 (not a problem with LDA) we add a tiny value to each cell.
     doctopic_chunks += 1e-6  # 1e-6 is the same as 0.000001
@@ -268,7 +268,7 @@ As we did in :ref:`previous sections <topic-model-mallet>`, we will aggregate
 the text sections associated with a single play together and average their topic
 proportions.
 
-.. ipython:: python
+.. code-block:: python3
 
     import itertools
     import re
@@ -301,7 +301,7 @@ Racine's atypical plays and the synthetic "average" play that will serve as a pr
 a "normal" Racine play. We will construct the average play by averaging the
 shares of the typical plays (i.e., all those that are not atypical):
 
-.. ipython:: python
+.. code-block:: python3
 
     racine_plays = [name for name in play_names if name.startswith('Racine')]
     racine_atypical = ['Racine_TR-V-1664-Thebaide', 'Racine_TR-V-1677-Phedre', 'Racine_TR-V-1689-Esther', 'Racine_TR-V-1691-Athalie']
@@ -329,7 +329,7 @@ and the composite Racine play, we can visualize the topic shares using
 a heatmap, a procedure which should be familiar from
 :ref:`topic-model-visualization`.
 
-.. ipython:: python
+.. code-block:: python3
 
     @suppress
     plt.figure(figsize=(11.3, 7))  # reset figure size
@@ -363,7 +363,7 @@ the document-topic shares across the topics. (Calculating the `entropy
 <https://en.wikipedia.org/wiki/Entropy>`_ for topic-document associations would
 also be a useful measure.)
 
-.. ipython:: python
+.. code-block:: python3
 
     # examine topics of interest by ranking them by standard deviation
     # reminder: NumPy's standard deviation differs from R's standard deviation. If you
@@ -406,7 +406,7 @@ To verify that the Topic #9 does indeed capture a salient difference, we may
 compare the rates of the words "et" and "un" across all Racine
 plays. The rate of "et" in *Thébaïde* does indeed stand out:
 
-.. ipython:: python
+.. code-block:: python3
 
     # reassemble the document-term matrix
     data_dir = 'data/french-tragedy/'
@@ -423,7 +423,7 @@ plays. The rate of "et" in *Thébaïde* does indeed stand out:
 
 .. breaking up the ipython blocks appears to help avoid problems
 
-.. ipython:: python
+.. code-block:: python3
 
     for word in ['et', 'un']:
         print("Rate per 1,000 words of {}".format(word))
@@ -445,7 +445,7 @@ Again, to validate the suspicion that the words "je" and "me" do indeed appear
 more frequently in the final plays we will look directly at their word rates.
 The low rates of "je" and "me" in the final two plays certainly do stand out.
 
-.. ipython:: python
+.. code-block:: python3
 
     for word in ['je', 'me']:
         print("Rate per 1,000 words of {}".format(word))

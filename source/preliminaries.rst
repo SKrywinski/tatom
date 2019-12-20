@@ -31,7 +31,7 @@ installed along with the following packages:
 If these packages are installed, the following lines of code should run in
 a Python interpreter without error.
 
-.. ipython:: python
+.. code-block:: python3
 
     import numpy
     numpy.__version__
@@ -51,7 +51,7 @@ The following packages are also worth checking out:
 - `IPython <http://www.ipython.org>`_
 - `statsmodels <http://statsmodels.sourceforge.net/>`_
 
-.. ipython:: python
+.. code-block:: python3
 
     import IPython
     IPython.__version__

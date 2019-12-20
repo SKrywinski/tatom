@@ -8,7 +8,7 @@
  Visualizing trends
 ====================
 
-.. ipython:: python
+.. code-block:: python3
     :suppress:
 
     import numpy as np; np.set_printoptions(precision=3)
@@ -57,7 +57,7 @@ tokenization. MALLET helpfully suggests ``--token-regex '[\p{L}\p{M}]+'``.
     mallet-2.0.7/bin/mallet import-dir --input data/hugo-les-misérables-split/ --output /tmp/topic-input-hugo.mallet --keep-sequence --remove-stopwords --stoplist-file data/stopwords/french.txt --token-regex '[\p{L}\p{M}]+'
     mallet-2.0.7/bin/mallet train-topics --input /tmp/topic-input-hugo.mallet --num-topics 50 --output-doc-topics /tmp/doc-topics-hugo.txt --output-topic-keys /tmp/topic-keys-hugo.txt --word-topic-counts-file /tmp/word-topic-hugo.txt
 
-.. ipython:: python
+.. code-block:: python3
     :suppress:
 
     import os
@@ -72,7 +72,7 @@ tokenization. MALLET helpfully suggests ``--token-regex '[\p{L}\p{M}]+'``.
     if not os.path.exists(MALLET_INPUT):
         subprocess.check_call("""mallet-2.0.7/bin/mallet import-dir --input data/hugo-les-misérables-split/ --output {} --keep-sequence --remove-stopwords --stoplist-file data/stopwords/french.txt --token-regex '[\p{{L}}\p{{M}}]+'""".format(MALLET_INPUT), shell=True)
 
-.. ipython:: python
+.. code-block:: python3
     :suppress:
 
     shutil.copy(MALLET_INPUT,'/tmp/topic-input-hugo.mallet')
@@ -86,7 +86,7 @@ As usual, we post-process the MALLET output in order to get a matrix of topic
 proportions. Each row of the matrix holds the topic proportions associated with
 a document.
 
-.. ipython:: python
+.. code-block:: python3
 
     import numpy as np
     import itertools
@@ -135,14 +135,14 @@ jumps out as characteristic of events towards the close of the novel. The words
 most strongly connected with this topic include "barricade", "fusil", and
 "cartouches" ("barricade", "rifle", and "cartridges").
 
-.. ipython:: python
+.. code-block:: python3
 
     ','.join(topic_words[35])
 
 Because the documents are ordered in a sequence, we can plot the fate, so to
 speak, of this topic over time with the following lines of code:
 
-.. ipython:: python
+.. code-block:: python3
 
     series = doctopic[:, 35]
     @savefig plot_topics_over_time_series_simple.png width=7in
@@ -170,7 +170,7 @@ observations is often
 called a "window". The idea of a rolling mean (conveniently implemented in
 ``pandas.rolling_mean()``) is effectively communicated visually:
 
-.. ipython:: python
+.. code-block:: python3
 
     import pandas as pd
 
@@ -179,7 +179,7 @@ called a "window". The idea of a rolling mean (conveniently implemented in
                   11.,   6.,   7.,   8.,   8.,   6.,   9.,  15.,  13.,  10.,   9.])
     pd.rolling_mean(z, 3)
 
-.. ipython:: python
+.. code-block:: python3
 
     plt.plot(z, '.', alpha=0.5)
 
@@ -192,7 +192,7 @@ a trend line based on a rolling average---the time series for our topic does
 a better job of orienting us in the novel and communicating the points in the
 novel where the topic appears:
 
-.. ipython:: python
+.. code-block:: python3
 
     import pandas as pd
 
@@ -244,7 +244,7 @@ novel where the topic appears:
 There are of many other topics that appear in our fit of the corpus. Looping
 over the topics and saving an image for each topic is straightforward:
 
-.. ipython:: python
+.. code-block:: python3
 
     for i in range(num_topics):
         plt.clf()  # clears the current plot

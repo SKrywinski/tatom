@@ -5,7 +5,7 @@
  Visualizing topic models
 ==========================
 
-.. ipython:: python
+.. code-block:: python3
     :suppress:
 
     import numpy as np; np.set_printoptions(precision=4)
@@ -78,7 +78,7 @@ word-topic assignments be saved with the command-line option ``--word-topic coun
     mallet-2.0.7/bin/mallet import-dir --input data/austen-brontë-split/ --output /tmp/topic-input.mallet --keep-sequence --remove-stopwords
     mallet-2.0.7/bin/mallet train-topics --input /tmp/topic-input.mallet --num-topics 5 --output-doc-topics /tmp/doc-topics.txt --output-topic-keys /tmp/topic-keys.txt --word-topic-counts-file /tmp/word-topic.txt
 
-.. ipython:: python
+.. code-block:: python3
     :suppress:
 
     import os
@@ -93,7 +93,7 @@ word-topic assignments be saved with the command-line option ``--word-topic coun
     if not os.path.exists(MALLET_INPUT):
         subprocess.check_call('mallet-2.0.7/bin/mallet import-dir --input data/austen-brontë-split/ --output {} --keep-sequence --remove-stopwords'.format(MALLET_INPUT), shell=True)
 
-.. ipython:: python
+.. code-block:: python3
     :suppress:
 
     shutil.copy(MALLET_INPUT,'/tmp/topic-input.mallet')
@@ -103,7 +103,7 @@ word-topic assignments be saved with the command-line option ``--word-topic coun
     shutil.copy(MALLET_KEYS,'/tmp/topic-keys.txt')
     shutil.copy(MALLET_WORD_TOPIC_COUNTS,'/tmp/word-topic.txt')
 
-.. ipython:: python
+.. code-block:: python3
     :suppress:
 
     import numpy as np
@@ -156,7 +156,7 @@ We then gather the output into a document-topic matrix of topic shares, stored
 in the variable ``doctopic``. The names of the novels are stored in the variable
 ``docnames``.
 
-.. ipython:: python
+.. code-block:: python3
 
     docnames
     doctopic.shape
@@ -166,7 +166,7 @@ To make the stacked bar chart we layer individual bar charts on top of each
 other. Recall that a single (unstacked) bar chart can be created in matplotlib
 with the following code:
 
-.. ipython:: python
+.. code-block:: python3
 
     import matplotlib.pyplot as plt
 
@@ -187,7 +187,7 @@ with the following code:
 To layer the bar charts, we plot each bar chart one by one, adjusting the
 starting point (``bottom`` is the parameter) so that the charts do not overlap.
 
-.. ipython:: python
+.. code-block:: python3
 
     # See: http://matplotlib.org/examples/pylab_examples/bar_stacked.html
 
@@ -227,7 +227,7 @@ Heatmap
 Another useful visualization of topic shares is the heatmap. The matplotlib
 function we need is ``pcolor`` ("psuedocolor plot").
 
-.. ipython:: python
+.. code-block:: python3
 
     # Ref: http://nbviewer.ipython.org/5427209
     # Ref: http://code.activestate.com/recipes/578175-hierarchical-clustering-heatmap-python/
@@ -275,7 +275,7 @@ topics and words: lists of the top words associated with each topic are often
 all that is needed when the corpus is large and the inferred topics make sense
 in light of prior knowledge of the corpus.
 
-.. ipython:: python
+.. code-block:: python3
 
     with open('/tmp/topic-keys.txt') as input:
         topic_keys_lines = input.readlines()
@@ -288,7 +288,7 @@ in light of prior knowledge of the corpus.
     for t in range(len(topic_words)):
         print("Topic {}: {}".format(t, ' '.join(topic_words[t][:15])))
 
-.. ipython:: python
+.. code-block:: python3
     :suppress:
 
     N_WORDS_DISPLAY = 10
@@ -342,7 +342,7 @@ into a matrix of counts. We do this much in the same manner as we parsed
 ``doc-topics.txt`` into a matrix of document-topic shares. The following
 procedure should be familiar by now:
 
-.. ipython:: python
+.. code-block:: python3
 
     import numpy as np
     import os
@@ -381,7 +381,7 @@ proportions. For example, a value of 0.5 in the matrix at row 5 and column
 0 indicates that the specified word type (``mallet_vocab[5]``) accounts for 50
 percent of all words assigned to topic 0.
 
-.. ipython:: python
+.. code-block:: python3
 
     # np.sum(word_topic, axis=0) sums across rows, so it yields totals of words assigned to topics
     word_topic = word_topic / np.sum(word_topic, axis=0)
@@ -389,7 +389,7 @@ percent of all words assigned to topic 0.
 Now we can assemble a list of each topic's top words along with a value that
 captures the strength of association with that topic.
 
-.. ipython:: python
+.. code-block:: python3
 
     num_top_words = 10
     mallet_vocab = np.array(mallet_vocab)  # convert vocab from a list to an array so we can use NumPy operations on it
@@ -405,7 +405,7 @@ captures the strength of association with that topic.
 One way to visualize this information is to size each word in proportion to its
 share of words associated with each topic:
 
-.. ipython:: python
+.. code-block:: python3
 
     import matplotlib.pyplot as plt
     num_top_words = 10
@@ -430,7 +430,7 @@ We can see that topic 3 is much more concentrated on the words shown above
 whereas topic 0 is much more diffuse (or uniform). Another way to appreciate
 this is to calculate the number of word *types* associated with each topic:
 
-.. ipython:: python
+.. code-block:: python3
 
     np.sum(word_topic > 0, axis=0)
 
