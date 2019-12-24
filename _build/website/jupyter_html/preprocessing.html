@@ -1,0 +1,1205 @@
+<!doctype html>
+<html lang="en">
+	<head>
+		<meta charset="utf-8">
+
+		<title>Preprocessing &ndash; Documentation</title>
+
+		<meta name="viewport" content="width=device-width, initial-scale=1">
+		<meta name="author" content="">
+		<meta name="keywords" content="">
+		<meta name="description" content="">
+
+		<link rel="stylesheet" href="/_static/css/base.css">
+
+	</head>
+
+	<body>
+
+		<div class="wrapper">
+
+			<header class="header">
+
+				<div class="branding">
+
+					<p class="site-title"><a href="/">Documentation</a></p>
+
+					<p class="sr-only"><a href="#skip">Skip to content</a></p>
+
+				</div>
+
+				<div class="header-tools">
+
+
+					<div class="header-badge" id="executability_status_badge"></div>
+
+
+				</div>
+
+			</header>
+
+			<div class="main">
+
+				<div class="content">
+
+					<div id="skip"></div>
+
+					<div class="document">
+
+<div class="{} cell border-box-sizing text_cell rendered"><div class="prompt input_prompt">
+</div><div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html">
+<p><a id='index-0'></a></p>
+<p><a id='preprocessing'></a></p>
+
+</div>
+</div>
+</div>
+
+<div class="{} cell border-box-sizing text_cell rendered"><div class="prompt input_prompt">
+</div><div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html">
+<h1 id="Preprocessing">Preprocessing<a class="anchor-link" href="#Preprocessing">&#182;</a></h1><p>Frequently the texts we have are not those we want to analyze. We may have an
+single file containing the collected works of an author although we are only
+interested in a single work. Or we may be given a large work broken up into
+volumes (this is the case for <em>Les Misèrables</em>, as we will see later) where the
+division into volumes is not important to us.</p>
+<p>If we are interested in an author’s style, we likely want to break up a long
+text (such as a book-length work) into smaller chunks so we can get a sense of
+the variability in an author’s writing. If we are comparing one group of writers
+to a second group, we may wish to aggregate information about writers belonging
+to the same group. This will require merging documents or other information that
+were initially separate. This section illustrates these two common preprocessing
+step: splitting long texts into smaller “chunks” and aggregating texts together.</p>
+<p>Another important preprocessing step is tokenization. This is the process of
+splitting a text into individual words or sequences of words (<em>n-grams</em>).
+Decisions regarding tokenization will depend on the language(s) being studied
+and the research question. For example, should the phrase <code>"her father's
+arm-chair"</code> be tokenized as as <code>["her", "father", "s", "arm", "chair"]</code> or
+<code>["her", "father's", "arm-chair"]</code>. Tokenization patterns that work for one
+language may not be appropriate for another (What is the appropriate
+tokenization of “Qu’est-ce que c’est?”?). This section begins with a brief
+discussion of tokenization before covering splitting and merging texts.</p>
+<blockquote><p><strong>Note</strong></p>
+<p>Each tutorial is self-contained and should be read through in order.
+Variables and functions introduced in one subsection will be referenced and used
+in subsequent subsections. For example, the NumPy library <code>numpy</code> is
+imported and then used later without being imported a second time.</p>
+</blockquote>
+
+</div>
+</div>
+</div>
+
+<div class="{} cell border-box-sizing text_cell rendered"><div class="prompt input_prompt">
+</div><div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html">
+<h2 id="Tokenizing">Tokenizing<a class="anchor-link" href="#Tokenizing">&#182;</a></h2><p>There are many ways to tokenize a text. Often ambiguity is inescapable.
+Consider the following lines of Charlotte Brontë’s <em>Villette</em>:</p>
+
+</div>
+</div>
+</div>
+
+<div class="{} cell border-box-sizing code_cell rendered">
+<div class="input">
+<div class="prompt input_prompt">In&nbsp;[1]:</div>
+<div class="inner_cell">
+	<div class="input_area">
+<div class=" highlight hl-ipython3"><pre><span></span><span class="n">whose</span> <span class="n">walls</span> <span class="n">gleamed</span> <span class="k">with</span> <span class="n">foreign</span> <span class="n">mirrors</span><span class="o">.</span> <span class="n">Near</span> <span class="n">the</span> <span class="n">hearth</span>
+<span class="n">appeared</span> <span class="n">a</span> <span class="n">little</span> <span class="n">group</span><span class="p">:</span> <span class="n">a</span> <span class="n">slight</span> <span class="n">form</span> <span class="n">sunk</span> <span class="ow">in</span> <span class="n">a</span> <span class="n">deep</span> <span class="n">arm</span><span class="o">-</span>
+<span class="n">chair</span><span class="p">,</span> <span class="n">one</span> <span class="ow">or</span> <span class="n">two</span> <span class="n">women</span> <span class="n">busy</span> <span class="n">about</span> <span class="n">it</span><span class="p">,</span> <span class="n">the</span> <span class="n">iron</span><span class="o">-</span><span class="n">grey</span> <span class="n">gentle</span><span class="o">-</span>
+<span class="n">man</span> <span class="n">anxiously</span> <span class="n">looking</span> <span class="n">on</span><span class="o">.</span> <span class="o">...</span>
+</pre></div>
+
+	</div>
+</div>
+</div>
+
+<div class="output_wrapper">
+<div class="output">
+
+
+<div class="output_area">
+
+	<div class="prompt"></div>
+
+
+<div class="output_subarea output_text output_error">
+<pre>
+<span class="ansi-cyan-fg">  File </span><span class="ansi-green-fg">&#34;&lt;ipython-input-1-f7339712bde2&gt;&#34;</span><span class="ansi-cyan-fg">, line </span><span class="ansi-green-fg">1</span>
+<span class="ansi-red-fg">    whose walls gleamed with foreign mirrors. Near the hearth</span>
+              ^
+<span class="ansi-red-fg">SyntaxError</span><span class="ansi-red-fg">:</span> invalid syntax
+</pre>
+</div>
+</div>
+
+</div>
+</div>
+
+</div>
+
+<div class="{} cell border-box-sizing text_cell rendered"><div class="prompt input_prompt">
+</div><div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html">
+<p>Does the appropriate tokenization include “armchair” or “arm-chair”? While it
+would be strange to see “arm-chair” in print today, the hyphenated version
+predominates in <em>Villette</em> and other texts from the same period. “gentleman”,
+however, seems preferable to “gentle-man,” although the <a href="http://books.google.com/ngrams/graph?content=gentle-man&amp;year_start=1800&amp;year_end=2000&amp;corpus=15&amp;smoothing=3&amp;share=">latter occurs in early
+nineteenth century English-language books</a>.
+This is a case where a simple tokenization rule (resolve end-of-line hyphens)
+will not cover all cases. For very large corpora containing a diversity of
+authors, idiosyncrasies resulting from tokenization tend not to be particularly
+consequential (“arm-chair” is not a high frequency word). For smaller corpora,
+however, decisions regarding tokenization can make a profound difference.</p>
+<p>Languages that do not mark word boundaries present an additional challenge.
+Chinese and <a href="http://163.1.169.40/cgi-bin/library?e=q-000-00---0POxy--00-0-0--0prompt-10---4----de0--0-1l--1-en-50---20-about-aristotle--00031-001-0-0utfZz-8-00&amp;a=d&amp;c=POxy&amp;cl=search&amp;d=HASHe8016f6b58790a2918de2b">Classical Greek</a>
+provide two important examples. Consider the following sequence of Chinese
+characters: 爱国人.  This sequence could be broken up into the following tokens:
+[“爱”， 国人”] (to love one’s compatriots) or [“爱国”, “人”] (a country-loving
+person).  Resolving this kind of ambiguity (when it can be resolved) is an
+active topic of research. For Chinese and for other languages with this feature
+there are a number of tokenization strategies in circulation.</p>
+<p>Here are a number of examples of tokenizing functions:</p>
+
+</div>
+</div>
+</div>
+
+<div class="{} cell border-box-sizing code_cell rendered">
+<div class="input">
+<div class="prompt input_prompt">In&nbsp;[2]:</div>
+<div class="inner_cell">
+	<div class="input_area">
+<div class=" highlight hl-ipython3"><pre><span></span><span class="c1"># note: there are three spaces between &quot;at&quot; and &quot;her&quot; to make the example more</span>
+<span class="c1"># realistic (texts are frequently plagued by such idiosyncracies)</span>
+<span class="n">text</span> <span class="o">=</span> <span class="s2">&quot;She looked at   her father&#39;s arm-chair.&quot;</span>
+<span class="n">text_fr</span> <span class="o">=</span> <span class="s2">&quot;Qu&#39;est-ce que c&#39;est?&quot;</span>
+
+<span class="c1"># tokenize on spaces</span>
+<span class="n">text</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s1">&#39; &#39;</span><span class="p">)</span>
+<span class="n">text_fr</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s1">&#39; &#39;</span><span class="p">)</span>
+
+<span class="c1"># scikit-learn</span>
+<span class="c1"># note that CountVectorizer discards &quot;words&quot; that contain only one character, such as &quot;s&quot;</span>
+<span class="c1"># CountVectorizer also transforms all words into lowercase</span>
+<span class="kn">from</span> <span class="nn">sklearn.feature_extraction.text</span> <span class="kn">import</span> <span class="n">CountVectorizer</span>
+<span class="n">CountVectorizer</span><span class="p">()</span><span class="o">.</span><span class="n">build_tokenizer</span><span class="p">()(</span><span class="n">text</span><span class="p">)</span>
+<span class="n">CountVectorizer</span><span class="p">()</span><span class="o">.</span><span class="n">build_tokenizer</span><span class="p">()(</span><span class="n">text_fr</span><span class="p">)</span>
+
+<span class="c1"># nltk word_tokenize uses the TreebankWordTokenizer and needs to be given</span>
+<span class="c1"># a single sentence at a time.</span>
+<span class="kn">from</span> <span class="nn">nltk.tokenize</span> <span class="kn">import</span> <span class="n">word_tokenize</span>
+<span class="n">word_tokenize</span><span class="p">(</span><span class="n">text</span><span class="p">)</span>
+<span class="n">word_tokenize</span><span class="p">(</span><span class="n">text_fr</span><span class="p">)</span>
+
+<span class="c1"># nltk PunktWordTokenizer</span>
+<span class="kn">from</span> <span class="nn">nltk.tokenize</span> <span class="kn">import</span> <span class="n">WordPunctTokenizer</span>
+<span class="n">tokenizer</span> <span class="o">=</span> <span class="n">WordPunctTokenizer</span><span class="p">()</span>
+<span class="n">tokenizer</span><span class="o">.</span><span class="n">tokenize</span><span class="p">(</span><span class="n">text</span><span class="p">)</span>
+<span class="n">tokenizer</span><span class="o">.</span><span class="n">tokenize</span><span class="p">(</span><span class="n">text_fr</span><span class="p">)</span>
+
+<span class="c1"># use of maketrans to tokenize on spaces, stripping punctuation</span>
+<span class="c1"># see python documentation for string.translate</span>
+<span class="c1"># string.punctuation is simply a list of punctuation</span>
+<span class="kn">import</span> <span class="nn">string</span>
+<span class="n">table</span> <span class="o">=</span> <span class="nb">str</span><span class="o">.</span><span class="n">maketrans</span><span class="p">({</span><span class="n">ch</span><span class="p">:</span> <span class="kc">None</span> <span class="k">for</span> <span class="n">ch</span> <span class="ow">in</span> <span class="n">string</span><span class="o">.</span><span class="n">punctuation</span><span class="p">})</span>
+<span class="p">[</span><span class="n">s</span><span class="o">.</span><span class="n">translate</span><span class="p">(</span><span class="n">table</span><span class="p">)</span> <span class="k">for</span> <span class="n">s</span> <span class="ow">in</span> <span class="n">text</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s1">&#39; &#39;</span><span class="p">)</span> <span class="k">if</span> <span class="n">s</span> <span class="o">!=</span> <span class="s1">&#39;&#39;</span><span class="p">]</span>
+<span class="p">[</span><span class="n">s</span><span class="o">.</span><span class="n">translate</span><span class="p">(</span><span class="n">table</span><span class="p">)</span> <span class="k">for</span> <span class="n">s</span> <span class="ow">in</span> <span class="n">text_fr</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s1">&#39; &#39;</span><span class="p">)</span> <span class="k">if</span> <span class="n">s</span> <span class="o">!=</span> <span class="s1">&#39;&#39;</span><span class="p">]</span>
+</pre></div>
+
+	</div>
+</div>
+</div>
+
+<div class="output_wrapper">
+<div class="output">
+
+
+<div class="output_area">
+
+	<div class="prompt output_prompt">Out[2]:</div>
+
+
+
+
+<div class="output_text output_subarea output_execute_result">
+<pre>[&#39;Questce&#39;, &#39;que&#39;, &#39;cest&#39;]</pre>
+</div>
+
+</div>
+
+</div>
+</div>
+
+</div>
+
+<div class="{} cell border-box-sizing text_cell rendered"><div class="prompt input_prompt">
+</div><div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html">
+<h3 id="Stemming">Stemming<a class="anchor-link" href="#Stemming">&#182;</a></h3><p>Often we want to count inflected forms of a word together. This procedure is
+referred to as <em>stemming</em>. Stemming a German text treats the following words as
+instances of the word “Wald”: “Wald”, “Walde”, “Wälder”, “Wäldern”, “Waldes”,
+and “Walds”. Analogously, in English the following words would be counted as
+“forest”: “forest”, “forests”, “forested”, “forest’s”, “forests’”. As stemming
+reduces the number of unique vocabulary items that need to be tracked, it speeds
+up a variety of computational operations. For some kinds of analyses, such as
+authorship attribution or fine-grained stylistic analyses, stemming may obscure
+differences among writers. For example, one author may be distinguished by the
+use of a plural form of a word.</p>
+<p>NLTK offers stemming for a variety of languages in the <a href="http://nltk.org/api/nltk.stem.html">nltk.stem package</a>. The following code illustrates the use of the popular
+Snowball stemmer:</p>
+
+</div>
+</div>
+</div>
+
+<div class="{} cell border-box-sizing code_cell rendered">
+<div class="input">
+<div class="prompt input_prompt">In&nbsp;[3]:</div>
+<div class="inner_cell">
+	<div class="input_area">
+<div class=" highlight hl-ipython3"><pre><span></span><span class="kn">from</span> <span class="nn">nltk.stem.snowball</span> <span class="kn">import</span> <span class="n">GermanStemmer</span>
+
+<span class="n">stemmer</span> <span class="o">=</span> <span class="n">GermanStemmer</span><span class="p">()</span>
+
+<span class="c1"># note that the stem function works one word at a time</span>
+<span class="n">words</span> <span class="o">=</span> <span class="p">[</span><span class="s2">&quot;Wald&quot;</span><span class="p">,</span> <span class="s2">&quot;Walde&quot;</span><span class="p">,</span> <span class="s2">&quot;Wälder&quot;</span><span class="p">,</span> <span class="s2">&quot;Wäldern&quot;</span><span class="p">,</span> <span class="s2">&quot;Waldes&quot;</span><span class="p">,</span> <span class="s2">&quot;Walds&quot;</span><span class="p">]</span>
+
+<span class="p">[</span><span class="n">stemmer</span><span class="o">.</span><span class="n">stem</span><span class="p">(</span><span class="n">w</span><span class="p">)</span> <span class="k">for</span> <span class="n">w</span> <span class="ow">in</span> <span class="n">words</span><span class="p">]</span>
+
+<span class="c1"># note that the stemming algorithm &quot;understands&quot; grammar to some extent and that if &quot;Waldi&quot; were to appear in a text, it would not be stemmed.</span>
+<span class="n">stemmer</span><span class="o">.</span><span class="n">stem</span><span class="p">(</span><span class="s2">&quot;Waldi&quot;</span><span class="p">)</span>
+</pre></div>
+
+	</div>
+</div>
+</div>
+
+<div class="output_wrapper">
+<div class="output">
+
+
+<div class="output_area">
+
+	<div class="prompt output_prompt">Out[3]:</div>
+
+
+
+
+<div class="output_text output_subarea output_execute_result">
+<pre>&#39;waldi&#39;</pre>
+</div>
+
+</div>
+
+</div>
+</div>
+
+</div>
+
+<div class="{} cell border-box-sizing text_cell rendered"><div class="prompt input_prompt">
+</div><div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html">
+<h2 id="Chunking">Chunking<a class="anchor-link" href="#Chunking">&#182;</a></h2><p>Splitting a long text into smaller samples is a common task in text analysis. As
+most kinds of quantitative text analysis take as inputs an unordered list of
+words, breaking a text up into smaller chunks allows one to preserve context
+that would otherwise be discarded; observing two words together in
+a paragraph-sized chunk of text tells us much more about the relationship
+between those two words than observing two words occurring together in an
+100,000 word book. Or, as we will be using a selection of tragedies as our
+examples, we might consider the difference between knowing that two character
+names occur in the same scene versus knowing that the two names occur in the
+same play.</p>
+<p>To demonstrate how to divide a large text into smaller chunks, we will be
+working with the <a href="datasets.html#datasets">corpus of French tragedies</a>. The following
+shows the first plays in the corpus:</p>
+
+</div>
+</div>
+</div>
+
+<div class="{} cell border-box-sizing code_cell rendered">
+<div class="input">
+<div class="prompt input_prompt">In&nbsp;[4]:</div>
+<div class="inner_cell">
+	<div class="input_area">
+<div class=" highlight hl-ipython3"><pre><span></span><span class="kn">import</span> <span class="nn">os</span>
+<span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
+
+<span class="c1"># plays are in the directory data/french-tragedy</span>
+<span class="c1"># gather all the filenames, sorted alphabetically</span>
+<span class="n">corpus_path</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="s1">&#39;data&#39;</span><span class="p">,</span> <span class="s1">&#39;french-tragedy&#39;</span><span class="p">)</span>
+
+<span class="c1"># look at the first few filenames</span>
+<span class="c1"># (we are sorting because different operating systems may list files in different orders)</span>
+<span class="nb">sorted</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">listdir</span><span class="p">(</span><span class="n">path</span><span class="o">=</span><span class="n">corpus_path</span><span class="p">))[</span><span class="mi">0</span><span class="p">:</span><span class="mi">5</span><span class="p">]</span>
+
+<span class="c1"># we will need the entire path, e.g., &#39;data/Crebillon_TR-V-1703-Idomenee.txt&#39;</span>
+<span class="c1"># rather than just &#39;Crebillon_TR-V-1703-Idomenee.txt&#39; alone.</span>
+<span class="n">tragedy_filenames</span> <span class="o">=</span> <span class="p">[</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">corpus_path</span><span class="p">,</span> <span class="n">fn</span><span class="p">)</span> <span class="k">for</span> <span class="n">fn</span> <span class="ow">in</span> <span class="nb">sorted</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">listdir</span><span class="p">(</span><span class="n">corpus_path</span><span class="p">))]</span>
+
+<span class="nd">@suppress</span>
+<span class="n">tragedy_filenames_orig</span> <span class="o">=</span> <span class="n">tragedy_filenames</span><span class="o">.</span><span class="n">copy</span><span class="p">()</span>
+
+<span class="c1"># alternatively, using the Python standard library package &#39;glob&#39;</span>
+<span class="kn">import</span> <span class="nn">glob</span>
+<span class="n">tragedy_filenames</span> <span class="o">=</span> <span class="n">glob</span><span class="o">.</span><span class="n">glob</span><span class="p">(</span><span class="n">corpus_path</span> <span class="o">+</span> <span class="n">os</span><span class="o">.</span><span class="n">sep</span> <span class="o">+</span> <span class="s1">&#39;*.txt&#39;</span><span class="p">)</span>
+
+<span class="nd">@suppress</span>
+<span class="k">assert</span> <span class="nb">sorted</span><span class="p">(</span><span class="n">tragedy_filenames</span><span class="p">)</span> <span class="o">==</span> <span class="nb">sorted</span><span class="p">(</span><span class="n">tragedy_filenames_orig</span><span class="p">)</span>
+</pre></div>
+
+	</div>
+</div>
+</div>
+
+<div class="output_wrapper">
+<div class="output">
+
+
+<div class="output_area">
+
+	<div class="prompt"></div>
+
+
+<div class="output_subarea output_text output_error">
+<pre>
+<span class="ansi-cyan-fg">  File </span><span class="ansi-green-fg">&#34;&lt;ipython-input-4-ac8628adeb01&gt;&#34;</span><span class="ansi-cyan-fg">, line </span><span class="ansi-green-fg">17</span>
+<span class="ansi-red-fg">    tragedy_filenames_orig = tragedy_filenames.copy()</span>
+                         ^
+<span class="ansi-red-fg">SyntaxError</span><span class="ansi-red-fg">:</span> invalid syntax
+</pre>
+</div>
+</div>
+
+</div>
+</div>
+
+</div>
+
+<div class="{} cell border-box-sizing text_cell rendered"><div class="prompt input_prompt">
+</div><div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html">
+<h3 id="Every-1,000-words">Every 1,000 words<a class="anchor-link" href="#Every-1,000-words">&#182;</a></h3><p>One way to split a text is to read through it and create a chunk every <em>n</em>
+words, where <em>n</em> is a number such as 500, 1,000 or 10,000. The following
+function accomplishes this:</p>
+
+</div>
+</div>
+</div>
+
+<div class="{} cell border-box-sizing code_cell rendered">
+<div class="input">
+<div class="prompt input_prompt">In&nbsp;[5]:</div>
+<div class="inner_cell">
+	<div class="input_area">
+<div class=" highlight hl-ipython3"><pre><span></span><span class="k">def</span> <span class="nf">split_text</span><span class="p">(</span><span class="n">filename</span><span class="p">,</span> <span class="n">n_words</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Split a text into chunks approximately `n_words` words in length.&quot;&quot;&quot;</span>
+    <span class="nb">input</span> <span class="o">=</span> <span class="nb">open</span><span class="p">(</span><span class="n">filename</span><span class="p">,</span> <span class="s1">&#39;r&#39;</span><span class="p">)</span>
+    <span class="n">words</span> <span class="o">=</span> <span class="nb">input</span><span class="o">.</span><span class="n">read</span><span class="p">()</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s1">&#39; &#39;</span><span class="p">)</span>
+    <span class="nb">input</span><span class="o">.</span><span class="n">close</span><span class="p">()</span>
+    <span class="c1"># in Python the above can also be accomplished with the following lines:</span>
+    <span class="c1"># with open(filename, &#39;r&#39;) as input:</span>
+    <span class="c1">#     words = input.read().split(&#39; &#39;)</span>
+    <span class="n">chunks</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="n">current_chunk_words</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="n">current_chunk_word_count</span> <span class="o">=</span> <span class="mi">0</span>
+    <span class="k">for</span> <span class="n">word</span> <span class="ow">in</span> <span class="n">words</span><span class="p">:</span>
+        <span class="n">current_chunk_words</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">word</span><span class="p">)</span>
+        <span class="n">current_chunk_word_count</span> <span class="o">+=</span> <span class="mi">1</span>
+        <span class="k">if</span> <span class="n">current_chunk_word_count</span> <span class="o">==</span> <span class="n">n_words</span><span class="p">:</span>
+            <span class="n">chunks</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="s1">&#39; &#39;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">current_chunk_words</span><span class="p">))</span>
+            <span class="c1"># start over for the next chunk</span>
+            <span class="n">current_chunk_words</span> <span class="o">=</span> <span class="p">[]</span>
+            <span class="n">current_chunk_word_count</span> <span class="o">=</span> <span class="mi">0</span>
+    <span class="c1"># add the final chunk, likely fewer than `n_words` in length</span>
+    <span class="n">chunks</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="s1">&#39; &#39;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">current_chunk_words</span><span class="p">)</span> <span class="p">)</span>
+    <span class="k">return</span> <span class="n">chunks</span>
+</pre></div>
+
+	</div>
+</div>
+</div>
+
+</div>
+
+<div class="{} cell border-box-sizing text_cell rendered"><div class="prompt input_prompt">
+</div><div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html">
+<p>To divide up the plays, we simply apply this function to each text in the
+corpus. We do need to be careful to record the original file name and chunk
+number as we will need them later. One way to keep track of these details is to
+collect them in a list of Python <a href="http://docs.python.org/dev/library/stdtypes.html#mapping-types-dict">dictionaries</a>. There
+will be one dictionary for each chunk, containing the original filename,
+a number for the chunk, and the text of the chunk.</p>
+
+</div>
+</div>
+</div>
+
+<div class="{} cell border-box-sizing text_cell rendered"><div class="prompt input_prompt">
+</div><div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html">
+<h4 id="Writing-chunks-to-a-directory">Writing chunks to a directory<a class="anchor-link" href="#Writing-chunks-to-a-directory">&#182;</a></h4><p>These chunks may be saved in a directory for reference or for analysis in
+another program (such as MALLET or R).</p>
+
+</div>
+</div>
+</div>
+
+<div class="{} cell border-box-sizing code_cell rendered">
+<div class="input">
+<div class="prompt input_prompt">In&nbsp;[6]:</div>
+<div class="inner_cell">
+	<div class="input_area">
+<div class=" highlight hl-ipython3"><pre><span></span><span class="c1"># make sure the directory exists</span>
+<span class="n">output_dir</span> <span class="o">=</span> <span class="s1">&#39;/tmp/&#39;</span>
+<span class="k">for</span> <span class="n">chunk</span> <span class="ow">in</span> <span class="n">chunks</span><span class="p">:</span>
+    <span class="n">basename</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">basename</span><span class="p">(</span><span class="n">chunk</span><span class="p">[</span><span class="s1">&#39;filename&#39;</span><span class="p">])</span>
+    <span class="n">fn</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">output_dir</span><span class="p">,</span>
+                      <span class="s2">&quot;</span><span class="si">{}{:04d}</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">basename</span><span class="p">,</span> <span class="n">chunk</span><span class="p">[</span><span class="s1">&#39;number&#39;</span><span class="p">]))</span>
+    <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="n">fn</span><span class="p">,</span> <span class="s1">&#39;w&#39;</span><span class="p">)</span> <span class="k">as</span> <span class="n">f</span><span class="p">:</span>
+        <span class="n">f</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="n">chunk</span><span class="p">[</span><span class="s1">&#39;text&#39;</span><span class="p">])</span>
+</pre></div>
+
+	</div>
+</div>
+</div>
+
+<div class="output_wrapper">
+<div class="output">
+
+
+<div class="output_area">
+
+	<div class="prompt"></div>
+
+
+<div class="output_subarea output_text output_error">
+<pre>
+<span class="ansi-red-fg">---------------------------------------------------------------------------</span>
+<span class="ansi-red-fg">NameError</span>                                 Traceback (most recent call last)
+<span class="ansi-green-fg">&lt;ipython-input-6-31f57fafd3d6&gt;</span> in <span class="ansi-cyan-fg">&lt;module&gt;</span>
+<span class="ansi-green-intense-fg ansi-bold">      1</span> <span class="ansi-red-fg"># make sure the directory exists</span>
+<span class="ansi-green-intense-fg ansi-bold">      2</span> output_dir <span class="ansi-blue-fg">=</span> <span class="ansi-blue-fg">&#39;/tmp/&#39;</span>
+<span class="ansi-green-fg">----&gt; 3</span><span class="ansi-red-fg"> </span><span class="ansi-green-fg">for</span> chunk <span class="ansi-green-fg">in</span> chunks<span class="ansi-blue-fg">:</span>
+<span class="ansi-green-intense-fg ansi-bold">      4</span>     basename <span class="ansi-blue-fg">=</span> os<span class="ansi-blue-fg">.</span>path<span class="ansi-blue-fg">.</span>basename<span class="ansi-blue-fg">(</span>chunk<span class="ansi-blue-fg">[</span><span class="ansi-blue-fg">&#39;filename&#39;</span><span class="ansi-blue-fg">]</span><span class="ansi-blue-fg">)</span>
+<span class="ansi-green-intense-fg ansi-bold">      5</span>     fn = os.path.join(output_dir,
+
+<span class="ansi-red-fg">NameError</span>: name &#39;chunks&#39; is not defined</pre>
+</div>
+</div>
+
+</div>
+</div>
+
+</div>
+
+<div class="{} cell border-box-sizing text_cell rendered"><div class="prompt input_prompt">
+</div><div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html">
+<p>(A stand-alone script for splitting texts is available:
+<a href=split-text.py download>split-text.py</a>.)</p>
+
+</div>
+</div>
+</div>
+
+<div class="{} cell border-box-sizing text_cell rendered"><div class="prompt input_prompt">
+</div><div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html">
+<h3 id="Every-paragraph">Every paragraph<a class="anchor-link" href="#Every-paragraph">&#182;</a></h3><p>It is possible to split a document into paragraph-length chunks. Finding the
+appropriate character (sequence) that marks a paragraph boundary requires
+familiarity with how paragraphs are encoded in the text file. For example, the
+version of <em>Jane Eyre</em> provided in the <a href="datasets.html#datasets">austen-brontë corpus</a>,
+contains no line breaks within paragraphs inside chapters, so the paragraph
+marker in this case is simply the newline. Using the <code>split</code> string method
+with the newline as the argument (<code>split('\n')</code>) will break the text into
+paragraphs. That is, if the text of <em>Jane Eyre</em> is contained in the variable
+<code>text</code> then the following sequence will split the document into
+paragraphs:</p>
+
+</div>
+</div>
+</div>
+
+<div class="{} cell border-box-sizing code_cell rendered">
+<div class="input">
+<div class="prompt input_prompt">In&nbsp;[7]:</div>
+<div class="inner_cell">
+	<div class="input_area">
+<div class=" highlight hl-ipython3"><pre><span></span><span class="n">text</span> <span class="o">=</span> <span class="s2">&quot;There was no possibility of taking a walk that day. We had been wandering, indeed, in the leafless shrubbery an hour in the morning; but since dinner (Mrs. Reed, when there was no company, dined early) the cold winter wind had brought with it clouds so sombre, and a rain so penetrating, that further out-door exercise was now out of the question.</span><span class="se">\n</span><span class="s2">I was glad of it: I never liked long walks, especially on chilly afternoons: dreadful to me was the coming home in the raw twilight, with nipped fingers and toes, and a heart saddened by the chidings of Bessie, the nurse, and humbled by the consciousness of my physical inferiority to Eliza, John, and Georgiana Reed.&quot;</span>
+<span class="n">text</span>
+<span class="n">paragraphs</span> <span class="o">=</span> <span class="n">text</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s1">&#39;</span><span class="se">\n</span><span class="s1">&#39;</span><span class="p">)</span>
+<span class="n">paragraphs</span>
+</pre></div>
+
+	</div>
+</div>
+</div>
+
+<div class="output_wrapper">
+<div class="output">
+
+
+<div class="output_area">
+
+	<div class="prompt output_prompt">Out[7]:</div>
+
+
+
+
+<div class="output_text output_subarea output_execute_result">
+<pre>[&#39;There was no possibility of taking a walk that day. We had been wandering, indeed, in the leafless shrubbery an hour in the morning; but since dinner (Mrs. Reed, when there was no company, dined early) the cold winter wind had brought with it clouds so sombre, and a rain so penetrating, that further out-door exercise was now out of the question.&#39;,
+ &#39;I was glad of it: I never liked long walks, especially on chilly afternoons: dreadful to me was the coming home in the raw twilight, with nipped fingers and toes, and a heart saddened by the chidings of Bessie, the nurse, and humbled by the consciousness of my physical inferiority to Eliza, John, and Georgiana Reed.&#39;]</pre>
+</div>
+
+</div>
+
+</div>
+</div>
+
+</div>
+
+<div class="{} cell border-box-sizing text_cell rendered"><div class="prompt input_prompt">
+</div><div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html">
+<p>By contrast, in the <a href="http://www.gutenberg.org/cache/epub/1260/pg1260.txt">Project Gutenberg edition of Brontë’s novel</a>, paragraphs are set off
+by two newlines in sequence. We still use the <code>split</code> method but we will use
+two newlines <code>\n\n</code> as our delimiter:</p>
+
+</div>
+</div>
+</div>
+
+<div class="{} cell border-box-sizing code_cell rendered">
+<div class="input">
+<div class="prompt input_prompt">In&nbsp;[8]:</div>
+<div class="inner_cell">
+	<div class="input_area">
+<div class=" highlight hl-ipython3"><pre><span></span><span class="n">text</span> <span class="o">=</span> <span class="s2">&quot;There was no possibility of taking a walk that day.  We had been</span><span class="se">\n</span><span class="s2">wandering, indeed, in the leafless shrubbery an hour in the morning; but</span><span class="se">\n</span><span class="s2">since dinner (Mrs. Reed, when there was no company, dined early) the cold</span><span class="se">\n</span><span class="s2">winter wind had brought with it clouds so sombre, and a rain so</span><span class="se">\n</span><span class="s2">penetrating, that further out-door exercise was now out of the question.</span><span class="se">\n\n</span><span class="s2">I was glad of it: I never liked long walks, especially on chilly</span><span class="se">\n</span><span class="s2">afternoons: dreadful to me was the coming home in the raw twilight, with</span><span class="se">\n</span><span class="s2">nipped fingers and toes, and a heart saddened by the chidings of Bessie,</span><span class="se">\n</span><span class="s2">the nurse, and humbled by the consciousness of my physical inferiority to</span><span class="se">\n</span><span class="s2">Eliza, John, and Georgiana Reed.&quot;</span>
+
+<span class="n">text</span>
+<span class="n">paragraphs</span> <span class="o">=</span> <span class="n">text</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s1">&#39;</span><span class="se">\n\n</span><span class="s1">&#39;</span><span class="p">)</span>
+<span class="n">paragraphs</span>
+</pre></div>
+
+	</div>
+</div>
+</div>
+
+<div class="output_wrapper">
+<div class="output">
+
+
+<div class="output_area">
+
+	<div class="prompt output_prompt">Out[8]:</div>
+
+
+
+
+<div class="output_text output_subarea output_execute_result">
+<pre>[&#39;There was no possibility of taking a walk that day.  We had been\nwandering, indeed, in the leafless shrubbery an hour in the morning; but\nsince dinner (Mrs. Reed, when there was no company, dined early) the cold\nwinter wind had brought with it clouds so sombre, and a rain so\npenetrating, that further out-door exercise was now out of the question.&#39;,
+ &#39;I was glad of it: I never liked long walks, especially on chilly\nafternoons: dreadful to me was the coming home in the raw twilight, with\nnipped fingers and toes, and a heart saddened by the chidings of Bessie,\nthe nurse, and humbled by the consciousness of my physical inferiority to\nEliza, John, and Georgiana Reed.&#39;]</pre>
+</div>
+
+</div>
+
+</div>
+</div>
+
+</div>
+
+<div class="{} cell border-box-sizing text_cell rendered"><div class="prompt input_prompt">
+</div><div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html">
+<p><a id='grouping-texts'></a></p>
+
+</div>
+</div>
+</div>
+
+<div class="{} cell border-box-sizing text_cell rendered"><div class="prompt input_prompt">
+</div><div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html">
+<h2 id="Grouping">Grouping<a class="anchor-link" href="#Grouping">&#182;</a></h2><p>When comparing groups of texts, we often want to aggregate information about the
+texts that comprise each group. For instance, we may be interested in comparing
+the works of one author with the works of another author. Or we may be
+interested in comparing texts published before 1800 with texts published after</p>
+<ol>
+<li>In order to do this, we need a strategy for collecting information (often
+word frequencies) associated with every text in a group.</li>
+</ol>
+<p>As an illustration, consider the task of grouping word frequencies in French
+tragedies by author. We have four authors (Crébillon, Corneille, Racine, and
+Voltaire) and 60 texts. Typically the first step in grouping texts together is
+determining what criterion or “key” defines a group. In this case the key is the
+author, which is conveniently recorded at the beginning of each filename in our
+corpus. So our first step will be to associate each text (the contents of each
+file) with the name of its author. As before we will use a list of dictionaries
+to manage our data.</p>
+
+</div>
+</div>
+</div>
+
+<div class="{} cell border-box-sizing code_cell rendered">
+<div class="input">
+<div class="prompt input_prompt">In&nbsp;[9]:</div>
+<div class="inner_cell">
+	<div class="input_area">
+<div class=" highlight hl-ipython3"><pre><span></span><span class="c1"># in every filename the author&#39;s last name is followed by an underscore (&#39;_&#39;),</span>
+<span class="c1"># for example: Voltaire_TR-V-1764-Olympie.txt</span>
+
+<span class="c1"># os.path.basename(...) gets us the filename from a path, e.g.,</span>
+<span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">basename</span><span class="p">(</span><span class="s1">&#39;french-tragedy/Voltaire_TR-V-1764-Olympie.txt&#39;</span><span class="p">)</span>
+
+<span class="c1"># using the split method we can break up the string on the underscore (&#39;_&#39;)</span>
+<span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">basename</span><span class="p">(</span><span class="s1">&#39;french-tragedy/Voltaire_TR-V-1764-Olympie.txt&#39;</span><span class="p">)</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s1">&#39;_&#39;</span><span class="p">)</span>
+
+<span class="c1"># putting these two steps together</span>
+<span class="n">author</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">basename</span><span class="p">(</span><span class="s1">&#39;french-tragedy/Voltaire_TR-V-1764-Olympie.txt&#39;</span><span class="p">)</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s1">&#39;_&#39;</span><span class="p">)[</span><span class="mi">0</span><span class="p">]</span>
+<span class="n">author</span>
+
+<span class="c1"># and for all the authors</span>
+<span class="n">authors</span> <span class="o">=</span> <span class="p">[</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">basename</span><span class="p">(</span><span class="n">filename</span><span class="p">)</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s1">&#39;_&#39;</span><span class="p">)[</span><span class="mi">0</span><span class="p">]</span> <span class="k">for</span> <span class="n">filename</span> <span class="ow">in</span> <span class="n">tragedy_filenames</span><span class="p">]</span>
+<span class="n">authors</span>
+
+<span class="c1"># to ignore duplicates we can transform the list into a set (which only records unique elements)</span>
+<span class="nb">set</span><span class="p">(</span><span class="n">authors</span><span class="p">)</span>
+
+<span class="c1"># as there is no guarantee about the ordering in a set (or a dictionary) we will typically</span>
+<span class="c1"># first drop duplicates and then save our unique names as a sorted list. Because there are</span>
+<span class="c1"># no duplicates in this list, we can be confident that the ordering is the same every time.</span>
+<span class="nb">sorted</span><span class="p">(</span><span class="nb">set</span><span class="p">(</span><span class="n">authors</span><span class="p">))</span>
+
+<span class="c1"># and we have a way of finding which indexes in authors correspond to each author using array indexing</span>
+<span class="n">authors</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">authors</span><span class="p">)</span>  <span class="c1"># convert from a Python list to a NumPy array</span>
+<span class="n">first_author</span> <span class="o">=</span> <span class="nb">sorted</span><span class="p">(</span><span class="nb">set</span><span class="p">(</span><span class="n">authors</span><span class="p">))[</span><span class="mi">0</span><span class="p">]</span>
+<span class="n">first_author</span>
+<span class="n">authors</span> <span class="o">==</span> <span class="n">first_author</span>
+<span class="n">np</span><span class="o">.</span><span class="n">nonzero</span><span class="p">(</span><span class="n">authors</span> <span class="o">==</span> <span class="n">first_author</span><span class="p">)</span>  <span class="c1"># if we want the actual indexes</span>
+<span class="n">authors</span><span class="p">[</span><span class="n">np</span><span class="o">.</span><span class="n">nonzero</span><span class="p">(</span><span class="n">authors</span> <span class="o">==</span> <span class="n">first_author</span><span class="p">)]</span>
+
+<span class="c1"># alternatively, we can find those indexes of texts *not* written by `first_author`</span>
+<span class="n">authors</span><span class="p">[</span><span class="n">authors</span> <span class="o">!=</span> <span class="n">first_author</span><span class="p">]</span>
+</pre></div>
+
+	</div>
+</div>
+</div>
+
+<div class="output_wrapper">
+<div class="output">
+
+
+<div class="output_area">
+
+	<div class="prompt"></div>
+
+
+<div class="output_subarea output_text output_error">
+<pre>
+<span class="ansi-red-fg">---------------------------------------------------------------------------</span>
+<span class="ansi-red-fg">NameError</span>                                 Traceback (most recent call last)
+<span class="ansi-green-fg">&lt;ipython-input-9-71de6be08617&gt;</span> in <span class="ansi-cyan-fg">&lt;module&gt;</span>
+<span class="ansi-green-intense-fg ansi-bold">      3</span> 
+<span class="ansi-green-intense-fg ansi-bold">      4</span> <span class="ansi-red-fg"># os.path.basename(...) gets us the filename from a path, e.g.,</span>
+<span class="ansi-green-fg">----&gt; 5</span><span class="ansi-red-fg"> </span>os<span class="ansi-blue-fg">.</span>path<span class="ansi-blue-fg">.</span>basename<span class="ansi-blue-fg">(</span><span class="ansi-blue-fg">&#39;french-tragedy/Voltaire_TR-V-1764-Olympie.txt&#39;</span><span class="ansi-blue-fg">)</span>
+<span class="ansi-green-intense-fg ansi-bold">      6</span> 
+<span class="ansi-green-intense-fg ansi-bold">      7</span> <span class="ansi-red-fg"># using the split method we can break up the string on the underscore (&#39;_&#39;)</span>
+
+<span class="ansi-red-fg">NameError</span>: name &#39;os&#39; is not defined</pre>
+</div>
+</div>
+
+</div>
+</div>
+
+</div>
+
+<div class="{} cell border-box-sizing text_cell rendered"><div class="prompt input_prompt">
+</div><div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html">
+<p>The easiest way to group the data is to use NumPy’s array indexing. This method
+is more concise than the alternatives and it should be familiar to those
+comfortable with R or Octave/Matlab. (Those for whom this method is unfamiliar
+will benefit from reviewing the introductions to NumPy mentioned in
+<a href="getting_started.html#getting-started">Getting started</a>.)</p>
+
+</div>
+</div>
+</div>
+
+<div class="{} cell border-box-sizing code_cell rendered">
+<div class="input">
+<div class="prompt input_prompt">In&nbsp;[10]:</div>
+<div class="inner_cell">
+	<div class="input_area">
+<div class=" highlight hl-ipython3"><pre><span></span><span class="n">authors</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">basename</span><span class="p">(</span><span class="n">filename</span><span class="p">)</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s1">&#39;_&#39;</span><span class="p">)[</span><span class="mi">0</span><span class="p">]</span> <span class="k">for</span> <span class="n">filename</span> <span class="ow">in</span> <span class="n">tragedy_filenames</span><span class="p">])</span>
+
+<span class="c1"># allocate an empty array to store our aggregated word frequencies</span>
+<span class="n">authors_unique</span> <span class="o">=</span> <span class="nb">sorted</span><span class="p">(</span><span class="nb">set</span><span class="p">(</span><span class="n">authors</span><span class="p">))</span>
+<span class="n">dtm_authors</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">((</span><span class="nb">len</span><span class="p">(</span><span class="n">authors_unique</span><span class="p">),</span> <span class="nb">len</span><span class="p">(</span><span class="n">vocab</span><span class="p">)))</span>
+<span class="k">for</span> <span class="n">i</span><span class="p">,</span> <span class="n">author</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">authors_unique</span><span class="p">):</span>
+    <span class="n">dtm_authors</span><span class="p">[</span><span class="n">i</span><span class="p">,</span> <span class="p">:]</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">dtm</span><span class="p">[</span><span class="n">authors</span><span class="o">==</span><span class="n">author</span><span class="p">,</span> <span class="p">:],</span> <span class="n">axis</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
+
+<span class="nd">@suppress</span>
+<span class="n">dtm_authors_method_numpy</span> <span class="o">=</span> <span class="n">dtm_authors</span><span class="o">.</span><span class="n">copy</span><span class="p">()</span>
+</pre></div>
+
+	</div>
+</div>
+</div>
+
+<div class="output_wrapper">
+<div class="output">
+
+
+<div class="output_area">
+
+	<div class="prompt"></div>
+
+
+<div class="output_subarea output_text output_error">
+<pre>
+<span class="ansi-cyan-fg">  File </span><span class="ansi-green-fg">&#34;&lt;ipython-input-10-98f0550156f2&gt;&#34;</span><span class="ansi-cyan-fg">, line </span><span class="ansi-green-fg">10</span>
+<span class="ansi-red-fg">    dtm_authors_method_numpy = dtm_authors.copy()</span>
+                           ^
+<span class="ansi-red-fg">SyntaxError</span><span class="ansi-red-fg">:</span> invalid syntax
+</pre>
+</div>
+</div>
+
+</div>
+</div>
+
+</div>
+
+<div class="{} cell border-box-sizing text_cell rendered"><div class="prompt input_prompt">
+</div><div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html">
+<blockquote><p><strong>Note</strong></p>
+<p>Recall that gathering together the sum of the entries along columns is
+performed with <code>np.sum(X, axis=0)</code> or <code>X.sum(axis=0)</code>. This is
+the NumPy equivalent of R’s <code>apply(X, 2, sum)</code> (or <code>colSums(X)</code>).</p>
+</blockquote>
+<p>Grouping data together in this manner is such a common problem in data analysis
+that there are packages devoted to making the work easier. For example, if you
+have the <a href="http://pandas.pydata.org">pandas library</a> installed, you can
+accomplish what we just did in two lines of code:</p>
+
+</div>
+</div>
+</div>
+
+<div class="{} cell border-box-sizing code_cell rendered">
+<div class="input">
+<div class="prompt input_prompt">In&nbsp;[11]:</div>
+<div class="inner_cell">
+	<div class="input_area">
+<div class=" highlight hl-ipython3"><pre><span></span><span class="kn">import</span> <span class="nn">pandas</span>
+<span class="n">authors</span> <span class="o">=</span> <span class="p">[</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">basename</span><span class="p">(</span><span class="n">filename</span><span class="p">)</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s1">&#39;_&#39;</span><span class="p">)[</span><span class="mi">0</span><span class="p">]</span> <span class="k">for</span> <span class="n">filename</span> <span class="ow">in</span> <span class="n">tragedy_filenames</span><span class="p">]</span>
+<span class="n">dtm_authors</span> <span class="o">=</span> <span class="n">pandas</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">(</span><span class="n">dtm</span><span class="p">)</span><span class="o">.</span><span class="n">groupby</span><span class="p">(</span><span class="n">authors</span><span class="p">)</span><span class="o">.</span><span class="n">sum</span><span class="p">()</span><span class="o">.</span><span class="n">values</span>
+
+<span class="nd">@suppress</span>
+<span class="n">dtm_authors_method_pandas</span> <span class="o">=</span> <span class="n">dtm_authors</span><span class="o">.</span><span class="n">copy</span><span class="p">()</span>
+
+<span class="nd">@suppress</span>
+<span class="n">np</span><span class="o">.</span><span class="n">testing</span><span class="o">.</span><span class="n">assert_array_almost_equal</span><span class="p">(</span><span class="n">dtm_authors_method_pandas</span><span class="p">,</span> <span class="n">dtm_authors_method_numpy</span><span class="p">)</span>
+</pre></div>
+
+	</div>
+</div>
+</div>
+
+<div class="output_wrapper">
+<div class="output">
+
+
+<div class="output_area">
+
+	<div class="prompt"></div>
+
+
+<div class="output_subarea output_text output_error">
+<pre>
+<span class="ansi-cyan-fg">  File </span><span class="ansi-green-fg">&#34;&lt;ipython-input-11-be6a177785be&gt;&#34;</span><span class="ansi-cyan-fg">, line </span><span class="ansi-green-fg">6</span>
+<span class="ansi-red-fg">    dtm_authors_method_pandas = dtm_authors.copy()</span>
+                            ^
+<span class="ansi-red-fg">SyntaxError</span><span class="ansi-red-fg">:</span> invalid syntax
+</pre>
+</div>
+</div>
+
+</div>
+</div>
+
+</div>
+
+<div class="{} cell border-box-sizing text_cell rendered"><div class="prompt input_prompt">
+</div><div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html">
+<p>A more general strategy for grouping data together makes use of the <code>groupby</code>
+function in the Python standard library <a href="http://docs.python.org/dev/library/itertools.html">itertools</a>. This method has the
+advantage of being fast and memory efficient. As a warm-up exercise, we will
+group just the filenames by author using <code>groupby</code> function.</p>
+
+</div>
+</div>
+</div>
+
+<div class="{} cell border-box-sizing code_cell rendered">
+<div class="input">
+<div class="prompt input_prompt">In&nbsp;[12]:</div>
+<div class="inner_cell">
+	<div class="input_area">
+<div class=" highlight hl-ipython3"><pre><span></span><span class="kn">import</span> <span class="nn">itertools</span>
+<span class="kn">import</span> <span class="nn">operator</span>
+
+<span class="n">texts</span> <span class="o">=</span> <span class="p">[]</span>
+<span class="k">for</span> <span class="n">filename</span> <span class="ow">in</span> <span class="n">tragedy_filenames</span><span class="p">:</span>
+    <span class="n">author</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">basename</span><span class="p">(</span><span class="n">filename</span><span class="p">)</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s1">&#39;_&#39;</span><span class="p">)[</span><span class="mi">0</span><span class="p">]</span>
+    <span class="c1"># the following are equivalent</span>
+    <span class="c1"># {&#39;filename&#39;: filename, &#39;author&#39;:author}</span>
+    <span class="c1"># dict(filename=filename, author=author)</span>
+    <span class="c1"># (I find the second easier to type)</span>
+    <span class="n">texts</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="nb">dict</span><span class="p">(</span><span class="n">filename</span><span class="o">=</span><span class="n">filename</span><span class="p">,</span> <span class="n">author</span><span class="o">=</span><span class="n">author</span><span class="p">))</span>
+
+<span class="c1"># groupby requires that the list be sorted by the &#39;key&#39; with which we will be doing the grouping</span>
+<span class="n">texts</span> <span class="o">=</span> <span class="nb">sorted</span><span class="p">(</span><span class="n">texts</span><span class="p">,</span> <span class="n">key</span><span class="o">=</span><span class="n">operator</span><span class="o">.</span><span class="n">itemgetter</span><span class="p">(</span><span class="s1">&#39;author&#39;</span><span class="p">))</span>
+
+<span class="c1"># if d is a dictionary, operator.itemgetter(key)(d) does d[key]</span>
+<span class="n">d</span> <span class="o">=</span> <span class="p">{</span><span class="s1">&#39;number&#39;</span><span class="p">:</span> <span class="mi">5</span><span class="p">}</span>
+<span class="n">d</span><span class="p">[</span><span class="s1">&#39;number&#39;</span><span class="p">]</span>
+<span class="n">operator</span><span class="o">.</span><span class="n">itemgetter</span><span class="p">(</span><span class="s1">&#39;number&#39;</span><span class="p">)(</span><span class="n">d</span><span class="p">)</span>
+</pre></div>
+
+	</div>
+</div>
+</div>
+
+<div class="output_wrapper">
+<div class="output">
+
+
+<div class="output_area">
+
+	<div class="prompt"></div>
+
+
+<div class="output_subarea output_text output_error">
+<pre>
+<span class="ansi-red-fg">---------------------------------------------------------------------------</span>
+<span class="ansi-red-fg">NameError</span>                                 Traceback (most recent call last)
+<span class="ansi-green-fg">&lt;ipython-input-12-dceb599270f2&gt;</span> in <span class="ansi-cyan-fg">&lt;module&gt;</span>
+<span class="ansi-green-intense-fg ansi-bold">      3</span> 
+<span class="ansi-green-intense-fg ansi-bold">      4</span> texts <span class="ansi-blue-fg">=</span> <span class="ansi-blue-fg">[</span><span class="ansi-blue-fg">]</span>
+<span class="ansi-green-fg">----&gt; 5</span><span class="ansi-red-fg"> </span><span class="ansi-green-fg">for</span> filename <span class="ansi-green-fg">in</span> tragedy_filenames<span class="ansi-blue-fg">:</span>
+<span class="ansi-green-intense-fg ansi-bold">      6</span>     author <span class="ansi-blue-fg">=</span> os<span class="ansi-blue-fg">.</span>path<span class="ansi-blue-fg">.</span>basename<span class="ansi-blue-fg">(</span>filename<span class="ansi-blue-fg">)</span><span class="ansi-blue-fg">.</span>split<span class="ansi-blue-fg">(</span><span class="ansi-blue-fg">&#39;_&#39;</span><span class="ansi-blue-fg">)</span><span class="ansi-blue-fg">[</span><span class="ansi-cyan-fg">0</span><span class="ansi-blue-fg">]</span>
+<span class="ansi-green-intense-fg ansi-bold">      7</span>     <span class="ansi-red-fg"># the following are equivalent</span>
+
+<span class="ansi-red-fg">NameError</span>: name &#39;tragedy_filenames&#39; is not defined</pre>
+</div>
+</div>
+
+</div>
+</div>
+
+</div>
+
+<div class="{} cell border-box-sizing code_cell rendered">
+<div class="input">
+<div class="prompt input_prompt">In&nbsp;[13]:</div>
+<div class="inner_cell">
+	<div class="input_area">
+<div class=" highlight hl-ipython3"><pre><span></span><span class="n">grouped_data</span> <span class="o">=</span> <span class="p">{}</span>
+<span class="k">for</span> <span class="n">author</span><span class="p">,</span> <span class="n">grouped</span> <span class="ow">in</span> <span class="n">itertools</span><span class="o">.</span><span class="n">groupby</span><span class="p">(</span><span class="n">texts</span><span class="p">,</span> <span class="n">key</span><span class="o">=</span><span class="n">operator</span><span class="o">.</span><span class="n">itemgetter</span><span class="p">(</span><span class="s1">&#39;author&#39;</span><span class="p">)):</span>
+    <span class="n">grouped_data</span><span class="p">[</span><span class="n">author</span><span class="p">]</span> <span class="o">=</span> <span class="s1">&#39;,&#39;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">basename</span><span class="p">(</span><span class="n">t</span><span class="p">[</span><span class="s1">&#39;filename&#39;</span><span class="p">])</span> <span class="k">for</span> <span class="n">t</span> <span class="ow">in</span> <span class="n">grouped</span><span class="p">)</span>
+<span class="n">grouped_data</span>
+</pre></div>
+
+	</div>
+</div>
+</div>
+
+<div class="output_wrapper">
+<div class="output">
+
+
+<div class="output_area">
+
+	<div class="prompt output_prompt">Out[13]:</div>
+
+
+
+
+<div class="output_text output_subarea output_execute_result">
+<pre>{}</pre>
+</div>
+
+</div>
+
+</div>
+</div>
+
+</div>
+
+<div class="{} cell border-box-sizing text_cell rendered"><div class="prompt input_prompt">
+</div><div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html">
+<p>The preceding lines of code demonstrate how to group filenames by author. Now we
+want to aggregate document-term frequencies by author. The process is similar.
+We use the same strategy of creating a collection of dictionaries with the
+information we want to aggregate and the key—the author’s name—that
+identifies each group.</p>
+<p>Now that we have done the work of grouping these texts together, we can examine
+the relationships among the four authors using the exploratory techniques we
+learned in <a href="working_with_text.html#working-with-text">Working with text</a>.</p>
+
+</div>
+</div>
+</div>
+
+<div class="{} cell border-box-sizing code_cell rendered">
+<div class="input">
+<div class="prompt input_prompt">In&nbsp;[14]:</div>
+<div class="inner_cell">
+	<div class="input_area">
+<div class=" highlight hl-ipython3"><pre><span></span><span class="kn">import</span> <span class="nn">matplotlib</span>
+<span class="kn">import</span> <span class="nn">matplotlib.pyplot</span> <span class="k">as</span> <span class="nn">plt</span>
+<span class="kn">from</span> <span class="nn">sklearn.manifold</span> <span class="kn">import</span> <span class="n">MDS</span>
+<span class="kn">from</span> <span class="nn">sklearn.metrics.pairwise</span> <span class="kn">import</span> <span class="n">cosine_similarity</span>
+
+<span class="n">dist</span> <span class="o">=</span> <span class="mi">1</span> <span class="o">-</span> <span class="n">cosine_similarity</span><span class="p">(</span><span class="n">dtm_authors</span><span class="p">)</span>
+<span class="n">mds</span> <span class="o">=</span> <span class="n">MDS</span><span class="p">(</span><span class="n">n_components</span><span class="o">=</span><span class="mi">2</span><span class="p">,</span> <span class="n">dissimilarity</span><span class="o">=</span><span class="s2">&quot;precomputed&quot;</span><span class="p">)</span>
+<span class="n">pos</span> <span class="o">=</span> <span class="n">mds</span><span class="o">.</span><span class="n">fit_transform</span><span class="p">(</span><span class="n">dist</span><span class="p">)</span>  <span class="c1"># shape (n_components, n_samples)</span>
+</pre></div>
+
+	</div>
+</div>
+</div>
+
+<div class="output_wrapper">
+<div class="output">
+
+
+<div class="output_area">
+
+	<div class="prompt"></div>
+
+
+<div class="output_subarea output_text output_error">
+<pre>
+<span class="ansi-red-fg">---------------------------------------------------------------------------</span>
+<span class="ansi-red-fg">NameError</span>                                 Traceback (most recent call last)
+<span class="ansi-green-fg">&lt;ipython-input-14-c5e378802128&gt;</span> in <span class="ansi-cyan-fg">&lt;module&gt;</span>
+<span class="ansi-green-intense-fg ansi-bold">      4</span> <span class="ansi-green-fg">from</span> sklearn<span class="ansi-blue-fg">.</span>metrics<span class="ansi-blue-fg">.</span>pairwise <span class="ansi-green-fg">import</span> cosine_similarity
+<span class="ansi-green-intense-fg ansi-bold">      5</span> 
+<span class="ansi-green-fg">----&gt; 6</span><span class="ansi-red-fg"> </span>dist <span class="ansi-blue-fg">=</span> <span class="ansi-cyan-fg">1</span> <span class="ansi-blue-fg">-</span> cosine_similarity<span class="ansi-blue-fg">(</span>dtm_authors<span class="ansi-blue-fg">)</span>
+<span class="ansi-green-intense-fg ansi-bold">      7</span> mds <span class="ansi-blue-fg">=</span> MDS<span class="ansi-blue-fg">(</span>n_components<span class="ansi-blue-fg">=</span><span class="ansi-cyan-fg">2</span><span class="ansi-blue-fg">,</span> dissimilarity<span class="ansi-blue-fg">=</span><span class="ansi-blue-fg">&#34;precomputed&#34;</span><span class="ansi-blue-fg">)</span>
+<span class="ansi-green-intense-fg ansi-bold">      8</span> pos <span class="ansi-blue-fg">=</span> mds<span class="ansi-blue-fg">.</span>fit_transform<span class="ansi-blue-fg">(</span>dist<span class="ansi-blue-fg">)</span>  <span class="ansi-red-fg"># shape (n_components, n_samples)</span>
+
+<span class="ansi-red-fg">NameError</span>: name &#39;dtm_authors&#39; is not defined</pre>
+</div>
+</div>
+
+</div>
+</div>
+
+</div>
+
+<div class="{} cell border-box-sizing code_cell rendered">
+<div class="input">
+<div class="prompt input_prompt">In&nbsp;[15]:</div>
+<div class="inner_cell">
+	<div class="input_area">
+<div class=" highlight hl-ipython3"><pre><span></span><span class="n">xs</span><span class="p">,</span> <span class="n">ys</span> <span class="o">=</span> <span class="n">pos</span><span class="p">[:,</span> <span class="mi">0</span><span class="p">],</span> <span class="n">pos</span><span class="p">[:,</span> <span class="mi">1</span><span class="p">]</span>
+<span class="n">names</span> <span class="o">=</span> <span class="nb">sorted</span><span class="p">(</span><span class="nb">set</span><span class="p">(</span><span class="n">authors</span><span class="p">))</span>
+<span class="k">for</span> <span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="n">name</span> <span class="ow">in</span> <span class="nb">zip</span><span class="p">(</span><span class="n">xs</span><span class="p">,</span> <span class="n">ys</span><span class="p">,</span> <span class="n">names</span><span class="p">):</span>
+    <span class="n">color</span> <span class="o">=</span> <span class="n">matplotlib</span><span class="o">.</span><span class="n">cm</span><span class="o">.</span><span class="n">summer</span><span class="p">(</span><span class="n">names</span><span class="o">.</span><span class="n">index</span><span class="p">(</span><span class="n">name</span><span class="p">))</span>
+    <span class="n">plt</span><span class="o">.</span><span class="n">scatter</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="n">c</span><span class="o">=</span><span class="n">color</span><span class="p">)</span>
+    <span class="n">plt</span><span class="o">.</span><span class="n">text</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="n">name</span><span class="p">)</span>
+
+<span class="nd">@savefig</span> <span class="n">plot_preprocessing_authors_mds</span><span class="o">.</span><span class="n">png</span> <span class="n">width</span><span class="o">=</span><span class="mi">7</span><span class="ow">in</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">show</span><span class="p">()</span>
+</pre></div>
+
+	</div>
+</div>
+</div>
+
+<div class="output_wrapper">
+<div class="output">
+
+
+<div class="output_area">
+
+	<div class="prompt"></div>
+
+
+<div class="output_subarea output_text output_error">
+<pre>
+<span class="ansi-cyan-fg">  File </span><span class="ansi-green-fg">&#34;&lt;ipython-input-15-8cb98f2c052a&gt;&#34;</span><span class="ansi-cyan-fg">, line </span><span class="ansi-green-fg">8</span>
+<span class="ansi-red-fg">    @savefig plot_preprocessing_authors_mds.png width=7in</span>
+                                          ^
+<span class="ansi-red-fg">SyntaxError</span><span class="ansi-red-fg">:</span> invalid syntax
+</pre>
+</div>
+</div>
+
+</div>
+</div>
+
+</div>
+
+<div class="{} cell border-box-sizing text_cell rendered"><div class="prompt input_prompt">
+</div><div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html">
+<p>Note that it is possible to group texts by any feature they share in common.
+If, for instance, we had wanted to organize our texts into 50 year periods
+(1650-1699, 1700-1749, …) rather than by author, we would begin by extracting
+the publication year from the filename.</p>
+<p>Then we would create a list of group identifiers based on the periods that
+interest us:</p>
+<p>Finally we would group the texts together using the same procedure as we did
+with authors.</p>
+
+</div>
+</div>
+</div>
+
+<div class="{} cell border-box-sizing code_cell rendered">
+<div class="input">
+<div class="prompt input_prompt">In&nbsp;[16]:</div>
+<div class="inner_cell">
+	<div class="input_area">
+<div class=" highlight hl-ipython3"><pre><span></span><span class="n">periods_unique</span> <span class="o">=</span> <span class="nb">sorted</span><span class="p">(</span><span class="nb">set</span><span class="p">(</span><span class="n">periods</span><span class="p">))</span>
+<span class="n">dtm_periods</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">((</span><span class="nb">len</span><span class="p">(</span><span class="n">periods_unique</span><span class="p">),</span> <span class="nb">len</span><span class="p">(</span><span class="n">vocab</span><span class="p">)))</span>
+<span class="k">for</span> <span class="n">i</span><span class="p">,</span> <span class="n">period</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">periods_unique</span><span class="p">):</span>
+    <span class="n">dtm_periods</span><span class="p">[</span><span class="n">i</span><span class="p">,:]</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">dtm</span><span class="p">[</span><span class="n">periods</span><span class="o">==</span><span class="n">period</span><span class="p">,:],</span> <span class="n">axis</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
+</pre></div>
+
+	</div>
+</div>
+</div>
+
+<div class="output_wrapper">
+<div class="output">
+
+
+<div class="output_area">
+
+	<div class="prompt"></div>
+
+
+<div class="output_subarea output_text output_error">
+<pre>
+<span class="ansi-red-fg">---------------------------------------------------------------------------</span>
+<span class="ansi-red-fg">NameError</span>                                 Traceback (most recent call last)
+<span class="ansi-green-fg">&lt;ipython-input-16-f01ece1c264f&gt;</span> in <span class="ansi-cyan-fg">&lt;module&gt;</span>
+<span class="ansi-green-fg">----&gt; 1</span><span class="ansi-red-fg"> </span>periods_unique <span class="ansi-blue-fg">=</span> sorted<span class="ansi-blue-fg">(</span>set<span class="ansi-blue-fg">(</span>periods<span class="ansi-blue-fg">)</span><span class="ansi-blue-fg">)</span>
+<span class="ansi-green-intense-fg ansi-bold">      2</span> dtm_periods <span class="ansi-blue-fg">=</span> np<span class="ansi-blue-fg">.</span>zeros<span class="ansi-blue-fg">(</span><span class="ansi-blue-fg">(</span>len<span class="ansi-blue-fg">(</span>periods_unique<span class="ansi-blue-fg">)</span><span class="ansi-blue-fg">,</span> len<span class="ansi-blue-fg">(</span>vocab<span class="ansi-blue-fg">)</span><span class="ansi-blue-fg">)</span><span class="ansi-blue-fg">)</span>
+<span class="ansi-green-intense-fg ansi-bold">      3</span> <span class="ansi-green-fg">for</span> i<span class="ansi-blue-fg">,</span> period <span class="ansi-green-fg">in</span> enumerate<span class="ansi-blue-fg">(</span>periods_unique<span class="ansi-blue-fg">)</span><span class="ansi-blue-fg">:</span>
+<span class="ansi-green-intense-fg ansi-bold">      4</span>     dtm_periods<span class="ansi-blue-fg">[</span>i<span class="ansi-blue-fg">,</span><span class="ansi-blue-fg">:</span><span class="ansi-blue-fg">]</span> <span class="ansi-blue-fg">=</span> np<span class="ansi-blue-fg">.</span>sum<span class="ansi-blue-fg">(</span>dtm<span class="ansi-blue-fg">[</span>periods<span class="ansi-blue-fg">==</span>period<span class="ansi-blue-fg">,</span><span class="ansi-blue-fg">:</span><span class="ansi-blue-fg">]</span><span class="ansi-blue-fg">,</span> axis<span class="ansi-blue-fg">=</span><span class="ansi-cyan-fg">0</span><span class="ansi-blue-fg">)</span>
+
+<span class="ansi-red-fg">NameError</span>: name &#39;periods&#39; is not defined</pre>
+</div>
+</div>
+
+</div>
+</div>
+
+</div>
+
+<div class="{} cell border-box-sizing text_cell rendered"><div class="prompt input_prompt">
+</div><div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html">
+<h2 id="Exercises">Exercises<a class="anchor-link" href="#Exercises">&#182;</a></h2><ol>
+<li>Write a tokenizer that, as it tokenizes, also transforms uppercase words into
+lowercase words. Consider using the string method <code>lower</code>.  </li>
+<li>Using your tokenizer, count the number of times <code>green</code> occurs in the
+following text sample.  </li>
+</ol>
+
+</div>
+</div>
+</div>
+
+<div class="{} cell border-box-sizing code_cell rendered">
+<div class="input">
+<div class="prompt input_prompt">In&nbsp;[17]:</div>
+<div class="inner_cell">
+	<div class="input_area">
+<div class=" highlight hl-ipython3"><pre><span></span><span class="s2">&quot;I find,&quot;</span> <span class="n">Mr</span><span class="o">.</span> <span class="n">Green</span> <span class="n">said</span><span class="p">,</span> <span class="s2">&quot;that there are many members here who do not know</span>
+<span class="n">me</span> <span class="n">yet</span><span class="p">,</span><span class="o">--</span><span class="n">young</span> <span class="n">members</span><span class="p">,</span> <span class="n">probably</span><span class="p">,</span> <span class="n">who</span> <span class="n">are</span> <span class="n">green</span> <span class="kn">from</span> <span class="nn">the</span> <span class="n">waste</span> <span class="n">lands</span> <span class="ow">and</span>
+<span class="n">road</span><span class="o">-</span><span class="n">sides</span> <span class="n">of</span> <span class="n">private</span> <span class="n">life</span><span class="o">.</span>
+</pre></div>
+
+	</div>
+</div>
+</div>
+
+<div class="output_wrapper">
+<div class="output">
+
+
+<div class="output_area">
+
+	<div class="prompt"></div>
+
+
+<div class="output_subarea output_text output_error">
+<pre>
+<span class="ansi-cyan-fg">  File </span><span class="ansi-green-fg">&#34;&lt;ipython-input-17-2cf45c024ca2&gt;&#34;</span><span class="ansi-cyan-fg">, line </span><span class="ansi-green-fg">1</span>
+<span class="ansi-red-fg">    &#34;I find,&#34; Mr. Green said, &#34;that there are many members here who do not know</span>
+               ^
+<span class="ansi-red-fg">SyntaxError</span><span class="ansi-red-fg">:</span> invalid syntax
+</pre>
+</div>
+</div>
+
+</div>
+</div>
+
+</div>
+
+<div class="{} cell border-box-sizing text_cell rendered"><div class="prompt input_prompt">
+</div><div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html">
+<ol>
+<li>Personal names that occur in lowercase form in the dictionary illustrate one
+kind of information that is lost by ignoring case. Provide another example of
+useful information lost when lowercasing all words.  </li>
+</ol>
+
+</div>
+</div>
+</div>
+ 
+
+
+
+
+					</div>
+
+				</div>
+
+			</div>
+
+			<footer class="footer">
+
+				<p>&copy; Copyright <YEAR>, Built using the minimal jupinx template.</p>
+
+			</footer>
+
+		</div>
+
+		<script src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.1/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+		<script src="/_static/js/base.js"></script>
+
+	</body>
+</html>

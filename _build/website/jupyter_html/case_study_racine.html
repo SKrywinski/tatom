@@ -1,0 +1,1122 @@
+<!doctype html>
+<html lang="en">
+	<head>
+		<meta charset="utf-8">
+
+		<title>Case study: Racine’s early and late tragedies 1 &ndash; Documentation</title>
+
+		<meta name="viewport" content="width=device-width, initial-scale=1">
+		<meta name="author" content="">
+		<meta name="keywords" content="">
+		<meta name="description" content="">
+
+		<link rel="stylesheet" href="/_static/css/base.css">
+
+	</head>
+
+	<body>
+
+		<div class="wrapper">
+
+			<header class="header">
+
+				<div class="branding">
+
+					<p class="site-title"><a href="/">Documentation</a></p>
+
+					<p class="sr-only"><a href="#skip">Skip to content</a></p>
+
+				</div>
+
+				<div class="header-tools">
+
+
+					<div class="header-badge" id="executability_status_badge"></div>
+
+
+				</div>
+
+			</header>
+
+			<div class="main">
+
+				<div class="content">
+
+					<div id="skip"></div>
+
+					<div class="document">
+
+<div class="{} cell border-box-sizing text_cell rendered"><div class="prompt input_prompt">
+</div><div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html">
+<p><a id='index-0'></a></p>
+<p><a id='case-study-racine'></a></p>
+
+</div>
+</div>
+</div>
+
+<div class="{} cell border-box-sizing text_cell rendered"><div class="prompt input_prompt">
+</div><div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html">
+<h1>Case study: Racine’s early and late tragedies <sup><a href=#fn-authors id=fn-authors-link>[1]</a></sup></h1>
+<p>This tutorial describes two stages of an analysis of a collection of French
+tragedies: (1) exploratory data analysis and (2) a closer quantitative reading
+of an aspect of interest in the corpus: <a href="https://en.wikipedia.org/wiki/Jean_Racine">Jean Racine’s</a> early and late plays.</p>
+
+</div>
+</div>
+</div>
+
+<div class="{} cell border-box-sizing text_cell rendered"><div class="prompt input_prompt">
+</div><div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html">
+<h2 id="Corpus:-sixty-tragedies">Corpus: sixty tragedies<a class="anchor-link" href="#Corpus:-sixty-tragedies">&#182;</a></h2><p>The corpus being explored is a collection of 60 French tragedies gathered from
+Paul Fièvre’s <a href="http://www.theatre-classique.fr">„Théâtre classique” collection of French seventeenth and
+eighteenth-century plays</a> (available in
+<a href="datasets.html#datasets">Datasets</a>).</p>
+<p>Following the maxim “know your data”, we first want to gain a rough sense of the
+length (in words) of the texts in a corpus. Are we dealing with 100,000 word
+tomes or 1,000 word newspaper articles? Even though we know we are dealing with
+French tragedies inspecting text lengths is always worthwhile. For example,
+checking the length of the texts in a corpus is an easy way to spot problems
+such as incomplete texts. In the present case, we might also consider checking
+the number of lines (<a href="https://en.wikipedia.org/wiki/Alexandrine">alexandrines</a>) as this is the standard measure
+for compositions in verse.  Regardless of what unit is used, the easiest way
+to visualize the distribution of lengths in a corpus is a histogram. In
+order to create a histogram we need first to calculate the length of all the
+texts in our corpus. If we have a document-term matrix available, the length in
+words may be calculated by summing the rows of the document-term matrix, as each
+row corresponds to one document.</p>
+<p>Now that we have the texts’ lengths stored in the array <code>lengths</code> we can
+create a histogram with the matplotlib function <code>hist</code>.</p>
+
+</div>
+</div>
+</div>
+
+<div class="{} cell border-box-sizing code_cell rendered">
+<div class="input">
+<div class="prompt input_prompt">In&nbsp;[1]:</div>
+<div class="inner_cell">
+	<div class="input_area">
+<div class=" highlight hl-ipython3"><pre><span></span><span class="kn">import</span> <span class="nn">matplotlib.pyplot</span> <span class="k">as</span> <span class="nn">plt</span>
+
+<span class="n">plt</span><span class="o">.</span><span class="n">hist</span><span class="p">(</span><span class="n">lengths</span><span class="p">)</span>
+<span class="nd">@savefig</span> <span class="n">case_study_voltaire_hist</span><span class="o">.</span><span class="n">png</span> <span class="n">width</span><span class="o">=</span><span class="mi">8</span><span class="ow">in</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">title</span><span class="p">(</span><span class="s2">&quot;Play length in words&quot;</span><span class="p">)</span>
+
+<span class="c1"># find the longest and the shortest texts</span>
+<span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">max</span><span class="p">(</span><span class="n">lengths</span><span class="p">),</span> <span class="n">filenames</span><span class="p">[</span><span class="n">np</span><span class="o">.</span><span class="n">argmax</span><span class="p">(</span><span class="n">lengths</span><span class="p">)])</span>
+<span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">min</span><span class="p">(</span><span class="n">lengths</span><span class="p">),</span> <span class="n">filenames</span><span class="p">[</span><span class="n">np</span><span class="o">.</span><span class="n">argmin</span><span class="p">(</span><span class="n">lengths</span><span class="p">)])</span>
+</pre></div>
+
+	</div>
+</div>
+</div>
+
+<div class="output_wrapper">
+<div class="output">
+
+
+<div class="output_area">
+
+	<div class="prompt"></div>
+
+
+<div class="output_subarea output_text output_error">
+<pre>
+<span class="ansi-cyan-fg">  File </span><span class="ansi-green-fg">&#34;&lt;ipython-input-1-20d42f57718f&gt;&#34;</span><span class="ansi-cyan-fg">, line </span><span class="ansi-green-fg">4</span>
+<span class="ansi-red-fg">    @savefig case_study_voltaire_hist.png width=8in</span>
+                                    ^
+<span class="ansi-red-fg">SyntaxError</span><span class="ansi-red-fg">:</span> invalid syntax
+</pre>
+</div>
+</div>
+
+</div>
+</div>
+
+</div>
+
+<div class="{} cell border-box-sizing text_cell rendered"><div class="prompt input_prompt">
+</div><div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html">
+<p>Turning to the contents of the corpus, one way to explore a collection is to
+plot the distances between texts. We have already seen how to do this in
+<a href="working_with_text.html#working-with-text">Working with text</a>. As we have not normalized our texts by play
+length—and the histogram of lengths shows us that there is considerable
+variation—cosine distance is an appropriate choice for a measure of distance.</p>
+
+</div>
+</div>
+</div>
+
+<div class="{} cell border-box-sizing code_cell rendered">
+<div class="input">
+<div class="prompt input_prompt">In&nbsp;[2]:</div>
+<div class="inner_cell">
+	<div class="input_area">
+<div class=" highlight hl-ipython3"><pre><span></span><span class="kn">from</span> <span class="nn">sklearn.manifold</span> <span class="kn">import</span> <span class="n">MDS</span>
+<span class="kn">from</span> <span class="nn">sklearn.metrics.pairwise</span> <span class="kn">import</span> <span class="n">cosine_similarity</span>
+
+<span class="c1"># we need distance, not similarity</span>
+<span class="n">dist</span> <span class="o">=</span> <span class="mi">1</span> <span class="o">-</span> <span class="n">cosine_similarity</span><span class="p">(</span><span class="n">dtm</span><span class="p">)</span>
+
+<span class="n">mds</span> <span class="o">=</span> <span class="n">MDS</span><span class="p">(</span><span class="n">n_components</span><span class="o">=</span><span class="mi">2</span><span class="p">,</span> <span class="n">dissimilarity</span><span class="o">=</span><span class="s2">&quot;precomputed&quot;</span><span class="p">,</span> <span class="n">random_state</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
+<span class="n">pos</span> <span class="o">=</span> <span class="n">mds</span><span class="o">.</span><span class="n">fit_transform</span><span class="p">(</span><span class="n">dist</span><span class="p">)</span>  <span class="c1"># shape (n_components, n_samples)</span>
+
+<span class="c1"># create very short names for plotting</span>
+<span class="c1"># filenames have form: Voltaire_TR-V-1724-Mariamne.txt</span>
+<span class="n">names</span> <span class="o">=</span> <span class="p">[]</span>
+<span class="n">authors</span> <span class="o">=</span> <span class="p">[]</span>
+<span class="k">for</span> <span class="n">fn</span> <span class="ow">in</span> <span class="n">filenames</span><span class="p">:</span>
+    <span class="n">author</span> <span class="o">=</span> <span class="n">fn</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s1">&#39;_&#39;</span><span class="p">)[</span><span class="mi">0</span><span class="p">]</span>
+    <span class="n">year</span> <span class="o">=</span> <span class="n">fn</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s1">&#39;-&#39;</span><span class="p">)[</span><span class="mi">2</span><span class="p">]</span>
+    <span class="n">authors</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">author</span><span class="p">)</span>
+    <span class="n">names</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">author</span> <span class="o">+</span> <span class="n">year</span><span class="p">)</span>
+</pre></div>
+
+	</div>
+</div>
+</div>
+
+<div class="output_wrapper">
+<div class="output">
+
+
+<div class="output_area">
+
+	<div class="prompt"></div>
+
+
+<div class="output_subarea output_text output_error">
+<pre>
+<span class="ansi-red-fg">---------------------------------------------------------------------------</span>
+<span class="ansi-red-fg">NameError</span>                                 Traceback (most recent call last)
+<span class="ansi-green-fg">&lt;ipython-input-2-f903e928c22d&gt;</span> in <span class="ansi-cyan-fg">&lt;module&gt;</span>
+<span class="ansi-green-intense-fg ansi-bold">      3</span> 
+<span class="ansi-green-intense-fg ansi-bold">      4</span> <span class="ansi-red-fg"># we need distance, not similarity</span>
+<span class="ansi-green-fg">----&gt; 5</span><span class="ansi-red-fg"> </span>dist <span class="ansi-blue-fg">=</span> <span class="ansi-cyan-fg">1</span> <span class="ansi-blue-fg">-</span> cosine_similarity<span class="ansi-blue-fg">(</span>dtm<span class="ansi-blue-fg">)</span>
+<span class="ansi-green-intense-fg ansi-bold">      6</span> 
+<span class="ansi-green-intense-fg ansi-bold">      7</span> mds <span class="ansi-blue-fg">=</span> MDS<span class="ansi-blue-fg">(</span>n_components<span class="ansi-blue-fg">=</span><span class="ansi-cyan-fg">2</span><span class="ansi-blue-fg">,</span> dissimilarity<span class="ansi-blue-fg">=</span><span class="ansi-blue-fg">&#34;precomputed&#34;</span><span class="ansi-blue-fg">,</span> random_state<span class="ansi-blue-fg">=</span><span class="ansi-cyan-fg">1</span><span class="ansi-blue-fg">)</span>
+
+<span class="ansi-red-fg">NameError</span>: name &#39;dtm&#39; is not defined</pre>
+</div>
+</div>
+
+</div>
+</div>
+
+</div>
+
+<div class="{} cell border-box-sizing code_cell rendered">
+<div class="input">
+<div class="prompt input_prompt">In&nbsp;[3]:</div>
+<div class="inner_cell">
+	<div class="input_area">
+<div class=" highlight hl-ipython3"><pre><span></span><span class="n">plt</span><span class="o">.</span><span class="n">figure</span><span class="p">(</span><span class="n">figsize</span><span class="o">=</span><span class="p">(</span><span class="mf">11.3</span><span class="p">,</span> <span class="mi">7</span><span class="p">))</span>  <span class="c1"># use a bigger canvas than usual</span>
+<span class="n">xs</span><span class="p">,</span> <span class="n">ys</span> <span class="o">=</span> <span class="n">pos</span><span class="p">[:,</span> <span class="mi">0</span><span class="p">],</span> <span class="n">pos</span><span class="p">[:,</span> <span class="mi">1</span><span class="p">]</span>
+
+<span class="n">authors_unique</span> <span class="o">=</span> <span class="nb">sorted</span><span class="p">(</span><span class="nb">set</span><span class="p">(</span><span class="n">authors</span><span class="p">))</span>
+<span class="n">colors</span> <span class="o">=</span> <span class="p">[</span><span class="n">authors_unique</span><span class="o">.</span><span class="n">index</span><span class="p">(</span><span class="n">a</span><span class="p">)</span> <span class="k">for</span> <span class="n">a</span> <span class="ow">in</span> <span class="n">authors</span><span class="p">]</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">scatter</span><span class="p">(</span><span class="n">xs</span><span class="p">,</span> <span class="n">ys</span><span class="p">,</span> <span class="n">c</span><span class="o">=</span><span class="n">colors</span><span class="p">,</span> <span class="n">cmap</span><span class="o">=</span><span class="s1">&#39;spring&#39;</span><span class="p">)</span>
+<span class="k">for</span> <span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="n">name</span> <span class="ow">in</span> <span class="nb">zip</span><span class="p">(</span><span class="n">xs</span><span class="p">,</span> <span class="n">ys</span><span class="p">,</span> <span class="n">names</span><span class="p">):</span>
+    <span class="n">plt</span><span class="o">.</span><span class="n">text</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="n">name</span><span class="p">,</span> <span class="n">alpha</span><span class="o">=</span><span class="mf">0.5</span><span class="p">,</span> <span class="n">fontsize</span><span class="o">=</span><span class="mi">10</span><span class="p">)</span>
+
+<span class="nd">@savefig</span> <span class="n">plot_voltaire_mds</span><span class="o">.</span><span class="n">png</span> <span class="n">width</span><span class="o">=</span><span class="mi">8</span><span class="ow">in</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">tight_layout</span><span class="p">()</span>
+</pre></div>
+
+	</div>
+</div>
+</div>
+
+<div class="output_wrapper">
+<div class="output">
+
+
+<div class="output_area">
+
+	<div class="prompt"></div>
+
+
+<div class="output_subarea output_text output_error">
+<pre>
+<span class="ansi-cyan-fg">  File </span><span class="ansi-green-fg">&#34;&lt;ipython-input-3-191d2568ccd9&gt;&#34;</span><span class="ansi-cyan-fg">, line </span><span class="ansi-green-fg">10</span>
+<span class="ansi-red-fg">    @savefig plot_voltaire_mds.png width=8in</span>
+                             ^
+<span class="ansi-red-fg">SyntaxError</span><span class="ansi-red-fg">:</span> invalid syntax
+</pre>
+</div>
+</div>
+
+</div>
+</div>
+
+</div>
+
+<div class="{} cell border-box-sizing text_cell rendered"><div class="prompt input_prompt">
+</div><div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html">
+<p>This kind of plot can get overwhelming. A dendrogram plot offers an alternative
+means of representing the same information (i.e., the distance between texts).
+It is important, however, not to take the implied hierarchy too seriously.
+While two texts paired together in the dendrogram are indeed nearest neighbors
+in terms of distance, there are a variety of methods of hierarchical clustering
+each often yielding different hierarchies. Right now we are interested in the
+dendrogram as a convenient summary of the multi-dimensional scaling plot shown
+above.</p>
+
+</div>
+</div>
+</div>
+
+<div class="{} cell border-box-sizing code_cell rendered">
+<div class="input">
+<div class="prompt input_prompt">In&nbsp;[4]:</div>
+<div class="inner_cell">
+	<div class="input_area">
+<div class=" highlight hl-ipython3"><pre><span></span><span class="kn">from</span> <span class="nn">scipy.cluster.hierarchy</span> <span class="kn">import</span> <span class="n">ward</span><span class="p">,</span> <span class="n">dendrogram</span>
+
+<span class="n">linkage_matrix</span> <span class="o">=</span> <span class="n">ward</span><span class="p">(</span><span class="n">dist</span><span class="p">)</span>
+
+<span class="n">plt</span><span class="o">.</span><span class="n">figure</span><span class="p">(</span><span class="n">figsize</span><span class="o">=</span><span class="p">(</span><span class="mf">11.3</span><span class="p">,</span> <span class="mf">11.3</span><span class="p">))</span>  <span class="c1"># we need a tall figure</span>
+<span class="c1"># match dendrogram to that returned by R&#39;s hclust()</span>
+<span class="n">dendrogram</span><span class="p">(</span><span class="n">linkage_matrix</span><span class="p">,</span> <span class="n">orientation</span><span class="o">=</span><span class="s2">&quot;right&quot;</span><span class="p">,</span> <span class="n">labels</span><span class="o">=</span><span class="n">names</span><span class="p">,</span> <span class="n">leaf_font_size</span><span class="o">=</span><span class="mi">5</span><span class="p">);</span>
+<span class="nd">@savefig</span> <span class="n">plot_voltaire_ward_dendrogram</span><span class="o">.</span><span class="n">png</span> <span class="n">width</span><span class="o">=</span><span class="mi">8</span><span class="ow">in</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">tight_layout</span><span class="p">()</span>  <span class="c1"># fixes margins</span>
+</pre></div>
+
+	</div>
+</div>
+</div>
+
+<div class="output_wrapper">
+<div class="output">
+
+
+<div class="output_area">
+
+	<div class="prompt"></div>
+
+
+<div class="output_subarea output_text output_error">
+<pre>
+<span class="ansi-cyan-fg">  File </span><span class="ansi-green-fg">&#34;&lt;ipython-input-4-bb614957d04c&gt;&#34;</span><span class="ansi-cyan-fg">, line </span><span class="ansi-green-fg">8</span>
+<span class="ansi-red-fg">    @savefig plot_voltaire_ward_dendrogram.png width=8in</span>
+                                         ^
+<span class="ansi-red-fg">SyntaxError</span><span class="ansi-red-fg">:</span> invalid syntax
+</pre>
+</div>
+</div>
+
+</div>
+</div>
+
+</div>
+
+<div class="{} cell border-box-sizing text_cell rendered"><div class="prompt input_prompt">
+</div><div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html">
+<p>It should come as no surprise that texts by the same author tend to be adjacent
+in the dendrogram. It is well documented that authors frequently leave stylistic
+“signatures” that are detectable at the level of word frequency. <sup><a href=#fn-authorship-attribution id=fn-authorship-attribution-link>[2]</a></sup>
+There are, however, a number of plays that do not follow the rule and are paired
+with texts by other writers. A number of these plays are attributed to Racine
+and it is to these plays we will turn our attention.</p>
+
+</div>
+</div>
+</div>
+
+<div class="{} cell border-box-sizing text_cell rendered"><div class="prompt input_prompt">
+</div><div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html">
+<h2 id="Racine&#8217;s-atypical-plays">Racine&#8217;s atypical plays<a class="anchor-link" href="#Racine&#8217;s-atypical-plays">&#182;</a></h2><p>Racine’s atypical plays are easiest to detect on the dendrogram. They include:</p>
+<ul>
+<li><a href="https://fr.wikipedia.org/wiki/La_Th%C3%A9ba%C3%AFde_%28Racine%29">La Thébaïde</a> (1664)  </li>
+<li><a href="https://fr.wikipedia.org/wiki/Ph%C3%A8dre_%28Racine%29">Phèdre</a> (1677)  </li>
+<li><a href="https://fr.wikipedia.org/wiki/Esther_%28Racine%29">Esther</a> (1689)  </li>
+<li><a href="https://fr.wikipedia.org/wiki/Athalie_%28Racine%29">Athalie</a> (1691)  </li>
+</ul>
+<p>Considering these outliers in the context of the chronology of Racine’s works as
+a whole is helpful. These plays include the first and the final three plays
+written by Racine. To display this chronology visually we may use a raster
+graph, coloring the outliers a distinct color. (This visualization has the added
+benefit of showing the nearly ten year gap between plays in the 1680s.)</p>
+
+</div>
+</div>
+</div>
+
+<div class="{} cell border-box-sizing code_cell rendered">
+<div class="input">
+<div class="prompt input_prompt">In&nbsp;[5]:</div>
+<div class="inner_cell">
+	<div class="input_area">
+<div class=" highlight hl-ipython3"><pre><span></span><span class="nd">@suppress</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">figure</span><span class="p">(</span><span class="n">figsize</span><span class="o">=</span><span class="p">(</span><span class="mf">11.3</span><span class="p">,</span> <span class="mi">5</span><span class="p">))</span>  <span class="c1"># reset figure size</span>
+
+<span class="n">outliers</span> <span class="o">=</span> <span class="p">[</span><span class="mi">1664</span><span class="p">,</span> <span class="mi">1677</span><span class="p">,</span> <span class="mi">1689</span><span class="p">,</span> <span class="mi">1691</span><span class="p">]</span>
+<span class="n">racine_years</span> <span class="o">=</span> <span class="p">[]</span>
+<span class="k">for</span> <span class="n">fn</span> <span class="ow">in</span> <span class="n">filenames</span><span class="p">:</span>
+    <span class="n">author</span> <span class="o">=</span> <span class="n">fn</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s1">&#39;_&#39;</span><span class="p">)[</span><span class="mi">0</span><span class="p">]</span>
+    <span class="n">year</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">fn</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s1">&#39;-&#39;</span><span class="p">)[</span><span class="mi">2</span><span class="p">])</span>
+    <span class="k">if</span> <span class="n">author</span> <span class="o">==</span> <span class="s2">&quot;Racine&quot;</span><span class="p">:</span>
+        <span class="n">racine_years</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">year</span><span class="p">)</span>
+<span class="n">racine_years</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">racine_years</span><span class="p">)</span>
+<span class="n">colors</span> <span class="o">=</span> <span class="p">[]</span>
+<span class="k">for</span> <span class="n">year</span> <span class="ow">in</span> <span class="n">racine_years</span><span class="p">:</span>
+    <span class="n">colors</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="s1">&#39;orange&#39;</span> <span class="k">if</span> <span class="n">year</span> <span class="ow">in</span> <span class="n">outliers</span> <span class="k">else</span> <span class="s1">&#39;cyan&#39;</span><span class="p">)</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">vlines</span><span class="p">(</span><span class="n">racine_years</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="n">linewidth</span><span class="o">=</span><span class="mi">3</span><span class="p">,</span> <span class="n">color</span><span class="o">=</span><span class="n">colors</span><span class="p">)</span>
+
+<span class="n">plt</span><span class="o">.</span><span class="n">title</span><span class="p">(</span><span class="s2">&quot;Year of publication of Racine&#39;s plays&quot;</span><span class="p">)</span>
+<span class="c1"># gca() stands for get current axes. Axes are a matplotlib primitive.</span>
+<span class="c1"># See http://matplotlib.org/users/pyplot_tutorial.html#working-with-multiple-figures-and-axes</span>
+<span class="n">ax</span> <span class="o">=</span> <span class="n">plt</span><span class="o">.</span><span class="n">gca</span><span class="p">()</span>
+<span class="nd">@savefig</span> <span class="n">plot_racine_voltaire_rastergram</span><span class="o">.</span><span class="n">png</span> <span class="n">width</span><span class="o">=</span><span class="mi">8</span><span class="ow">in</span>
+<span class="n">ax</span><span class="o">.</span><span class="n">yaxis</span><span class="o">.</span><span class="n">set_visible</span><span class="p">(</span><span class="kc">False</span><span class="p">)</span>
+</pre></div>
+
+	</div>
+</div>
+</div>
+
+<div class="output_wrapper">
+<div class="output">
+
+
+<div class="output_area">
+
+	<div class="prompt"></div>
+
+
+<div class="output_subarea output_text output_error">
+<pre>
+<span class="ansi-cyan-fg">  File </span><span class="ansi-green-fg">&#34;&lt;ipython-input-5-bbd2755edef2&gt;&#34;</span><span class="ansi-cyan-fg">, line </span><span class="ansi-green-fg">2</span>
+<span class="ansi-red-fg">    plt.figure(figsize=(11.3, 5))  # reset figure size</span>
+      ^
+<span class="ansi-red-fg">SyntaxError</span><span class="ansi-red-fg">:</span> invalid syntax
+</pre>
+</div>
+</div>
+
+</div>
+</div>
+
+</div>
+
+<div class="{} cell border-box-sizing text_cell rendered"><div class="prompt input_prompt">
+</div><div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html">
+<p>A provisional explanation for why the late plays stand out might draw on
+Racine’s religious turn. In 1679 he married Catherine de
+Romanet and his <a href="https://en.wikipedia.org/wiki/Jansenism">Jansenism</a> grew more
+pronounced. The title <em>Esther</em> refers to the biblical book of the same name and
+<em>Athalie</em>, Racine’s final play, stages events from the Bible.</p>
+
+</div>
+</div>
+</div>
+
+<div class="{} cell border-box-sizing text_cell rendered"><div class="prompt input_prompt">
+</div><div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html">
+<h3 id="Features">Features<a class="anchor-link" href="#Features">&#182;</a></h3><p>A useful way to explore the atypical plays further is to directly compare the
+outliers with a fictitious “average” Racine tragedy. To do this we will first
+decompose our documents into an ersatz “topic model” using non-negative matrix
+factorization and then we will average the topic shares of the “normal” Racine
+plays and compare those shares with the shares of the atypical plays.</p>
+<p>We will fit the NMF model using the corpus of tragedies split into approximately
+1,000-word sections. Recall that before feeding your document-term matrix into
+NMF it is helpful to normalize each document by length. Here we will
+normalize and, additionally, use tf-idf weighting as the invocation is simple:
+we use <code>TfidfVectorizer</code> instead of <code>CountVectorizer</code>.</p>
+
+</div>
+</div>
+</div>
+
+<div class="{} cell border-box-sizing code_cell rendered">
+<div class="input">
+<div class="prompt input_prompt">In&nbsp;[6]:</div>
+<div class="inner_cell">
+	<div class="input_area">
+<div class=" highlight hl-ipython3"><pre><span></span><span class="n">data_dir</span> <span class="o">=</span> <span class="s1">&#39;data/french-tragedy-split/&#39;</span>
+
+<span class="n">filenames</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="nb">sorted</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">listdir</span><span class="p">(</span><span class="n">data_dir</span><span class="p">)))</span>
+<span class="n">filenames_with_path</span> <span class="o">=</span> <span class="p">[</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">data_dir</span><span class="p">,</span> <span class="n">fn</span><span class="p">)</span> <span class="k">for</span> <span class="n">fn</span> <span class="ow">in</span> <span class="n">filenames</span><span class="p">]</span>
+
+<span class="c1"># check the first few filenames</span>
+<span class="n">filenames_with_path</span><span class="p">[</span><span class="mi">0</span><span class="p">:</span><span class="mi">4</span><span class="p">]</span>
+
+<span class="n">vectorizer</span> <span class="o">=</span> <span class="n">text</span><span class="o">.</span><span class="n">TfidfVectorizer</span><span class="p">(</span><span class="nb">input</span><span class="o">=</span><span class="s1">&#39;filename&#39;</span><span class="p">,</span> <span class="n">min_df</span><span class="o">=</span><span class="mi">15</span><span class="p">)</span>
+<span class="n">dtm</span> <span class="o">=</span> <span class="n">vectorizer</span><span class="o">.</span><span class="n">fit_transform</span><span class="p">(</span><span class="n">filenames_with_path</span><span class="p">)</span>
+<span class="n">dtm</span> <span class="o">=</span> <span class="n">dtm</span><span class="o">.</span><span class="n">toarray</span><span class="p">()</span>
+<span class="n">vocab</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">vectorizer</span><span class="o">.</span><span class="n">get_feature_names</span><span class="p">())</span>
+</pre></div>
+
+	</div>
+</div>
+</div>
+
+<div class="output_wrapper">
+<div class="output">
+
+
+<div class="output_area">
+
+	<div class="prompt"></div>
+
+
+<div class="output_subarea output_text output_error">
+<pre>
+<span class="ansi-red-fg">---------------------------------------------------------------------------</span>
+<span class="ansi-red-fg">NameError</span>                                 Traceback (most recent call last)
+<span class="ansi-green-fg">&lt;ipython-input-6-5723422e290c&gt;</span> in <span class="ansi-cyan-fg">&lt;module&gt;</span>
+<span class="ansi-green-intense-fg ansi-bold">      1</span> data_dir <span class="ansi-blue-fg">=</span> <span class="ansi-blue-fg">&#39;data/french-tragedy-split/&#39;</span>
+<span class="ansi-green-intense-fg ansi-bold">      2</span> 
+<span class="ansi-green-fg">----&gt; 3</span><span class="ansi-red-fg"> </span>filenames <span class="ansi-blue-fg">=</span> np<span class="ansi-blue-fg">.</span>array<span class="ansi-blue-fg">(</span>sorted<span class="ansi-blue-fg">(</span>os<span class="ansi-blue-fg">.</span>listdir<span class="ansi-blue-fg">(</span>data_dir<span class="ansi-blue-fg">)</span><span class="ansi-blue-fg">)</span><span class="ansi-blue-fg">)</span>
+<span class="ansi-green-intense-fg ansi-bold">      4</span> filenames_with_path <span class="ansi-blue-fg">=</span> <span class="ansi-blue-fg">[</span>os<span class="ansi-blue-fg">.</span>path<span class="ansi-blue-fg">.</span>join<span class="ansi-blue-fg">(</span>data_dir<span class="ansi-blue-fg">,</span> fn<span class="ansi-blue-fg">)</span> <span class="ansi-green-fg">for</span> fn <span class="ansi-green-fg">in</span> filenames<span class="ansi-blue-fg">]</span>
+<span class="ansi-green-intense-fg ansi-bold">      5</span> 
+
+<span class="ansi-red-fg">NameError</span>: name &#39;np&#39; is not defined</pre>
+</div>
+</div>
+
+</div>
+</div>
+
+</div>
+
+<div class="{} cell border-box-sizing code_cell rendered">
+<div class="input">
+<div class="prompt input_prompt">In&nbsp;[7]:</div>
+<div class="inner_cell">
+	<div class="input_area">
+<div class=" highlight hl-ipython3"><pre><span></span><span class="c1"># fit NMF model</span>
+
+<span class="kn">from</span> <span class="nn">sklearn</span> <span class="kn">import</span> <span class="n">decomposition</span>
+
+<span class="n">num_topics</span> <span class="o">=</span> <span class="mi">15</span>
+
+<span class="n">clf</span> <span class="o">=</span> <span class="n">decomposition</span><span class="o">.</span><span class="n">NMF</span><span class="p">(</span><span class="n">n_components</span><span class="o">=</span><span class="n">num_topics</span><span class="p">,</span> <span class="n">random_state</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
+
+<span class="c1"># this next step may take some time</span>
+</pre></div>
+
+	</div>
+</div>
+</div>
+
+</div>
+
+<div class="{} cell border-box-sizing text_cell rendered"><div class="prompt input_prompt">
+</div><div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html">
+<div class="highlight"><pre><span></span><span class="n">doctopic_chunks</span> <span class="o">=</span> <span class="n">clf</span><span class="o">.</span><span class="n">fit_transform</span><span class="p">(</span><span class="n">dtm</span><span class="p">)</span>
+</pre></div>
+
+</div>
+</div>
+</div>
+
+<div class="{} cell border-box-sizing text_cell rendered"><div class="prompt input_prompt">
+</div><div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html">
+<p>In order to interpret and visualize the NMF components in a manner analogous to
+LDA topic proportions, we will scale the document-component matrix such that
+the component values associated with each document sum to one.</p>
+
+</div>
+</div>
+</div>
+
+<div class="{} cell border-box-sizing code_cell rendered">
+<div class="input">
+<div class="prompt input_prompt">In&nbsp;[8]:</div>
+<div class="inner_cell">
+	<div class="input_area">
+<div class=" highlight hl-ipython3"><pre><span></span><span class="c1"># to avoid division by 0 (not a problem with LDA) we add a tiny value to each cell.</span>
+<span class="n">doctopic_chunks</span> <span class="o">+=</span> <span class="mf">1e-6</span>  <span class="c1"># 1e-6 is the same as 0.000001</span>
+<span class="n">doctopic_chunks</span> <span class="o">=</span> <span class="n">doctopic_chunks</span> <span class="o">/</span> <span class="n">np</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">doctopic_chunks</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">keepdims</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+</pre></div>
+
+	</div>
+</div>
+</div>
+
+<div class="output_wrapper">
+<div class="output">
+
+
+<div class="output_area">
+
+	<div class="prompt"></div>
+
+
+<div class="output_subarea output_text output_error">
+<pre>
+<span class="ansi-red-fg">---------------------------------------------------------------------------</span>
+<span class="ansi-red-fg">NameError</span>                                 Traceback (most recent call last)
+<span class="ansi-green-fg">&lt;ipython-input-8-f29ec646b835&gt;</span> in <span class="ansi-cyan-fg">&lt;module&gt;</span>
+<span class="ansi-green-intense-fg ansi-bold">      1</span> <span class="ansi-red-fg"># to avoid division by 0 (not a problem with LDA) we add a tiny value to each cell.</span>
+<span class="ansi-green-fg">----&gt; 2</span><span class="ansi-red-fg"> </span>doctopic_chunks <span class="ansi-blue-fg">+=</span> <span class="ansi-cyan-fg">1e-6</span>  <span class="ansi-red-fg"># 1e-6 is the same as 0.000001</span>
+<span class="ansi-green-intense-fg ansi-bold">      3</span> doctopic_chunks <span class="ansi-blue-fg">=</span> doctopic_chunks <span class="ansi-blue-fg">/</span> np<span class="ansi-blue-fg">.</span>sum<span class="ansi-blue-fg">(</span>doctopic_chunks<span class="ansi-blue-fg">,</span> axis<span class="ansi-blue-fg">=</span><span class="ansi-cyan-fg">1</span><span class="ansi-blue-fg">,</span> keepdims<span class="ansi-blue-fg">=</span><span class="ansi-green-fg">True</span><span class="ansi-blue-fg">)</span>
+
+<span class="ansi-red-fg">NameError</span>: name &#39;doctopic_chunks&#39; is not defined</pre>
+</div>
+</div>
+
+</div>
+</div>
+
+</div>
+
+<div class="{} cell border-box-sizing text_cell rendered"><div class="prompt input_prompt">
+</div><div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html">
+<p>As we did in <a href="topic_model_mallet.html#topic-model-mallet">previous sections</a>, we will aggregate
+the text sections associated with a single play together and average their topic
+proportions.</p>
+
+</div>
+</div>
+</div>
+
+<div class="{} cell border-box-sizing code_cell rendered">
+<div class="input">
+<div class="prompt input_prompt">In&nbsp;[9]:</div>
+<div class="inner_cell">
+	<div class="input_area">
+<div class=" highlight hl-ipython3"><pre><span></span><span class="kn">import</span> <span class="nn">itertools</span>
+<span class="kn">import</span> <span class="nn">re</span>
+<span class="kn">import</span> <span class="nn">operator</span>
+
+<span class="c1"># Play sections have filenames like: Racine_TR-V-1677-Phedre0000.txt. We can split</span>
+<span class="c1"># the last part &quot;0000.txt&quot; off using string slicing since we know that the part of</span>
+<span class="c1"># the filename we do not want is always 8 characters in width. For example,</span>
+<span class="s1">&#39;Racine_TR-V-1677-Phedre0000.txt&#39;</span><span class="p">[:</span><span class="o">-</span><span class="mi">8</span><span class="p">]</span>
+<span class="c1"># alternatively, we could use a regular expression:</span>
+<span class="kn">import</span> <span class="nn">re</span>
+<span class="n">re</span><span class="o">.</span><span class="n">sub</span><span class="p">(</span><span class="sa">r</span><span class="s1">&#39;[0-9]+\.txt$&#39;</span><span class="p">,</span><span class="s1">&#39;&#39;</span><span class="p">,</span> <span class="s1">&#39;Racine_TR-V-1677-Phedre0000.txt&#39;</span><span class="p">)</span>
+
+<span class="n">play_names_chunks</span> <span class="o">=</span> <span class="p">[]</span>
+<span class="k">for</span> <span class="n">fn</span> <span class="ow">in</span> <span class="n">filenames</span><span class="p">:</span>
+    <span class="n">play_names_chunks</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">fn</span><span class="p">[:</span><span class="o">-</span><span class="mi">8</span><span class="p">])</span>
+
+<span class="n">num_plays</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="nb">set</span><span class="p">(</span><span class="n">play_names_chunks</span><span class="p">))</span>
+<span class="n">doctopic</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">((</span><span class="n">num_plays</span><span class="p">,</span> <span class="n">num_topics</span><span class="p">))</span>
+<span class="n">play_row_pairs</span> <span class="o">=</span> <span class="nb">zip</span><span class="p">(</span><span class="n">play_names_chunks</span><span class="p">,</span> <span class="n">doctopic_chunks</span><span class="p">)</span>
+<span class="n">play_names</span> <span class="o">=</span> <span class="p">[]</span>
+<span class="k">for</span> <span class="n">i</span><span class="p">,</span> <span class="p">(</span><span class="n">name</span><span class="p">,</span> <span class="n">pairs</span><span class="p">)</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">itertools</span><span class="o">.</span><span class="n">groupby</span><span class="p">(</span><span class="n">play_row_pairs</span><span class="p">,</span> <span class="n">key</span><span class="o">=</span><span class="n">operator</span><span class="o">.</span><span class="n">itemgetter</span><span class="p">(</span><span class="mi">0</span><span class="p">))):</span>
+    <span class="n">rows</span> <span class="o">=</span> <span class="p">[</span><span class="n">row</span> <span class="k">for</span> <span class="n">_</span><span class="p">,</span> <span class="n">row</span> <span class="ow">in</span> <span class="n">pairs</span><span class="p">]</span>
+    <span class="n">doctopic</span><span class="p">[</span><span class="n">i</span><span class="p">,</span> <span class="p">:]</span> <span class="o">=</span> <span class="nb">sum</span><span class="p">(</span><span class="n">rows</span><span class="p">)</span> <span class="o">/</span> <span class="nb">len</span><span class="p">(</span><span class="n">rows</span><span class="p">)</span>
+    <span class="n">play_names</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">name</span><span class="p">)</span>
+</pre></div>
+
+	</div>
+</div>
+</div>
+
+<div class="output_wrapper">
+<div class="output">
+
+
+<div class="output_area">
+
+	<div class="prompt"></div>
+
+
+<div class="output_subarea output_text output_error">
+<pre>
+<span class="ansi-red-fg">---------------------------------------------------------------------------</span>
+<span class="ansi-red-fg">NameError</span>                                 Traceback (most recent call last)
+<span class="ansi-green-fg">&lt;ipython-input-9-403daaaedb5e&gt;</span> in <span class="ansi-cyan-fg">&lt;module&gt;</span>
+<span class="ansi-green-intense-fg ansi-bold">     12</span> 
+<span class="ansi-green-intense-fg ansi-bold">     13</span> play_names_chunks <span class="ansi-blue-fg">=</span> <span class="ansi-blue-fg">[</span><span class="ansi-blue-fg">]</span>
+<span class="ansi-green-fg">---&gt; 14</span><span class="ansi-red-fg"> </span><span class="ansi-green-fg">for</span> fn <span class="ansi-green-fg">in</span> filenames<span class="ansi-blue-fg">:</span>
+<span class="ansi-green-intense-fg ansi-bold">     15</span>     play_names_chunks<span class="ansi-blue-fg">.</span>append<span class="ansi-blue-fg">(</span>fn<span class="ansi-blue-fg">[</span><span class="ansi-blue-fg">:</span><span class="ansi-blue-fg">-</span><span class="ansi-cyan-fg">8</span><span class="ansi-blue-fg">]</span><span class="ansi-blue-fg">)</span>
+<span class="ansi-green-intense-fg ansi-bold">     16</span> 
+
+<span class="ansi-red-fg">NameError</span>: name &#39;filenames&#39; is not defined</pre>
+</div>
+</div>
+
+</div>
+</div>
+
+</div>
+
+<div class="{} cell border-box-sizing text_cell rendered"><div class="prompt input_prompt">
+</div><div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html">
+<p>While we have used all the other plays to fit the NMF model—in deriving the
+topic components and the word-topic associations—we care principally about
+Racine’s atypical plays and the synthetic “average” play that will serve as a proxy for
+a “normal” Racine play. We will construct the average play by averaging the
+shares of the typical plays (i.e., all those that are not atypical):</p>
+
+</div>
+</div>
+</div>
+
+<div class="{} cell border-box-sizing code_cell rendered">
+<div class="input">
+<div class="prompt input_prompt">In&nbsp;[10]:</div>
+<div class="inner_cell">
+	<div class="input_area">
+<div class=" highlight hl-ipython3"><pre><span></span><span class="n">racine_plays</span> <span class="o">=</span> <span class="p">[</span><span class="n">name</span> <span class="k">for</span> <span class="n">name</span> <span class="ow">in</span> <span class="n">play_names</span> <span class="k">if</span> <span class="n">name</span><span class="o">.</span><span class="n">startswith</span><span class="p">(</span><span class="s1">&#39;Racine&#39;</span><span class="p">)]</span>
+<span class="n">racine_atypical</span> <span class="o">=</span> <span class="p">[</span><span class="s1">&#39;Racine_TR-V-1664-Thebaide&#39;</span><span class="p">,</span> <span class="s1">&#39;Racine_TR-V-1677-Phedre&#39;</span><span class="p">,</span> <span class="s1">&#39;Racine_TR-V-1689-Esther&#39;</span><span class="p">,</span> <span class="s1">&#39;Racine_TR-V-1691-Athalie&#39;</span><span class="p">]</span>
+<span class="n">racine_typical</span> <span class="o">=</span> <span class="p">[</span><span class="n">name</span> <span class="k">for</span> <span class="n">name</span> <span class="ow">in</span> <span class="n">racine_plays</span> <span class="k">if</span> <span class="n">name</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">racine_atypical</span><span class="p">]</span>
+<span class="c1"># alternatively, an opportunity to use set difference</span>
+<span class="c1"># racine_typical = list(set(racine_plays) - set(racine_atypical))</span>
+
+<span class="c1"># examine the list of typical plays, making sure we have the right ones</span>
+<span class="n">racine_typical</span>
+
+<span class="n">doctopic_racine_typical</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">mean</span><span class="p">(</span><span class="n">doctopic</span><span class="p">[</span><span class="n">np</span><span class="o">.</span><span class="n">in1d</span><span class="p">(</span><span class="n">play_names</span><span class="p">,</span> <span class="n">racine_typical</span><span class="p">)],</span> <span class="n">axis</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
+<span class="n">doctopic_racine_atypical</span> <span class="o">=</span> <span class="n">doctopic</span><span class="p">[</span><span class="n">np</span><span class="o">.</span><span class="n">in1d</span><span class="p">(</span><span class="n">play_names</span><span class="p">,</span> <span class="n">racine_atypical</span><span class="p">)]</span>
+
+<span class="c1"># stack the typical and the atypical plays by row</span>
+<span class="n">doctopic_of_interest</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">row_stack</span><span class="p">([</span><span class="n">doctopic_racine_typical</span><span class="p">,</span> <span class="n">doctopic_racine_atypical</span><span class="p">])</span>
+
+<span class="c1"># as a last and final step we need to keep track of the names</span>
+<span class="c1"># note that some of the manipulation of names and rows is fragile and relies on the names</span>
+<span class="c1"># being sorted alphabetically. If this were a concern we might use a pandas DataFrame</span>
+<span class="c1"># instead, as row and column names can be explicitly assigned</span>
+<span class="n">play_names_of_interest</span> <span class="o">=</span> <span class="p">[</span><span class="s1">&#39;Racine-1666-1674-AVERAGE&#39;</span><span class="p">]</span> <span class="o">+</span> <span class="n">racine_atypical</span>
+</pre></div>
+
+	</div>
+</div>
+</div>
+
+<div class="output_wrapper">
+<div class="output">
+
+
+<div class="output_area">
+
+	<div class="prompt"></div>
+
+
+<div class="output_subarea output_text output_error">
+<pre>
+<span class="ansi-red-fg">---------------------------------------------------------------------------</span>
+<span class="ansi-red-fg">NameError</span>                                 Traceback (most recent call last)
+<span class="ansi-green-fg">&lt;ipython-input-10-e3c24cc9a469&gt;</span> in <span class="ansi-cyan-fg">&lt;module&gt;</span>
+<span class="ansi-green-fg">----&gt; 1</span><span class="ansi-red-fg"> </span>racine_plays <span class="ansi-blue-fg">=</span> <span class="ansi-blue-fg">[</span>name <span class="ansi-green-fg">for</span> name <span class="ansi-green-fg">in</span> play_names <span class="ansi-green-fg">if</span> name<span class="ansi-blue-fg">.</span>startswith<span class="ansi-blue-fg">(</span><span class="ansi-blue-fg">&#39;Racine&#39;</span><span class="ansi-blue-fg">)</span><span class="ansi-blue-fg">]</span>
+<span class="ansi-green-intense-fg ansi-bold">      2</span> racine_atypical <span class="ansi-blue-fg">=</span> <span class="ansi-blue-fg">[</span><span class="ansi-blue-fg">&#39;Racine_TR-V-1664-Thebaide&#39;</span><span class="ansi-blue-fg">,</span> <span class="ansi-blue-fg">&#39;Racine_TR-V-1677-Phedre&#39;</span><span class="ansi-blue-fg">,</span> <span class="ansi-blue-fg">&#39;Racine_TR-V-1689-Esther&#39;</span><span class="ansi-blue-fg">,</span> <span class="ansi-blue-fg">&#39;Racine_TR-V-1691-Athalie&#39;</span><span class="ansi-blue-fg">]</span>
+<span class="ansi-green-intense-fg ansi-bold">      3</span> racine_typical <span class="ansi-blue-fg">=</span> <span class="ansi-blue-fg">[</span>name <span class="ansi-green-fg">for</span> name <span class="ansi-green-fg">in</span> racine_plays <span class="ansi-green-fg">if</span> name <span class="ansi-green-fg">not</span> <span class="ansi-green-fg">in</span> racine_atypical<span class="ansi-blue-fg">]</span>
+<span class="ansi-green-intense-fg ansi-bold">      4</span> <span class="ansi-red-fg"># alternatively, an opportunity to use set difference</span>
+<span class="ansi-green-intense-fg ansi-bold">      5</span> <span class="ansi-red-fg"># racine_typical = list(set(racine_plays) - set(racine_atypical))</span>
+
+<span class="ansi-red-fg">NameError</span>: name &#39;play_names&#39; is not defined</pre>
+</div>
+</div>
+
+</div>
+</div>
+
+</div>
+
+<div class="{} cell border-box-sizing text_cell rendered"><div class="prompt input_prompt">
+</div><div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html">
+<p>Now that we have our matrix of document-topic proportions for the atypical plays
+and the composite Racine play, we can visualize the topic shares using
+a heatmap, a procedure which should be familiar from
+<a href="topic_model_visualization.html#topic-model-visualization">Visualizing topic models</a>.</p>
+
+</div>
+</div>
+</div>
+
+<div class="{} cell border-box-sizing code_cell rendered">
+<div class="input">
+<div class="prompt input_prompt">In&nbsp;[11]:</div>
+<div class="inner_cell">
+	<div class="input_area">
+<div class=" highlight hl-ipython3"><pre><span></span><span class="nd">@suppress</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">figure</span><span class="p">(</span><span class="n">figsize</span><span class="o">=</span><span class="p">(</span><span class="mf">11.3</span><span class="p">,</span> <span class="mi">7</span><span class="p">))</span>  <span class="c1"># reset figure size</span>
+
+<span class="n">plt</span><span class="o">.</span><span class="n">pcolor</span><span class="p">(</span><span class="n">doctopic_of_interest</span><span class="p">,</span> <span class="n">norm</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">cmap</span><span class="o">=</span><span class="s1">&#39;Blues&#39;</span><span class="p">)</span>
+
+<span class="n">topic_labels</span> <span class="o">=</span> <span class="p">[</span><span class="s1">&#39;Topic #</span><span class="si">{}</span><span class="s1">&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">k</span><span class="p">)</span> <span class="k">for</span> <span class="n">k</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">num_topics</span><span class="p">)]</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">xticks</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">arange</span><span class="p">(</span><span class="n">doctopic_of_interest</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">1</span><span class="p">])</span> <span class="o">+</span> <span class="mf">0.5</span><span class="p">,</span> <span class="n">topic_labels</span><span class="p">);</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">yticks</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">arange</span><span class="p">(</span><span class="n">doctopic_of_interest</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span> <span class="o">+</span> <span class="mf">0.5</span><span class="p">,</span> <span class="n">play_names_of_interest</span><span class="p">);</span>
+
+<span class="c1"># flip the y-axis so the texts are in the order we anticipate</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">gca</span><span class="p">()</span><span class="o">.</span><span class="n">invert_yaxis</span><span class="p">()</span>
+
+<span class="c1"># rotate the ticks on the x-axis</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">xticks</span><span class="p">(</span><span class="n">rotation</span><span class="o">=</span><span class="mi">90</span><span class="p">)</span>
+
+<span class="c1"># add a legend</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">colorbar</span><span class="p">(</span><span class="n">cmap</span><span class="o">=</span><span class="s1">&#39;Blues&#39;</span><span class="p">)</span>
+
+<span class="nd">@savefig</span> <span class="n">plot_racine_doctopic_heatmap</span><span class="o">.</span><span class="n">png</span> <span class="n">width</span><span class="o">=</span><span class="mi">8</span><span class="ow">in</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">tight_layout</span><span class="p">()</span>  <span class="c1"># fixes margins</span>
+</pre></div>
+
+	</div>
+</div>
+</div>
+
+<div class="output_wrapper">
+<div class="output">
+
+
+<div class="output_area">
+
+	<div class="prompt"></div>
+
+
+<div class="output_subarea output_text output_error">
+<pre>
+<span class="ansi-cyan-fg">  File </span><span class="ansi-green-fg">&#34;&lt;ipython-input-11-551d34b93b13&gt;&#34;</span><span class="ansi-cyan-fg">, line </span><span class="ansi-green-fg">2</span>
+<span class="ansi-red-fg">    plt.figure(figsize=(11.3, 7))  # reset figure size</span>
+      ^
+<span class="ansi-red-fg">SyntaxError</span><span class="ansi-red-fg">:</span> invalid syntax
+</pre>
+</div>
+</div>
+
+</div>
+</div>
+
+</div>
+
+<div class="{} cell border-box-sizing text_cell rendered"><div class="prompt input_prompt">
+</div><div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html">
+<p>Looking at this heatmap, a number of topics stand out as ones which we might
+wish to examine. In this case there is no harm in visually identifying the
+topics that vary the most (using our eyes).  However, were we
+confronted with a greater number of topics (say, 100 or 200 topics), such
+a procedure would be tedious and error prone. We may as well come up with
+a systematic way of identifying topics that vary substantially across texts of
+interest. One way of doing this would be to calculate the standard deviation of
+the document-topic shares across the topics. (Calculating the <a href="https://en.wikipedia.org/wiki/Entropy">entropy</a> for topic-document associations would
+also be a useful measure.)</p>
+
+</div>
+</div>
+</div>
+
+<div class="{} cell border-box-sizing code_cell rendered">
+<div class="input">
+<div class="prompt input_prompt">In&nbsp;[12]:</div>
+<div class="inner_cell">
+	<div class="input_area">
+<div class=" highlight hl-ipython3"><pre><span></span><span class="c1"># examine topics of interest by ranking them by standard deviation</span>
+<span class="c1"># reminder: NumPy&#39;s standard deviation differs from R&#39;s standard deviation. If you</span>
+<span class="c1"># want them to return identical results include the argument ``ddof=1``.</span>
+<span class="c1"># Essentially,  NumPy&#39;s standard deviation divides the variance by ``n`` whereas R</span>
+<span class="c1"># uses ``n-1`` (which is preferable as it gives an unbiased estimate of the variance).</span>
+<span class="c1"># Using ``ddof=1`` makes NumPy use ``n-1``.</span>
+<span class="n">topics_by_std</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">argsort</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">std</span><span class="p">(</span><span class="n">doctopic_of_interest</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">ddof</span><span class="o">=</span><span class="mi">1</span><span class="p">))[::</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span>
+<span class="n">topics_by_std</span><span class="p">[</span><span class="mi">0</span><span class="p">:</span><span class="mi">10</span><span class="p">]</span>
+
+<span class="c1"># First we gather the words most associated with each topic</span>
+<span class="n">num_top_words</span> <span class="o">=</span> <span class="mi">17</span>
+<span class="n">topic_words</span> <span class="o">=</span> <span class="p">[]</span>
+<span class="nd">@suppress</span>
+<span class="k">assert</span> <span class="nb">len</span><span class="p">(</span><span class="n">clf</span><span class="o">.</span><span class="n">components_</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span> <span class="o">==</span> <span class="nb">len</span><span class="p">(</span><span class="n">vocab</span><span class="p">)</span>
+<span class="k">for</span> <span class="n">topic</span> <span class="ow">in</span> <span class="n">clf</span><span class="o">.</span><span class="n">components_</span><span class="p">:</span>
+    <span class="n">word_idx</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">argsort</span><span class="p">(</span><span class="n">topic</span><span class="p">)[::</span><span class="o">-</span><span class="mi">1</span><span class="p">][</span><span class="mi">0</span><span class="p">:</span><span class="n">num_top_words</span><span class="p">]</span>
+    <span class="n">topic_words</span><span class="o">.</span><span class="n">append</span><span class="p">([</span><span class="n">vocab</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="n">word_idx</span><span class="p">])</span>
+
+<span class="c1"># Now we examine the topic-word distributions for the topics that vary the most</span>
+<span class="k">for</span> <span class="n">t</span> <span class="ow">in</span> <span class="n">topics_by_std</span><span class="p">[</span><span class="mi">0</span><span class="p">:</span><span class="mi">5</span><span class="p">]:</span>
+    <span class="n">topic_words_str</span> <span class="o">=</span> <span class="s1">&#39; &#39;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="n">t</span><span class="p">)</span> <span class="k">for</span> <span class="n">t</span> <span class="ow">in</span> <span class="n">topic_words</span><span class="p">[</span><span class="n">t</span><span class="p">])</span>
+    <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Topic </span><span class="si">{}</span><span class="s2">: </span><span class="si">{}</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">t</span><span class="p">,</span> <span class="n">topic_words_str</span><span class="p">))</span>
+</pre></div>
+
+	</div>
+</div>
+</div>
+
+<div class="output_wrapper">
+<div class="output">
+
+
+<div class="output_area">
+
+	<div class="prompt"></div>
+
+
+<div class="output_subarea output_text output_error">
+<pre>
+<span class="ansi-cyan-fg">  File </span><span class="ansi-green-fg">&#34;&lt;ipython-input-12-239a99b688b5&gt;&#34;</span><span class="ansi-cyan-fg">, line </span><span class="ansi-green-fg">14</span>
+<span class="ansi-red-fg">    assert len(clf.components_[0]) == len(vocab)</span>
+         ^
+<span class="ansi-red-fg">SyntaxError</span><span class="ansi-red-fg">:</span> invalid syntax
+</pre>
+</div>
+</div>
+
+</div>
+</div>
+
+</div>
+
+<div class="{} cell border-box-sizing text_cell rendered"><div class="prompt input_prompt">
+</div><div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html">
+<p>As our ranking indicates, most of the mystery about the atypical plays is
+resolved by inspecting topics #5 and #9. (Only <em>Phèdre</em> (1677) needs
+additional scrutiny.) Given what we know about Racine’s biography, topic #5
+(dieu, temple, chrétiens) does not require a great deal of additional
+explanation. Topic #9 is more strongly associated with <em>Thébaïde</em> (1664) than
+with any other play. Inspecting the words associated with topic #9 we see it
+features words such as “et” and “un”. If we read the text of the play it
+appears that these words do indeed appear comparatively frequently. While we
+will leave it to Racine scholars to provide a detailed account of the
+difference, we may venture two provisional explanations: first, this was
+Racine’s first play and his style had yet to mature, and second, there is strong
+evidence that Molière contributed to the editing of the play and this fact may
+have something to do with the stylistic difference.</p>
+<p>To verify that the Topic #9 does indeed capture a salient difference, we may
+compare the rates of the words “et” and “un” across all Racine
+plays. The rate of “et” in <em>Thébaïde</em> does indeed stand out:</p>
+
+</div>
+</div>
+</div>
+
+<div class="{} cell border-box-sizing code_cell rendered">
+<div class="input">
+<div class="prompt input_prompt">In&nbsp;[13]:</div>
+<div class="inner_cell">
+	<div class="input_area">
+<div class=" highlight hl-ipython3"><pre><span></span><span class="c1"># reassemble the document-term matrix</span>
+<span class="n">data_dir</span> <span class="o">=</span> <span class="s1">&#39;data/french-tragedy/&#39;</span>
+<span class="n">filenames</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="nb">sorted</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">listdir</span><span class="p">(</span><span class="n">data_dir</span><span class="p">)))</span>
+<span class="n">filenames_with_path</span> <span class="o">=</span> <span class="p">[</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">data_dir</span><span class="p">,</span> <span class="n">fn</span><span class="p">)</span> <span class="k">for</span> <span class="n">fn</span> <span class="ow">in</span> <span class="n">filenames</span><span class="p">]</span>
+<span class="n">vectorizer</span> <span class="o">=</span> <span class="n">text</span><span class="o">.</span><span class="n">CountVectorizer</span><span class="p">(</span><span class="nb">input</span><span class="o">=</span><span class="s1">&#39;filename&#39;</span><span class="p">)</span>
+<span class="n">dtm</span> <span class="o">=</span> <span class="n">vectorizer</span><span class="o">.</span><span class="n">fit_transform</span><span class="p">(</span><span class="n">filenames_with_path</span><span class="p">)</span>
+<span class="n">dtm</span> <span class="o">=</span> <span class="n">dtm</span><span class="o">.</span><span class="n">toarray</span><span class="p">()</span>
+<span class="n">vocab</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">vectorizer</span><span class="o">.</span><span class="n">get_feature_names</span><span class="p">())</span>
+<span class="n">authors</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="n">fn</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s1">&#39;_&#39;</span><span class="p">)[</span><span class="mi">0</span><span class="p">]</span> <span class="k">for</span> <span class="n">fn</span> <span class="ow">in</span> <span class="n">filenames</span><span class="p">])</span>
+
+<span class="c1"># convert to rates per 1000 words as this is easier to interpret</span>
+<span class="n">dtm</span> <span class="o">=</span> <span class="mi">1000</span> <span class="o">*</span> <span class="n">dtm</span> <span class="o">/</span> <span class="n">np</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">dtm</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">keepdims</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+</pre></div>
+
+	</div>
+</div>
+</div>
+
+<div class="output_wrapper">
+<div class="output">
+
+
+<div class="output_area">
+
+	<div class="prompt"></div>
+
+
+<div class="output_subarea output_text output_error">
+<pre>
+<span class="ansi-red-fg">---------------------------------------------------------------------------</span>
+<span class="ansi-red-fg">NameError</span>                                 Traceback (most recent call last)
+<span class="ansi-green-fg">&lt;ipython-input-13-420ca695713e&gt;</span> in <span class="ansi-cyan-fg">&lt;module&gt;</span>
+<span class="ansi-green-intense-fg ansi-bold">      1</span> <span class="ansi-red-fg"># reassemble the document-term matrix</span>
+<span class="ansi-green-intense-fg ansi-bold">      2</span> data_dir <span class="ansi-blue-fg">=</span> <span class="ansi-blue-fg">&#39;data/french-tragedy/&#39;</span>
+<span class="ansi-green-fg">----&gt; 3</span><span class="ansi-red-fg"> </span>filenames <span class="ansi-blue-fg">=</span> np<span class="ansi-blue-fg">.</span>array<span class="ansi-blue-fg">(</span>sorted<span class="ansi-blue-fg">(</span>os<span class="ansi-blue-fg">.</span>listdir<span class="ansi-blue-fg">(</span>data_dir<span class="ansi-blue-fg">)</span><span class="ansi-blue-fg">)</span><span class="ansi-blue-fg">)</span>
+<span class="ansi-green-intense-fg ansi-bold">      4</span> filenames_with_path <span class="ansi-blue-fg">=</span> <span class="ansi-blue-fg">[</span>os<span class="ansi-blue-fg">.</span>path<span class="ansi-blue-fg">.</span>join<span class="ansi-blue-fg">(</span>data_dir<span class="ansi-blue-fg">,</span> fn<span class="ansi-blue-fg">)</span> <span class="ansi-green-fg">for</span> fn <span class="ansi-green-fg">in</span> filenames<span class="ansi-blue-fg">]</span>
+<span class="ansi-green-intense-fg ansi-bold">      5</span> vectorizer <span class="ansi-blue-fg">=</span> text<span class="ansi-blue-fg">.</span>CountVectorizer<span class="ansi-blue-fg">(</span>input<span class="ansi-blue-fg">=</span><span class="ansi-blue-fg">&#39;filename&#39;</span><span class="ansi-blue-fg">)</span>
+
+<span class="ansi-red-fg">NameError</span>: name &#39;np&#39; is not defined</pre>
+</div>
+</div>
+
+</div>
+</div>
+
+</div>
+
+<div class="{} cell border-box-sizing code_cell rendered">
+<div class="input">
+<div class="prompt input_prompt">In&nbsp;[14]:</div>
+<div class="inner_cell">
+	<div class="input_area">
+<div class=" highlight hl-ipython3"><pre><span></span><span class="k">for</span> <span class="n">word</span> <span class="ow">in</span> <span class="p">[</span><span class="s1">&#39;et&#39;</span><span class="p">,</span> <span class="s1">&#39;un&#39;</span><span class="p">]:</span>
+    <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Rate per 1,000 words of </span><span class="si">{}</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">word</span><span class="p">))</span>
+    <span class="n">filenames_racine</span> <span class="o">=</span> <span class="n">filenames</span><span class="p">[</span><span class="n">authors</span> <span class="o">==</span> <span class="s1">&#39;Racine&#39;</span><span class="p">]</span>
+    <span class="n">rates_racine</span> <span class="o">=</span> <span class="n">dtm</span><span class="p">[</span><span class="n">authors</span> <span class="o">==</span> <span class="s1">&#39;Racine&#39;</span><span class="p">,</span> <span class="n">vocab</span> <span class="o">==</span> <span class="n">word</span><span class="p">]</span>
+    <span class="k">for</span> <span class="n">filename</span><span class="p">,</span> <span class="n">rate</span> <span class="ow">in</span> <span class="nb">zip</span><span class="p">(</span><span class="n">filenames_racine</span><span class="p">,</span> <span class="n">rates_racine</span><span class="p">):</span>
+        <span class="c1"># use some fancy formatting, see http://docs.python.org/3.3/library/string.html#formatspec</span>
+        <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;</span><span class="si">{:&gt;40s}</span><span class="s2">: </span><span class="si">{:.1f}</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">filename</span><span class="p">,</span> <span class="n">rate</span><span class="p">))</span>
+</pre></div>
+
+	</div>
+</div>
+</div>
+
+<div class="output_wrapper">
+<div class="output">
+
+
+<div class="output_area">
+
+	<div class="prompt"></div>
+
+
+<div class="output_subarea output_stream output_stdout output_text">
+<pre>Rate per 1,000 words of et
+</pre>
+</div>
+</div>
+
+<div class="output_area">
+
+	<div class="prompt"></div>
+
+
+<div class="output_subarea output_text output_error">
+<pre>
+<span class="ansi-red-fg">---------------------------------------------------------------------------</span>
+<span class="ansi-red-fg">NameError</span>                                 Traceback (most recent call last)
+<span class="ansi-green-fg">&lt;ipython-input-14-d8c63418982a&gt;</span> in <span class="ansi-cyan-fg">&lt;module&gt;</span>
+<span class="ansi-green-intense-fg ansi-bold">      1</span> <span class="ansi-green-fg">for</span> word <span class="ansi-green-fg">in</span> <span class="ansi-blue-fg">[</span><span class="ansi-blue-fg">&#39;et&#39;</span><span class="ansi-blue-fg">,</span> <span class="ansi-blue-fg">&#39;un&#39;</span><span class="ansi-blue-fg">]</span><span class="ansi-blue-fg">:</span>
+<span class="ansi-green-intense-fg ansi-bold">      2</span>     print<span class="ansi-blue-fg">(</span><span class="ansi-blue-fg">&#34;Rate per 1,000 words of {}&#34;</span><span class="ansi-blue-fg">.</span>format<span class="ansi-blue-fg">(</span>word<span class="ansi-blue-fg">)</span><span class="ansi-blue-fg">)</span>
+<span class="ansi-green-fg">----&gt; 3</span><span class="ansi-red-fg">     </span>filenames_racine <span class="ansi-blue-fg">=</span> filenames<span class="ansi-blue-fg">[</span>authors <span class="ansi-blue-fg">==</span> <span class="ansi-blue-fg">&#39;Racine&#39;</span><span class="ansi-blue-fg">]</span>
+<span class="ansi-green-intense-fg ansi-bold">      4</span>     rates_racine <span class="ansi-blue-fg">=</span> dtm<span class="ansi-blue-fg">[</span>authors <span class="ansi-blue-fg">==</span> <span class="ansi-blue-fg">&#39;Racine&#39;</span><span class="ansi-blue-fg">,</span> vocab <span class="ansi-blue-fg">==</span> word<span class="ansi-blue-fg">]</span>
+<span class="ansi-green-intense-fg ansi-bold">      5</span>     <span class="ansi-green-fg">for</span> filename<span class="ansi-blue-fg">,</span> rate <span class="ansi-green-fg">in</span> zip<span class="ansi-blue-fg">(</span>filenames_racine<span class="ansi-blue-fg">,</span> rates_racine<span class="ansi-blue-fg">)</span><span class="ansi-blue-fg">:</span>
+
+<span class="ansi-red-fg">NameError</span>: name &#39;filenames&#39; is not defined</pre>
+</div>
+</div>
+
+</div>
+</div>
+
+</div>
+
+<div class="{} cell border-box-sizing text_cell rendered"><div class="prompt input_prompt">
+</div><div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html">
+<p>In addition to the Christian vocabulary associated with topic #5, <em>Esther</em> and
+<em>Athalie</em> also distinguish themselves through an <em>absence</em> of topic #10. Looking
+at the words associated with these topics a pattern emerges: the words are
+associated with narration or dialogue. Topic #10 includes the first person
+singular pronouns “je” and “me” along with the first person singular forms of
+the verbs “être” and “pouvoir” (“suis” and “puis”). Do Racine’s final plays
+perhaps feature dialogue to a lesser degree than Racine’s other plays?</p>
+<p>Again, to validate the suspicion that the words “je” and “me” do indeed appear
+more frequently in the final plays we will look directly at their word rates.
+The low rates of “je” and “me” in the final two plays certainly do stand out.</p>
+
+</div>
+</div>
+</div>
+
+<div class="{} cell border-box-sizing code_cell rendered">
+<div class="input">
+<div class="prompt input_prompt">In&nbsp;[15]:</div>
+<div class="inner_cell">
+	<div class="input_area">
+<div class=" highlight hl-ipython3"><pre><span></span><span class="k">for</span> <span class="n">word</span> <span class="ow">in</span> <span class="p">[</span><span class="s1">&#39;je&#39;</span><span class="p">,</span> <span class="s1">&#39;me&#39;</span><span class="p">]:</span>
+    <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Rate per 1,000 words of </span><span class="si">{}</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">word</span><span class="p">))</span>
+    <span class="n">filenames_racine</span> <span class="o">=</span> <span class="n">filenames</span><span class="p">[</span><span class="n">authors</span> <span class="o">==</span> <span class="s1">&#39;Racine&#39;</span><span class="p">]</span>
+    <span class="n">rates_racine</span> <span class="o">=</span> <span class="n">dtm</span><span class="p">[</span><span class="n">authors</span> <span class="o">==</span> <span class="s1">&#39;Racine&#39;</span><span class="p">,</span> <span class="n">vocab</span> <span class="o">==</span> <span class="n">word</span><span class="p">]</span>
+    <span class="k">for</span> <span class="n">filename</span><span class="p">,</span> <span class="n">rate</span> <span class="ow">in</span> <span class="nb">zip</span><span class="p">(</span><span class="n">filenames_racine</span><span class="p">,</span> <span class="n">rates_racine</span><span class="p">):</span>
+        <span class="c1"># use some fancy formatting, see http://docs.python.org/3.3/library/string.html#formatspec</span>
+        <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;</span><span class="si">{:&gt;40s}</span><span class="s2">: </span><span class="si">{:.1f}</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">filename</span><span class="p">,</span> <span class="n">rate</span><span class="p">))</span>
+    <span class="nb">print</span><span class="p">()</span>  <span class="c1"># print a blank line</span>
+</pre></div>
+
+	</div>
+</div>
+</div>
+
+<div class="output_wrapper">
+<div class="output">
+
+
+<div class="output_area">
+
+	<div class="prompt"></div>
+
+
+<div class="output_subarea output_stream output_stdout output_text">
+<pre>Rate per 1,000 words of je
+</pre>
+</div>
+</div>
+
+<div class="output_area">
+
+	<div class="prompt"></div>
+
+
+<div class="output_subarea output_text output_error">
+<pre>
+<span class="ansi-red-fg">---------------------------------------------------------------------------</span>
+<span class="ansi-red-fg">NameError</span>                                 Traceback (most recent call last)
+<span class="ansi-green-fg">&lt;ipython-input-15-3206cde842cc&gt;</span> in <span class="ansi-cyan-fg">&lt;module&gt;</span>
+<span class="ansi-green-intense-fg ansi-bold">      1</span> <span class="ansi-green-fg">for</span> word <span class="ansi-green-fg">in</span> <span class="ansi-blue-fg">[</span><span class="ansi-blue-fg">&#39;je&#39;</span><span class="ansi-blue-fg">,</span> <span class="ansi-blue-fg">&#39;me&#39;</span><span class="ansi-blue-fg">]</span><span class="ansi-blue-fg">:</span>
+<span class="ansi-green-intense-fg ansi-bold">      2</span>     print<span class="ansi-blue-fg">(</span><span class="ansi-blue-fg">&#34;Rate per 1,000 words of {}&#34;</span><span class="ansi-blue-fg">.</span>format<span class="ansi-blue-fg">(</span>word<span class="ansi-blue-fg">)</span><span class="ansi-blue-fg">)</span>
+<span class="ansi-green-fg">----&gt; 3</span><span class="ansi-red-fg">     </span>filenames_racine <span class="ansi-blue-fg">=</span> filenames<span class="ansi-blue-fg">[</span>authors <span class="ansi-blue-fg">==</span> <span class="ansi-blue-fg">&#39;Racine&#39;</span><span class="ansi-blue-fg">]</span>
+<span class="ansi-green-intense-fg ansi-bold">      4</span>     rates_racine <span class="ansi-blue-fg">=</span> dtm<span class="ansi-blue-fg">[</span>authors <span class="ansi-blue-fg">==</span> <span class="ansi-blue-fg">&#39;Racine&#39;</span><span class="ansi-blue-fg">,</span> vocab <span class="ansi-blue-fg">==</span> word<span class="ansi-blue-fg">]</span>
+<span class="ansi-green-intense-fg ansi-bold">      5</span>     <span class="ansi-green-fg">for</span> filename<span class="ansi-blue-fg">,</span> rate <span class="ansi-green-fg">in</span> zip<span class="ansi-blue-fg">(</span>filenames_racine<span class="ansi-blue-fg">,</span> rates_racine<span class="ansi-blue-fg">)</span><span class="ansi-blue-fg">:</span>
+
+<span class="ansi-red-fg">NameError</span>: name &#39;filenames&#39; is not defined</pre>
+</div>
+</div>
+
+</div>
+</div>
+
+</div>
+
+<div class="{} cell border-box-sizing text_cell rendered"><div class="prompt input_prompt">
+</div><div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html">
+<p>Finally, we turn back to <em>Phèdre</em> (1677).  In terms of topic proportions,
+<em>Phèdre</em> (1677) looks similar to the composite “average” Racine play. Inspecting
+the dendrogram and the multidimensional scaling plot, we observe that the play
+is, in fact, not so different from Racine’s other plays; it stands out not
+because it is as atypical as those discussed above but because it happens to be
+similar (in terms of cosine distance) to several of Voltaire’s plays.
+Investigating why the works of a radical Enlightenment figure like Voltaire
+should so strongly resemble Racine’s is left as an exercise for the reader.</p>
+<p><p><a id=fn-authors href=#fn-authors-link><strong>[1]</strong></a> This tutorial was written by <a href="http://ariddell.org">Allen Riddell</a>.
+and <a href="http://www.christof-schoech.de">Christof Schöch</a>.</p>
+<p><p><a id=fn-authorship-attribution href=#fn-authorship-attribution-link><strong>[2]</strong></a> Such signatures do not always appear.
+They can be eliminated with some modest effort on the part of the writer
+<a href="references.html#brennan-adversarial-2011">[BAG11]</a>. There are also many instances of writers
+changing their style over time—Henry James is an excellent example
+<a href="references.html#hoover-corpus-2007">[Hoo07]</a>.)</p>
+
+</div>
+</div>
+</div>
+ 
+
+
+
+
+					</div>
+
+				</div>
+
+			</div>
+
+			<footer class="footer">
+
+				<p>&copy; Copyright <YEAR>, Built using the minimal jupinx template.</p>
+
+			</footer>
+
+		</div>
+
+		<script src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.1/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+		<script src="/_static/js/base.js"></script>
+
+	</body>
+</html>

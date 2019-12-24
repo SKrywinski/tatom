@@ -1,0 +1,1458 @@
+<!doctype html>
+<html lang="en">
+	<head>
+		<meta charset="utf-8">
+
+		<title>Feature selection: finding distinctive words &ndash; Documentation</title>
+
+		<meta name="viewport" content="width=device-width, initial-scale=1">
+		<meta name="author" content="">
+		<meta name="keywords" content="">
+		<meta name="description" content="">
+
+		<link rel="stylesheet" href="/_static/css/base.css">
+
+	</head>
+
+	<body>
+
+		<div class="wrapper">
+
+			<header class="header">
+
+				<div class="branding">
+
+					<p class="site-title"><a href="/">Documentation</a></p>
+
+					<p class="sr-only"><a href="#skip">Skip to content</a></p>
+
+				</div>
+
+				<div class="header-tools">
+
+
+					<div class="header-badge" id="executability_status_badge"></div>
+
+
+				</div>
+
+			</header>
+
+			<div class="main">
+
+				<div class="content">
+
+					<div id="skip"></div>
+
+					<div class="document">
+
+<div class="{} cell border-box-sizing text_cell rendered"><div class="prompt input_prompt">
+</div><div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html">
+<p><a id='index-0'></a></p>
+<p><a id='feature-selection'></a></p>
+
+</div>
+</div>
+</div>
+
+<div class="{} cell border-box-sizing text_cell rendered"><div class="prompt input_prompt">
+</div><div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html">
+<h1 id="Feature-selection:-finding-distinctive-words">Feature selection: finding distinctive words<a class="anchor-link" href="#Feature-selection:-finding-distinctive-words">&#182;</a></h1><p>We often want to know what words distinguish one group of texts from another
+group of texts. For instance, we might be working with an archive of two city
+newspapers, say, the <em>Frankfurter Allgemeine Zeitung</em> and the <em>Frankfurter
+Rundschau</em> and want to know which words tend to appear in one newspaper rather
+than the other. Or we might be interested in comparing word usage in US
+Presidents’ <a href="http://en.wikipedia.org/wiki/State_of_the_Union_address">State of the Union addresses</a> given during
+recessions with addresses given during periods of economic growth. Or we might
+be comparing the style of several novelists and want to know if one author tends
+to use words not found in the works of others.</p>
+<p>This section illustrates how distinctive words can be identified using a corpus
+of novels containing works by two authors: Jane Austen and Charlotte Brontë.</p>
+<ul>
+<li>Austen, <em>Emma</em>  </li>
+<li>Austen, <em>Pride and Prejudice</em>  </li>
+<li>Austen, <em>Sense and Sensibility</em>  </li>
+<li>C. Brontë, <em>Jane Eyre</em>  </li>
+<li>C. Brontë, <em>The Professor</em>  </li>
+<li>C. Brontë, <em>Villette</em>  </li>
+</ul>
+<p>This <a href="datasets.html#datasets">corpus of six novels</a> consists of the following text
+files:</p>
+
+</div>
+</div>
+</div>
+
+<div class="{} cell border-box-sizing code_cell rendered">
+<div class="input">
+<div class="prompt input_prompt">In&nbsp;[1]:</div>
+<div class="inner_cell">
+	<div class="input_area">
+<div class=" highlight hl-ipython3"><pre><span></span><span class="n">filenames</span>
+</pre></div>
+
+	</div>
+</div>
+</div>
+
+<div class="output_wrapper">
+<div class="output">
+
+
+<div class="output_area">
+
+	<div class="prompt"></div>
+
+
+<div class="output_subarea output_text output_error">
+<pre>
+<span class="ansi-red-fg">---------------------------------------------------------------------------</span>
+<span class="ansi-red-fg">NameError</span>                                 Traceback (most recent call last)
+<span class="ansi-green-fg">&lt;ipython-input-1-0502efd65a76&gt;</span> in <span class="ansi-cyan-fg">&lt;module&gt;</span>
+<span class="ansi-green-fg">----&gt; 1</span><span class="ansi-red-fg"> </span>filenames
+
+<span class="ansi-red-fg">NameError</span>: name &#39;filenames&#39; is not defined</pre>
+</div>
+</div>
+
+</div>
+</div>
+
+</div>
+
+<div class="{} cell border-box-sizing text_cell rendered"><div class="prompt input_prompt">
+</div><div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html">
+<p>We will find that among the words that reliably distinguish Austen from Brontë
+are  “such”, “could”, and “any”. This tutorial demonstrates how we arrived at
+these words.</p>
+<blockquote><p><strong>Note</strong></p>
+<p>The following features an introduction to the concepts underlying
+feature selection. Those who are working with a very large corpus and are
+familiar with statistics may wish to skip ahead to the section on
+<a href="#bayesian-group-comparison">group comparison</a> or the section
+<a href="#chi2">Log likelihood ratio and \chi^2 feature selection</a>.</p>
+</blockquote>
+<p>Since we are concerned with words, we begin by extracting word frequencies from
+each of the texts in our corpus and <a href="working_with_text.html#working-with-text">construct a document-term matrix</a> that records the rate per 1,000 words for each word
+appearing in the corpus.  Using rates rather than counts will allow us to
+account for differences in the length of the novels. Accounting for differences
+in document lengths when dealing with word counts is essential. For example,
+a text using “whence” ten times in a 1,000 word article uses the word at a rate
+of 10 per 1,000 words, while a 100,000 word novel that uses “whence” 20 times
+uses it at a rate of 0.2 per 1,000 words. While the word occurs more in absolute
+terms in the second text, the rate is higher in the first text. While there are
+other ways to account for document length—a procedure called
+“normalization”—considering the rate per 1,000 words will serve us well. An
+appealing feature of word rates per 1,000 words is that readers are familiar
+with documents of this length (e.g., a newspaper article).</p>
+
+</div>
+</div>
+</div>
+
+<div class="{} cell border-box-sizing code_cell rendered">
+<div class="input">
+<div class="prompt input_prompt">In&nbsp;[2]:</div>
+<div class="inner_cell">
+	<div class="input_area">
+<div class=" highlight hl-ipython3"><pre><span></span><span class="c1"># just examine a sample, those at offsets 100 to 105</span>
+<span class="n">rates</span><span class="p">[:,</span> <span class="mi">100</span><span class="p">:</span><span class="mi">105</span><span class="p">]</span>
+<span class="n">vocab</span><span class="p">[</span><span class="mi">100</span><span class="p">:</span><span class="mi">105</span><span class="p">]</span>
+</pre></div>
+
+	</div>
+</div>
+</div>
+
+<div class="output_wrapper">
+<div class="output">
+
+
+<div class="output_area">
+
+	<div class="prompt"></div>
+
+
+<div class="output_subarea output_text output_error">
+<pre>
+<span class="ansi-red-fg">---------------------------------------------------------------------------</span>
+<span class="ansi-red-fg">NameError</span>                                 Traceback (most recent call last)
+<span class="ansi-green-fg">&lt;ipython-input-2-a6e5f6eab407&gt;</span> in <span class="ansi-cyan-fg">&lt;module&gt;</span>
+<span class="ansi-green-intense-fg ansi-bold">      1</span> <span class="ansi-red-fg"># just examine a sample, those at offsets 100 to 105</span>
+<span class="ansi-green-fg">----&gt; 2</span><span class="ansi-red-fg"> </span>rates<span class="ansi-blue-fg">[</span><span class="ansi-blue-fg">:</span><span class="ansi-blue-fg">,</span> <span class="ansi-cyan-fg">100</span><span class="ansi-blue-fg">:</span><span class="ansi-cyan-fg">105</span><span class="ansi-blue-fg">]</span>
+<span class="ansi-green-intense-fg ansi-bold">      3</span> vocab<span class="ansi-blue-fg">[</span><span class="ansi-cyan-fg">100</span><span class="ansi-blue-fg">:</span><span class="ansi-cyan-fg">105</span><span class="ansi-blue-fg">]</span>
+
+<span class="ansi-red-fg">NameError</span>: name &#39;rates&#39; is not defined</pre>
+</div>
+</div>
+
+</div>
+</div>
+
+</div>
+
+<div class="{} cell border-box-sizing text_cell rendered"><div class="prompt input_prompt">
+</div><div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html">
+<h2 id="Measuring-&#8220;distinctiveness&#8221;">Measuring &#8220;distinctiveness&#8221;<a class="anchor-link" href="#Measuring-&#8220;distinctiveness&#8221;">&#182;</a></h2><p>Finding distinctive words requires a decision about what “distinctive” means.
+As we will see, there are a variety of definitions that we might use.  It seems
+reasonable to expect that all definitions of distinctive would identify as
+distinctive words found exclusively in texts associated with a single author (or
+group). For example, if Brontë uses the word “access” and Austen never
+does, we should count “access” as distinctive. A more challenging question is
+how to treat words that occur in both groups of texts but do so with different
+rates.</p>
+<p>Finding words that are unique to a group is a simple exercise. Indeed, it is
+worth treating these words a special case so they will not clutter our work
+later on. We will quickly identify these words and remove them. (They tend not
+to be terribly interesting words.)</p>
+<p>A simple way of identifying words unique to one author would be to calculate the
+average rate of word use across all texts for each author and then to look for
+cases where the average rate is zero for one author.</p>
+
+</div>
+</div>
+</div>
+
+<div class="{} cell border-box-sizing code_cell rendered">
+<div class="input">
+<div class="prompt input_prompt">In&nbsp;[3]:</div>
+<div class="inner_cell">
+	<div class="input_area">
+<div class=" highlight hl-ipython3"><pre><span></span><span class="c1"># indices so we can refer to the rows for the relevant author</span>
+<span class="n">austen_indices</span><span class="p">,</span> <span class="n">cbronte_indices</span> <span class="o">=</span> <span class="p">[],</span> <span class="p">[]</span>
+<span class="k">for</span> <span class="n">index</span><span class="p">,</span> <span class="n">fn</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">filenames</span><span class="p">):</span>
+    <span class="k">if</span> <span class="s2">&quot;Austen&quot;</span> <span class="ow">in</span> <span class="n">fn</span><span class="p">:</span>
+        <span class="n">austen_indices</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">index</span><span class="p">)</span>
+    <span class="k">elif</span> <span class="s2">&quot;CBronte&quot;</span> <span class="ow">in</span> <span class="n">fn</span><span class="p">:</span>
+        <span class="n">cbronte_indices</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">index</span><span class="p">)</span>
+
+<span class="c1"># this kind of slicing should be familiar if you&#39;ve used R or Octave/Matlab</span>
+<span class="n">austen_rates</span> <span class="o">=</span> <span class="n">rates</span><span class="p">[</span><span class="n">austen_indices</span><span class="p">,</span> <span class="p">:]</span>
+<span class="n">cbronte_rates</span> <span class="o">=</span> <span class="n">rates</span><span class="p">[</span><span class="n">cbronte_indices</span><span class="p">,</span> <span class="p">:]</span>
+
+<span class="c1"># np.mean(..., axis=0) calculates the column-wise mean</span>
+<span class="n">austen_rates_avg</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">mean</span><span class="p">(</span><span class="n">austen_rates</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
+<span class="n">cbronte_rates_avg</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">mean</span><span class="p">(</span><span class="n">cbronte_rates</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
+
+<span class="c1"># since zero times any number is zero, this will identify documents where</span>
+<span class="c1"># any author&#39;s average rate is zero</span>
+<span class="n">distinctive_indices</span> <span class="o">=</span> <span class="p">(</span><span class="n">austen_rates_avg</span> <span class="o">*</span> <span class="n">cbronte_rates_avg</span><span class="p">)</span> <span class="o">==</span> <span class="mi">0</span>
+
+<span class="c1"># examine words that are unique, ranking by rates</span>
+<span class="n">np</span><span class="o">.</span><span class="n">count_nonzero</span><span class="p">(</span><span class="n">distinctive_indices</span><span class="p">)</span>
+<span class="n">ranking</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">argsort</span><span class="p">(</span><span class="n">austen_rates_avg</span><span class="p">[</span><span class="n">distinctive_indices</span><span class="p">]</span> <span class="o">+</span> <span class="n">cbronte_rates_avg</span><span class="p">[</span><span class="n">distinctive_indices</span><span class="p">])[::</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span>  <span class="c1"># from highest to lowest; [::-1] reverses order.</span>
+<span class="n">vocab</span><span class="p">[</span><span class="n">distinctive_indices</span><span class="p">][</span><span class="n">ranking</span><span class="p">]</span>
+</pre></div>
+
+	</div>
+</div>
+</div>
+
+<div class="output_wrapper">
+<div class="output">
+
+
+<div class="output_area">
+
+	<div class="prompt"></div>
+
+
+<div class="output_subarea output_text output_error">
+<pre>
+<span class="ansi-red-fg">---------------------------------------------------------------------------</span>
+<span class="ansi-red-fg">NameError</span>                                 Traceback (most recent call last)
+<span class="ansi-green-fg">&lt;ipython-input-3-6c6a1209a632&gt;</span> in <span class="ansi-cyan-fg">&lt;module&gt;</span>
+<span class="ansi-green-intense-fg ansi-bold">      1</span> <span class="ansi-red-fg"># indices so we can refer to the rows for the relevant author</span>
+<span class="ansi-green-intense-fg ansi-bold">      2</span> austen_indices<span class="ansi-blue-fg">,</span> cbronte_indices <span class="ansi-blue-fg">=</span> <span class="ansi-blue-fg">[</span><span class="ansi-blue-fg">]</span><span class="ansi-blue-fg">,</span> <span class="ansi-blue-fg">[</span><span class="ansi-blue-fg">]</span>
+<span class="ansi-green-fg">----&gt; 3</span><span class="ansi-red-fg"> </span><span class="ansi-green-fg">for</span> index<span class="ansi-blue-fg">,</span> fn <span class="ansi-green-fg">in</span> enumerate<span class="ansi-blue-fg">(</span>filenames<span class="ansi-blue-fg">)</span><span class="ansi-blue-fg">:</span>
+<span class="ansi-green-intense-fg ansi-bold">      4</span>     <span class="ansi-green-fg">if</span> <span class="ansi-blue-fg">&#34;Austen&#34;</span> <span class="ansi-green-fg">in</span> fn<span class="ansi-blue-fg">:</span>
+<span class="ansi-green-intense-fg ansi-bold">      5</span>         austen_indices<span class="ansi-blue-fg">.</span>append<span class="ansi-blue-fg">(</span>index<span class="ansi-blue-fg">)</span>
+
+<span class="ansi-red-fg">NameError</span>: name &#39;filenames&#39; is not defined</pre>
+</div>
+</div>
+
+</div>
+</div>
+
+</div>
+
+<div class="{} cell border-box-sizing text_cell rendered"><div class="prompt input_prompt">
+</div><div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html">
+<p>Now that we have identified these words, we will remove them from our corpus in
+order to focus on identifying distinctive words that appear in texts associated
+with every author.</p>
+
+</div>
+</div>
+</div>
+
+<div class="{} cell border-box-sizing code_cell rendered">
+<div class="input">
+<div class="prompt input_prompt">In&nbsp;[4]:</div>
+<div class="inner_cell">
+	<div class="input_area">
+<div class=" highlight hl-ipython3"><pre><span></span><span class="n">dtm</span> <span class="o">=</span> <span class="n">dtm</span><span class="p">[:,</span> <span class="n">np</span><span class="o">.</span><span class="n">invert</span><span class="p">(</span><span class="n">distinctive_indices</span><span class="p">)]</span>
+<span class="n">rates</span> <span class="o">=</span> <span class="n">rates</span><span class="p">[:,</span> <span class="n">np</span><span class="o">.</span><span class="n">invert</span><span class="p">(</span><span class="n">distinctive_indices</span><span class="p">)]</span>
+<span class="n">vocab</span> <span class="o">=</span> <span class="n">vocab</span><span class="p">[</span><span class="n">np</span><span class="o">.</span><span class="n">invert</span><span class="p">(</span><span class="n">distinctive_indices</span><span class="p">)]</span>
+
+<span class="c1"># recalculate variables that depend on rates</span>
+<span class="n">austen_rates</span> <span class="o">=</span> <span class="n">rates</span><span class="p">[</span><span class="n">austen_indices</span><span class="p">,</span> <span class="p">:]</span>
+<span class="n">cbronte_rates</span> <span class="o">=</span> <span class="n">rates</span><span class="p">[</span><span class="n">cbronte_indices</span><span class="p">,</span> <span class="p">:]</span>
+<span class="n">austen_rates_avg</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">mean</span><span class="p">(</span><span class="n">austen_rates</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
+<span class="n">cbronte_rates_avg</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">mean</span><span class="p">(</span><span class="n">cbronte_rates</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
+</pre></div>
+
+	</div>
+</div>
+</div>
+
+<div class="output_wrapper">
+<div class="output">
+
+
+<div class="output_area">
+
+	<div class="prompt"></div>
+
+
+<div class="output_subarea output_text output_error">
+<pre>
+<span class="ansi-red-fg">---------------------------------------------------------------------------</span>
+<span class="ansi-red-fg">NameError</span>                                 Traceback (most recent call last)
+<span class="ansi-green-fg">&lt;ipython-input-4-42f2ee05c1ae&gt;</span> in <span class="ansi-cyan-fg">&lt;module&gt;</span>
+<span class="ansi-green-fg">----&gt; 1</span><span class="ansi-red-fg"> </span>dtm <span class="ansi-blue-fg">=</span> dtm<span class="ansi-blue-fg">[</span><span class="ansi-blue-fg">:</span><span class="ansi-blue-fg">,</span> np<span class="ansi-blue-fg">.</span>invert<span class="ansi-blue-fg">(</span>distinctive_indices<span class="ansi-blue-fg">)</span><span class="ansi-blue-fg">]</span>
+<span class="ansi-green-intense-fg ansi-bold">      2</span> rates <span class="ansi-blue-fg">=</span> rates<span class="ansi-blue-fg">[</span><span class="ansi-blue-fg">:</span><span class="ansi-blue-fg">,</span> np<span class="ansi-blue-fg">.</span>invert<span class="ansi-blue-fg">(</span>distinctive_indices<span class="ansi-blue-fg">)</span><span class="ansi-blue-fg">]</span>
+<span class="ansi-green-intense-fg ansi-bold">      3</span> vocab <span class="ansi-blue-fg">=</span> vocab<span class="ansi-blue-fg">[</span>np<span class="ansi-blue-fg">.</span>invert<span class="ansi-blue-fg">(</span>distinctive_indices<span class="ansi-blue-fg">)</span><span class="ansi-blue-fg">]</span>
+<span class="ansi-green-intense-fg ansi-bold">      4</span> 
+<span class="ansi-green-intense-fg ansi-bold">      5</span> <span class="ansi-red-fg"># recalculate variables that depend on rates</span>
+
+<span class="ansi-red-fg">NameError</span>: name &#39;dtm&#39; is not defined</pre>
+</div>
+</div>
+
+</div>
+</div>
+
+</div>
+
+<div class="{} cell border-box-sizing text_cell rendered"><div class="prompt input_prompt">
+</div><div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html">
+<h3 id="Differences-in-averages">Differences in averages<a class="anchor-link" href="#Differences-in-averages">&#182;</a></h3><p>How can we identify a distinctive word? One approach would compare the average
+rate at which authors use a word. A simple quantitative comparison would
+calculate the difference between the rates. If one author uses a word often
+across his or her oeuvre and another barely uses the word at all, then we
+suspect the difference in rates will be large.  This will be the first
+definition of distinctiveness (sometimes called “keyness”) we will consider.
+Using this measure we can calculate the top ten distinctive words in the
+Austen-Brontë comparison as follows:</p>
+
+</div>
+</div>
+</div>
+
+<div class="{} cell border-box-sizing code_cell rendered">
+<div class="input">
+<div class="prompt input_prompt">In&nbsp;[5]:</div>
+<div class="inner_cell">
+	<div class="input_area">
+<div class=" highlight hl-ipython3"><pre><span></span><span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
+
+<span class="c1"># calculate absolute value because we only care about the magnitude of the difference</span>
+<span class="n">keyness</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">abs</span><span class="p">(</span><span class="n">austen_rates_avg</span> <span class="o">-</span> <span class="n">cbronte_rates_avg</span><span class="p">)</span>
+<span class="n">ranking</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">argsort</span><span class="p">(</span><span class="n">keyness</span><span class="p">)[::</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span>  <span class="c1"># from highest to lowest; [::-1] reverses order in Python sequences</span>
+
+<span class="c1"># print the top 10 words along with their rates and the difference</span>
+<span class="n">vocab</span><span class="p">[</span><span class="n">ranking</span><span class="p">][</span><span class="mi">0</span><span class="p">:</span><span class="mi">10</span><span class="p">]</span>
+</pre></div>
+
+	</div>
+</div>
+</div>
+
+<div class="output_wrapper">
+<div class="output">
+
+
+<div class="output_area">
+
+	<div class="prompt"></div>
+
+
+<div class="output_subarea output_text output_error">
+<pre>
+<span class="ansi-red-fg">---------------------------------------------------------------------------</span>
+<span class="ansi-red-fg">NameError</span>                                 Traceback (most recent call last)
+<span class="ansi-green-fg">&lt;ipython-input-5-b8141cf73991&gt;</span> in <span class="ansi-cyan-fg">&lt;module&gt;</span>
+<span class="ansi-green-intense-fg ansi-bold">      2</span> 
+<span class="ansi-green-intense-fg ansi-bold">      3</span> <span class="ansi-red-fg"># calculate absolute value because we only care about the magnitude of the difference</span>
+<span class="ansi-green-fg">----&gt; 4</span><span class="ansi-red-fg"> </span>keyness <span class="ansi-blue-fg">=</span> np<span class="ansi-blue-fg">.</span>abs<span class="ansi-blue-fg">(</span>austen_rates_avg <span class="ansi-blue-fg">-</span> cbronte_rates_avg<span class="ansi-blue-fg">)</span>
+<span class="ansi-green-intense-fg ansi-bold">      5</span> ranking <span class="ansi-blue-fg">=</span> np<span class="ansi-blue-fg">.</span>argsort<span class="ansi-blue-fg">(</span>keyness<span class="ansi-blue-fg">)</span><span class="ansi-blue-fg">[</span><span class="ansi-blue-fg">:</span><span class="ansi-blue-fg">:</span><span class="ansi-blue-fg">-</span><span class="ansi-cyan-fg">1</span><span class="ansi-blue-fg">]</span>  <span class="ansi-red-fg"># from highest to lowest; [::-1] reverses order in Python sequences</span>
+<span class="ansi-green-intense-fg ansi-bold">      6</span> 
+
+<span class="ansi-red-fg">NameError</span>: name &#39;austen_rates_avg&#39; is not defined</pre>
+</div>
+</div>
+
+</div>
+</div>
+
+</div>
+
+<div class="{} cell border-box-sizing text_cell rendered"><div class="prompt input_prompt">
+</div><div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html">
+<p>This is a start. The problem with this measure is that it tends to highlight
+differences in very frequent words. For example, this method
+gives greater attention to a word that occurs
+30 times per 1,000 words in Austen and 25 times per 1,000 in Brontë
+than it does to a word that occurs 5 times per 1,000 words in
+Austen and 0.1 times per 1,000 words in Brontë. This does not seem
+right. It seems important to recognize cases when one author uses a word
+frequently and another author barely uses it.</p>
+<p>As this initial attempt suggests, identifying distinctive words will be
+a balancing act. When comparing two groups of texts differences in the rates of
+frequent words will tend to be large relative to differences in the rates of
+rarer words. Human language is variable; some words occur more frequently than
+others regardless of who is writing.  We need to find a way of adjusting our
+definition of distinctive in light of this.</p>
+<p>One adjustment that is easy to make is to divide the difference in authors’
+average rates by the average rate across all authors. Since dividing a quantity
+by a large number will make that quantity smaller, our new distinctiveness score
+will tend to be lower for words that occur frequently. While this is merely
+a heuristic, it does move us in the right direction.</p>
+
+</div>
+</div>
+</div>
+
+<div class="{} cell border-box-sizing code_cell rendered">
+<div class="input">
+<div class="prompt input_prompt">In&nbsp;[6]:</div>
+<div class="inner_cell">
+	<div class="input_area">
+<div class=" highlight hl-ipython3"><pre><span></span><span class="c1"># we have already calculated the following quantities</span>
+<span class="c1"># austen_rates_avg</span>
+<span class="c1"># cbronte_rates_avg</span>
+
+<span class="n">rates_avg</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">mean</span><span class="p">(</span><span class="n">rates</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
+
+<span class="n">keyness</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">abs</span><span class="p">(</span><span class="n">austen_rates_avg</span> <span class="o">-</span> <span class="n">cbronte_rates_avg</span><span class="p">)</span> <span class="o">/</span> <span class="n">rates_avg</span>
+<span class="n">ranking</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">argsort</span><span class="p">(</span><span class="n">keyness</span><span class="p">)[::</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span>  <span class="c1"># from highest to lowest; [::-1] reverses order.</span>
+
+<span class="c1"># print the top 10 words along with their rates and the difference</span>
+<span class="n">vocab</span><span class="p">[</span><span class="n">ranking</span><span class="p">][</span><span class="mi">0</span><span class="p">:</span><span class="mi">10</span><span class="p">]</span>
+</pre></div>
+
+	</div>
+</div>
+</div>
+
+<div class="output_wrapper">
+<div class="output">
+
+
+<div class="output_area">
+
+	<div class="prompt"></div>
+
+
+<div class="output_subarea output_text output_error">
+<pre>
+<span class="ansi-red-fg">---------------------------------------------------------------------------</span>
+<span class="ansi-red-fg">NameError</span>                                 Traceback (most recent call last)
+<span class="ansi-green-fg">&lt;ipython-input-6-f130ced33065&gt;</span> in <span class="ansi-cyan-fg">&lt;module&gt;</span>
+<span class="ansi-green-intense-fg ansi-bold">      3</span> <span class="ansi-red-fg"># cbronte_rates_avg</span>
+<span class="ansi-green-intense-fg ansi-bold">      4</span> 
+<span class="ansi-green-fg">----&gt; 5</span><span class="ansi-red-fg"> </span>rates_avg <span class="ansi-blue-fg">=</span> np<span class="ansi-blue-fg">.</span>mean<span class="ansi-blue-fg">(</span>rates<span class="ansi-blue-fg">,</span> axis<span class="ansi-blue-fg">=</span><span class="ansi-cyan-fg">0</span><span class="ansi-blue-fg">)</span>
+<span class="ansi-green-intense-fg ansi-bold">      6</span> 
+<span class="ansi-green-intense-fg ansi-bold">      7</span> keyness <span class="ansi-blue-fg">=</span> np<span class="ansi-blue-fg">.</span>abs<span class="ansi-blue-fg">(</span>austen_rates_avg <span class="ansi-blue-fg">-</span> cbronte_rates_avg<span class="ansi-blue-fg">)</span> <span class="ansi-blue-fg">/</span> rates_avg
+
+<span class="ansi-red-fg">NameError</span>: name &#39;rates&#39; is not defined</pre>
+</div>
+</div>
+
+</div>
+</div>
+
+</div>
+
+<div class="{} cell border-box-sizing text_cell rendered"><div class="prompt input_prompt">
+</div><div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html">
+<p>This method improves on our initial attempt. It has
+the virtue of being simple and easy to implement. Yet it has its flaws. For
+example, the method tends to overemphasize very rare words.</p>
+<p>Just as there are many definitions of “similarity” or “distance” available to
+compare two texts (see <a href="working_with_text.html#working-with-text">Working with text</a>), there are many definitions of
+distinctive that can be used to identify words that characterize a group of
+texts.</p>
+<blockquote><p><strong>Note</strong></p>
+<p>While we used the absolute value of the difference in average rates,
+$ |x-y| $ we might have easily used the squared difference,
+$ (x-y)^2 $ as it has similar properties (always positive, increasing as
+difference increases).</p>
+</blockquote>
+<p><a id='bayesian-group-comparison'></a></p>
+
+</div>
+</div>
+</div>
+
+<div class="{} cell border-box-sizing text_cell rendered"><div class="prompt input_prompt">
+</div><div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html">
+<h2 id="Bayesian-group-comparison">Bayesian group comparison<a class="anchor-link" href="#Bayesian-group-comparison">&#182;</a></h2><blockquote><p><strong>Note</strong></p>
+<p>The following sections assume some familiarity with statistics and
+probability. Introductory texts include <a href="references.html#casella-statistical-2001">[CB01]</a>,
+<a href="references.html#hoff-first-2009">[Hof09]</a>, and <a href="references.html#lee-bayesian-2004">[Lee04]</a>.</p>
+<p><strong>Note</strong></p>
+<p>The following excursion into the world of Bayesian inference and Gibbs
+sampling is closely related to topic modeling and Latent Dirichlet Allocation
+(LDA). The inference for the model discussed below proceeds using a Gibbs
+sampler from the full condition distribution of each variable of
+interest—precisely the same procedure is used in LDA.</p>
+</blockquote>
+<p>A more nuanced comparison of word use in two groups takes account of the
+variability in word use. Consider for instance the word “green”
+in Austen and Brontë.  In Austen the word occurs with the following rates: 0.01,
+0.03, and 0.06 (0.03 on average).  In Brontë the word is consistently more
+frequent: 0.16, 0.36, and 0.22 (0.24 on average). These two groups of rates
+look different. But consider how our judgment might change if the rates observed
+in Brontë’s novels were much more variable, say, 0.03, 0.04, and 0.66 (0.24 on
+average).  Although the averages remain the same, the difference does not seem
+so pronounced; with only one observation (0.66) noticeably greater than we find in Austen, we
+might reasonably doubt that there is evidence of a systematic difference between
+the authors. <sup><a href=#fn-lyon id=fn-lyon-link>[1]</a></sup></p>
+<p>One way of formalizing a comparison of two groups that takes account of the
+variability of word usage comes from Bayesian statistics. To describe our
+beliefs about the word frequencies we observe, we use a probability
+distribution, which we will call our a sampling model. Under the model we will
+use, the rates are assumed to come from two different normal distributions. The
+question we will be asking is how confident we are that the means of the two
+normal distributions are different. How confident we are (expressed as
+a probability) that the means are indeed different will stand in as our measure
+of distinctiveness.</p>
+<p>We will use the parameterization below for our two normal sampling
+distributions. Group 1 corresponds to Austen and group 2 corresponds to Brontë:</p>
+$$
+Y_{i,1} = \mu + \delta + \epsilon_{i,1}
+
+Y_{i,2} = \mu - \delta + \epsilon_{i,2}
+
+\{\epsilon_{i,j}\} \sim \textrm{i.i.d.} \; \textrm{Normal}(0, \sigma^2)
+
+n = 1, 2, 3
+$$<p>(i.i.d. stands for <a href="http://en.wikipedia.org/wiki/Independent_and_identically_distributed_random_variables">independently and identically distributed</a>)</p>
+<p>It is easy to relate this parameterization back to two normal distributions.
+Austen’s texts come from a normal distribution with mean parameter
+$ \theta_1 = \mu + \delta $ and variance $ \sigma^2 $, whereas Brontë’s
+novels come from a distribution with the same variance and with mean parameter
+$ \theta_2 = \mu - \delta $. $ \delta $ corresponds to half the
+difference between the two means and it is through this parameter that we will
+judge how confident we are of a difference between the two distributions.</p>
+<p>As we consider the question of what prior distributions to assign to
+$ \mu $, $ \delta $, and $ \sigma^2 $ we need to keep in mind that
+the word rates must be positive even though we are using normal distributions
+(which will always assign some, potentially quite small, probability to negative
+values).  A compromise that will allow us to make use of
+computationally-convenient conjugate prior distributions will be to use normal
+prior distributions that favor positive values in most cases. As we will be
+modeling more than ten thousand of vocabulary items, computational speed will be
+important. These are the prior distributions that we will use:</p>
+$$
+\mu \sim \textrm{Normal}(\mu_0, \tau_0^2)
+
+\delta \sim \textrm{Normal}(0, \gamma_0^2)
+
+\sigma^2 \sim \textrm{Inverse-Gamma}(\nu_0/2, \nu_0\sigma_0^2/2)
+$$<p>We need to determine suitable values for the priors’ parameters
+(called hyperparameters): $ \mu_0,
+\tau_0^2, \gamma_0^2, \nu_0 $, and $ \sigma_0^2 $. Let us consider
+$ \mu_0 $ and $ \sigma_0^2 $ first. While words like “the” and “she”
+occur quite frequently, almost all words (&gt;99%) occur less than four times per
+1,000 words:</p>
+
+</div>
+</div>
+</div>
+
+<div class="{} cell border-box-sizing code_cell rendered">
+<div class="input">
+<div class="prompt input_prompt">In&nbsp;[7]:</div>
+<div class="inner_cell">
+	<div class="input_area">
+<div class=" highlight hl-ipython3"><pre><span></span><span class="n">np</span><span class="o">.</span><span class="n">mean</span><span class="p">(</span><span class="n">rates</span> <span class="o">&lt;</span> <span class="mi">4</span><span class="p">)</span>
+
+<span class="n">np</span><span class="o">.</span><span class="n">mean</span><span class="p">(</span><span class="n">rates</span> <span class="o">&gt;</span> <span class="mi">1</span><span class="p">)</span>
+
+<span class="kn">from</span> <span class="nn">scipy.stats.mstats</span> <span class="kn">import</span> <span class="n">mquantiles</span>  <span class="c1"># analgous to R&#39;s quantiles</span>
+<span class="n">mquantiles</span><span class="p">(</span><span class="n">rates</span><span class="p">,</span> <span class="n">prob</span><span class="o">=</span><span class="p">[</span><span class="mf">0.01</span><span class="p">,</span> <span class="mf">0.5</span><span class="p">,</span> <span class="mf">0.99</span><span class="p">])</span>
+</pre></div>
+
+	</div>
+</div>
+</div>
+
+<div class="output_wrapper">
+<div class="output">
+
+
+<div class="output_area">
+
+	<div class="prompt"></div>
+
+
+<div class="output_subarea output_text output_error">
+<pre>
+<span class="ansi-red-fg">---------------------------------------------------------------------------</span>
+<span class="ansi-red-fg">NameError</span>                                 Traceback (most recent call last)
+<span class="ansi-green-fg">&lt;ipython-input-7-9fd99f59ae06&gt;</span> in <span class="ansi-cyan-fg">&lt;module&gt;</span>
+<span class="ansi-green-fg">----&gt; 1</span><span class="ansi-red-fg"> </span>np<span class="ansi-blue-fg">.</span>mean<span class="ansi-blue-fg">(</span>rates <span class="ansi-blue-fg">&lt;</span> <span class="ansi-cyan-fg">4</span><span class="ansi-blue-fg">)</span>
+<span class="ansi-green-intense-fg ansi-bold">      2</span> 
+<span class="ansi-green-intense-fg ansi-bold">      3</span> np<span class="ansi-blue-fg">.</span>mean<span class="ansi-blue-fg">(</span>rates <span class="ansi-blue-fg">&gt;</span> <span class="ansi-cyan-fg">1</span><span class="ansi-blue-fg">)</span>
+<span class="ansi-green-intense-fg ansi-bold">      4</span> 
+<span class="ansi-green-intense-fg ansi-bold">      5</span> <span class="ansi-green-fg">from</span> scipy<span class="ansi-blue-fg">.</span>stats<span class="ansi-blue-fg">.</span>mstats <span class="ansi-green-fg">import</span> mquantiles  <span class="ansi-red-fg"># analgous to R&#39;s quantiles</span>
+
+<span class="ansi-red-fg">NameError</span>: name &#39;rates&#39; is not defined</pre>
+</div>
+</div>
+
+</div>
+</div>
+
+</div>
+
+<div class="{} cell border-box-sizing text_cell rendered"><div class="prompt input_prompt">
+</div><div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html">
+<p>In keeping with this observation we will set $ \mu_0 $ to be 3 and
+$ \tau^2 $ to be $ 1.5^2 $, with the reasoning that when drawing
+from a normal distribution, the great majority (.95) of observations will fall
+between two standard deviations of the mean. There isn’t tremendous variability
+in rates across the works of a single author, so we will set $ \sigma_0^2 $
+to be 1 and $ \nu_0 $ to be 1. (If we were to use non-conjugate priors we
+could model our prior beliefs about rates more realistically.) We know there is
+considerable variability in the rates <em>between</em> authors, so we will choose
+$ \gamma_0^2 $ to be $ 1.5^2 $, as $ \delta $ represents half the
+difference between the means and its value is unlikely to be greater than 3 in
+absolute value.</p>
+<p>With these conjugate priors it is possible to use a Gibbs sampler to sample
+efficiently from the posterior distribution, using the full conditional
+distributions for the parameters of interest <a href="references.html#hoff-first-2009">[Hof09]</a>:</p>
+$$
+\{\mu|\mathbf{y_1}, \mathbf{y_2}, \delta, \sigma^2\} &amp;\sim \textrm{Normal}(\mu_n, \gamma_n^2)\\
+    \mu_n &amp;= \gamma_n^2 \times [\mu_0/\gamma_0^2 + \sum_{i=1}^{n_1} (y_{i,1} - \delta)/\sigma^2 +
+        \sum_{i=1}^{n_2} (y_{i,2} - \delta)/\sigma^2 ] \\
+    \gamma_n^2 &amp;= [1/\gamma_0^2 + (n_1+n_2)/\sigma^2]^{-1} \\
+
+\{\delta|\mathbf{y_1}, \mathbf{y_2}, \mu, \sigma^2\} &amp;\sim \textrm{Normal}(\delta_n, \tau_n^2)\\
+    \delta_n &amp;= \tau_n^2 \times [ \delta_0/\tau_0^2 +
+        \sum_{i=1}^{n_1} (y_{i,1} - \mu)/\sigma^2 - \sum_{i=1}^{n_2} (y_{i,2} - \mu)/\sigma^2 ]\\
+    \tau_n^2 &amp;= [1/\tau_0^2 + (n_1+n_2)/\sigma^2]^{-1} \\
+
+\{\sigma^2|\mathbf{y_1}, \mathbf{y_2}, \delta, \mu\} &amp;\sim \textrm{Inverse-Gamma}(\nu_n/2, \nu_n\sigma_n^2/2)\\
+    \nu_n &amp;= \nu_0 + n_1 + n_2 \\
+    \nu_n\sigma_n^2 &amp;= \nu_0\sigma_0^2 +
+        \sum_{i=1}^{n_1} (y_{i,1} - (\mu+\delta)) + \sum_{i=1}^{n_2} (y_{i,2} - (\mu - \delta)) \\
+$$<p>In Python, we can wrap the Gibbs sampler in single function and use it to get
+a distribution of posterior values for $ \delta $, which is the variable we
+care about in this context as it characterizes our belief about the difference
+in authors’ word usage.</p>
+
+</div>
+</div>
+</div>
+
+<div class="{} cell border-box-sizing code_cell rendered">
+<div class="input">
+<div class="prompt input_prompt">In&nbsp;[8]:</div>
+<div class="inner_cell">
+	<div class="input_area">
+<div class=" highlight hl-ipython3"><pre><span></span><span class="k">def</span> <span class="nf">sample_posterior</span><span class="p">(</span><span class="n">y1</span><span class="p">,</span> <span class="n">y2</span><span class="p">,</span> <span class="n">mu0</span><span class="p">,</span> <span class="n">sigma20</span><span class="p">,</span> <span class="n">nu0</span><span class="p">,</span> <span class="n">delta0</span><span class="p">,</span> <span class="n">gamma20</span><span class="p">,</span> <span class="n">tau20</span><span class="p">,</span> <span class="n">S</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Draw samples from posterior distribution using Gibbs sampling</span>
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    `S` is the number of samples</span>
+<span class="sd">    Returns</span>
+<span class="sd">    -------</span>
+<span class="sd">    chains : dict of array</span>
+<span class="sd">        Dictionary has keys: &#39;mu&#39;, &#39;delta&#39;, and &#39;sigma2&#39;.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">n1</span><span class="p">,</span> <span class="n">n2</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">y1</span><span class="p">),</span> <span class="nb">len</span><span class="p">(</span><span class="n">y2</span><span class="p">)</span>
+    <span class="c1"># initial values</span>
+    <span class="n">mu</span> <span class="o">=</span> <span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">mean</span><span class="p">(</span><span class="n">y1</span><span class="p">)</span> <span class="o">+</span> <span class="n">np</span><span class="o">.</span><span class="n">mean</span><span class="p">(</span><span class="n">y2</span><span class="p">))</span><span class="o">/</span><span class="mi">2</span>
+    <span class="n">delta</span> <span class="o">=</span> <span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">mean</span><span class="p">(</span><span class="n">y1</span><span class="p">)</span> <span class="o">-</span> <span class="n">np</span><span class="o">.</span><span class="n">mean</span><span class="p">(</span><span class="n">y2</span><span class="p">))</span><span class="o">/</span><span class="mi">2</span>
+    <span class="nb">vars</span> <span class="o">=</span> <span class="p">[</span><span class="s1">&#39;mu&#39;</span><span class="p">,</span> <span class="s1">&#39;delta&#39;</span><span class="p">,</span> <span class="s1">&#39;sigma2&#39;</span><span class="p">]</span>
+    <span class="n">chains</span> <span class="o">=</span> <span class="p">{</span><span class="n">key</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">empty</span><span class="p">(</span><span class="n">S</span><span class="p">)</span> <span class="k">for</span> <span class="n">key</span> <span class="ow">in</span> <span class="nb">vars</span><span class="p">}</span>
+    <span class="k">for</span> <span class="n">s</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">S</span><span class="p">):</span>
+        <span class="c1"># update sigma2</span>
+        <span class="n">a</span> <span class="o">=</span> <span class="p">(</span><span class="n">nu0</span><span class="o">+</span><span class="n">n1</span><span class="o">+</span><span class="n">n2</span><span class="p">)</span><span class="o">/</span><span class="mi">2</span>
+        <span class="n">b</span> <span class="o">=</span> <span class="p">(</span><span class="n">nu0</span><span class="o">*</span><span class="n">sigma20</span> <span class="o">+</span> <span class="n">np</span><span class="o">.</span><span class="n">sum</span><span class="p">((</span><span class="n">y1</span><span class="o">-</span><span class="n">mu</span><span class="o">-</span><span class="n">delta</span><span class="p">)</span><span class="o">**</span><span class="mi">2</span><span class="p">)</span> <span class="o">+</span> <span class="n">np</span><span class="o">.</span><span class="n">sum</span><span class="p">((</span><span class="n">y2</span><span class="o">-</span><span class="n">mu</span><span class="o">+</span><span class="n">delta</span><span class="p">)</span><span class="o">**</span><span class="mi">2</span><span class="p">))</span><span class="o">/</span><span class="mi">2</span>
+        <span class="n">sigma2</span> <span class="o">=</span> <span class="mi">1</span> <span class="o">/</span> <span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">gamma</span><span class="p">(</span><span class="n">a</span><span class="p">,</span> <span class="mi">1</span><span class="o">/</span><span class="n">b</span><span class="p">)</span>
+        <span class="c1"># update mu</span>
+        <span class="n">mu_var</span> <span class="o">=</span> <span class="mi">1</span><span class="o">/</span><span class="p">(</span><span class="mi">1</span><span class="o">/</span><span class="n">gamma20</span> <span class="o">+</span> <span class="p">(</span><span class="n">n1</span><span class="o">+</span><span class="n">n2</span><span class="p">)</span><span class="o">/</span><span class="n">sigma2</span><span class="p">)</span>
+        <span class="n">mu_mean</span> <span class="o">=</span> <span class="n">mu_var</span> <span class="o">*</span> <span class="p">(</span><span class="n">mu0</span><span class="o">/</span><span class="n">gamma20</span> <span class="o">+</span> <span class="n">np</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">y1</span><span class="o">-</span><span class="n">delta</span><span class="p">)</span><span class="o">/</span><span class="n">sigma2</span> <span class="o">+</span>
+                            <span class="n">np</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">y2</span><span class="o">+</span><span class="n">delta</span><span class="p">)</span><span class="o">/</span><span class="n">sigma2</span><span class="p">)</span>
+        <span class="n">mu</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">normal</span><span class="p">(</span><span class="n">mu_mean</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">sqrt</span><span class="p">(</span><span class="n">mu_var</span><span class="p">))</span>
+        <span class="c1"># update delta</span>
+        <span class="n">delta_var</span> <span class="o">=</span> <span class="mi">1</span><span class="o">/</span><span class="p">(</span><span class="mi">1</span><span class="o">/</span><span class="n">tau20</span> <span class="o">+</span> <span class="p">(</span><span class="n">n1</span><span class="o">+</span><span class="n">n2</span><span class="p">)</span><span class="o">/</span><span class="n">sigma2</span><span class="p">)</span>
+        <span class="n">delta_mean</span> <span class="o">=</span> <span class="n">delta_var</span> <span class="o">*</span> <span class="p">(</span><span class="n">delta0</span><span class="o">/</span><span class="n">tau20</span> <span class="o">+</span> <span class="n">np</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">y1</span><span class="o">-</span><span class="n">mu</span><span class="p">)</span><span class="o">/</span><span class="n">sigma2</span> <span class="o">-</span>
+                                <span class="n">np</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">y2</span><span class="o">-</span><span class="n">mu</span><span class="p">)</span><span class="o">/</span><span class="n">sigma2</span><span class="p">)</span>
+        <span class="n">delta</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">normal</span><span class="p">(</span><span class="n">delta_mean</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">sqrt</span><span class="p">(</span><span class="n">delta_var</span><span class="p">))</span>
+        <span class="c1"># save values</span>
+        <span class="n">chains</span><span class="p">[</span><span class="s1">&#39;mu&#39;</span><span class="p">][</span><span class="n">s</span><span class="p">]</span> <span class="o">=</span> <span class="n">mu</span>
+        <span class="n">chains</span><span class="p">[</span><span class="s1">&#39;delta&#39;</span><span class="p">][</span><span class="n">s</span><span class="p">]</span> <span class="o">=</span> <span class="n">delta</span>
+        <span class="n">chains</span><span class="p">[</span><span class="s1">&#39;sigma2&#39;</span><span class="p">][</span><span class="n">s</span><span class="p">]</span> <span class="o">=</span> <span class="n">sigma2</span>
+    <span class="k">return</span> <span class="n">chains</span>
+</pre></div>
+
+	</div>
+</div>
+</div>
+
+</div>
+
+<div class="{} cell border-box-sizing code_cell rendered">
+<div class="input">
+<div class="prompt input_prompt">In&nbsp;[9]:</div>
+<div class="inner_cell">
+	<div class="input_area">
+<div class=" highlight hl-ipython3"><pre><span></span><span class="c1"># data</span>
+<span class="n">word</span> <span class="o">=</span> <span class="s2">&quot;green&quot;</span>
+<span class="n">y1</span><span class="p">,</span> <span class="n">y2</span> <span class="o">=</span> <span class="n">austen_rates</span><span class="p">[:,</span> <span class="n">vocab</span> <span class="o">==</span> <span class="n">word</span><span class="p">],</span> <span class="n">cbronte_rates</span><span class="p">[:,</span> <span class="n">vocab</span> <span class="o">==</span> <span class="n">word</span><span class="p">]</span>
+
+<span class="c1"># prior parameters</span>
+<span class="n">mu0</span> <span class="o">=</span> <span class="mi">3</span>
+<span class="n">tau20</span> <span class="o">=</span> <span class="mf">1.5</span><span class="o">**</span><span class="mi">2</span>
+
+<span class="n">nu0</span> <span class="o">=</span> <span class="mi">1</span>
+<span class="n">sigma20</span> <span class="o">=</span> <span class="mi">1</span>
+
+<span class="n">delta0</span> <span class="o">=</span> <span class="mi">0</span>
+<span class="n">gamma20</span> <span class="o">=</span> <span class="mf">1.5</span><span class="o">**</span><span class="mi">2</span>
+
+<span class="c1"># number of samples</span>
+<span class="n">S</span> <span class="o">=</span> <span class="mi">2000</span>
+
+<span class="n">chains</span> <span class="o">=</span> <span class="n">sample_posterior</span><span class="p">(</span><span class="n">y1</span><span class="p">,</span> <span class="n">y2</span><span class="p">,</span> <span class="n">mu0</span><span class="p">,</span> <span class="n">sigma20</span><span class="p">,</span> <span class="n">nu0</span><span class="p">,</span> <span class="n">delta0</span><span class="p">,</span> <span class="n">gamma20</span><span class="p">,</span> <span class="n">tau20</span><span class="p">,</span> <span class="n">S</span><span class="p">)</span>
+
+<span class="n">delta</span> <span class="o">=</span> <span class="n">chains</span><span class="p">[</span><span class="s1">&#39;delta&#39;</span><span class="p">]</span>
+</pre></div>
+
+	</div>
+</div>
+</div>
+
+<div class="output_wrapper">
+<div class="output">
+
+
+<div class="output_area">
+
+	<div class="prompt"></div>
+
+
+<div class="output_subarea output_text output_error">
+<pre>
+<span class="ansi-red-fg">---------------------------------------------------------------------------</span>
+<span class="ansi-red-fg">NameError</span>                                 Traceback (most recent call last)
+<span class="ansi-green-fg">&lt;ipython-input-9-b79b4b921e73&gt;</span> in <span class="ansi-cyan-fg">&lt;module&gt;</span>
+<span class="ansi-green-intense-fg ansi-bold">      1</span> <span class="ansi-red-fg"># data</span>
+<span class="ansi-green-intense-fg ansi-bold">      2</span> word <span class="ansi-blue-fg">=</span> <span class="ansi-blue-fg">&#34;green&#34;</span>
+<span class="ansi-green-fg">----&gt; 3</span><span class="ansi-red-fg"> </span>y1<span class="ansi-blue-fg">,</span> y2 <span class="ansi-blue-fg">=</span> austen_rates<span class="ansi-blue-fg">[</span><span class="ansi-blue-fg">:</span><span class="ansi-blue-fg">,</span> vocab <span class="ansi-blue-fg">==</span> word<span class="ansi-blue-fg">]</span><span class="ansi-blue-fg">,</span> cbronte_rates<span class="ansi-blue-fg">[</span><span class="ansi-blue-fg">:</span><span class="ansi-blue-fg">,</span> vocab <span class="ansi-blue-fg">==</span> word<span class="ansi-blue-fg">]</span>
+<span class="ansi-green-intense-fg ansi-bold">      4</span> 
+<span class="ansi-green-intense-fg ansi-bold">      5</span> <span class="ansi-red-fg"># prior parameters</span>
+
+<span class="ansi-red-fg">NameError</span>: name &#39;austen_rates&#39; is not defined</pre>
+</div>
+</div>
+
+</div>
+</div>
+
+</div>
+
+<div class="{} cell border-box-sizing text_cell rendered"><div class="prompt input_prompt">
+</div><div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html">
+<p>These samples reflect what our belief about $ \delta $ ought to be given our
+prior specification. Our interest is in $ \delta $, which represents the
+half the difference between the population means for the distributions
+characterizing word rates in Austen and Brontë. We aren’t concerned with whether
+or not it is negative or positive, but we do care whether or not it is likely to
+be zero. In fact, we need to have a measure of how confident we are that
+$ \delta $ is something other than zero (implying no difference in means).
+If, for instance, the moment that samples of $ \delta $ tend to be negative;
+we need to know the posterior probability of its being definitively less than
+zero, $ \textrm{p}(\delta &lt; 0) $. This probability can be estimated from the
+output of the Gibbs sampler. The following demonstrates the calculation of this
+probability for two different words, ‘green’ and ‘dark’, both words more
+characteristic of the Brontë novels than the Austen novels.</p>
+
+</div>
+</div>
+</div>
+
+<div class="{} cell border-box-sizing code_cell rendered">
+<div class="input">
+<div class="prompt input_prompt">In&nbsp;[10]:</div>
+<div class="inner_cell">
+	<div class="input_area">
+<div class=" highlight hl-ipython3"><pre><span></span><span class="n">y1</span> <span class="o">=</span> <span class="n">austen_rates</span><span class="p">[:,</span> <span class="n">vocab</span> <span class="o">==</span> <span class="s1">&#39;green&#39;</span><span class="p">]</span>
+<span class="n">y2</span> <span class="o">=</span> <span class="n">cbronte_rates</span><span class="p">[:,</span> <span class="n">vocab</span> <span class="o">==</span> <span class="s1">&#39;green&#39;</span><span class="p">]</span>
+<span class="n">chains</span> <span class="o">=</span> <span class="n">sample_posterior</span><span class="p">(</span><span class="n">y1</span><span class="p">,</span> <span class="n">y2</span><span class="p">,</span> <span class="n">mu0</span><span class="p">,</span> <span class="n">sigma20</span><span class="p">,</span> <span class="n">nu0</span><span class="p">,</span> <span class="n">delta0</span><span class="p">,</span> <span class="n">gamma20</span><span class="p">,</span> <span class="n">tau20</span><span class="p">,</span> <span class="n">S</span><span class="p">)</span>
+<span class="n">delta_green</span> <span class="o">=</span> <span class="n">chains</span><span class="p">[</span><span class="s1">&#39;delta&#39;</span><span class="p">]</span>
+
+<span class="n">y1</span> <span class="o">=</span> <span class="n">austen_rates</span><span class="p">[:,</span> <span class="n">vocab</span> <span class="o">==</span> <span class="s1">&#39;dark&#39;</span><span class="p">]</span>
+<span class="n">y2</span> <span class="o">=</span> <span class="n">cbronte_rates</span><span class="p">[:,</span> <span class="n">vocab</span> <span class="o">==</span> <span class="s1">&#39;dark&#39;</span><span class="p">]</span>
+<span class="n">chains</span> <span class="o">=</span> <span class="n">sample_posterior</span><span class="p">(</span><span class="n">y1</span><span class="p">,</span> <span class="n">y2</span><span class="p">,</span> <span class="n">mu0</span><span class="p">,</span> <span class="n">sigma20</span><span class="p">,</span> <span class="n">nu0</span><span class="p">,</span> <span class="n">delta0</span><span class="p">,</span> <span class="n">gamma20</span><span class="p">,</span> <span class="n">tau20</span><span class="p">,</span> <span class="n">S</span><span class="p">)</span>
+<span class="n">delta_dark</span> <span class="o">=</span> <span class="n">chains</span><span class="p">[</span><span class="s1">&#39;delta&#39;</span><span class="p">]</span>
+
+<span class="c1"># estimate of p(delta &lt; 0)</span>
+<span class="n">np</span><span class="o">.</span><span class="n">mean</span><span class="p">(</span><span class="n">delta_dark</span> <span class="o">&lt;</span> <span class="mi">0</span><span class="p">)</span>
+</pre></div>
+
+	</div>
+</div>
+</div>
+
+<div class="output_wrapper">
+<div class="output">
+
+
+<div class="output_area">
+
+	<div class="prompt"></div>
+
+
+<div class="output_subarea output_text output_error">
+<pre>
+<span class="ansi-red-fg">---------------------------------------------------------------------------</span>
+<span class="ansi-red-fg">NameError</span>                                 Traceback (most recent call last)
+<span class="ansi-green-fg">&lt;ipython-input-10-be666db6e04d&gt;</span> in <span class="ansi-cyan-fg">&lt;module&gt;</span>
+<span class="ansi-green-fg">----&gt; 1</span><span class="ansi-red-fg"> </span>y1 <span class="ansi-blue-fg">=</span> austen_rates<span class="ansi-blue-fg">[</span><span class="ansi-blue-fg">:</span><span class="ansi-blue-fg">,</span> vocab <span class="ansi-blue-fg">==</span> <span class="ansi-blue-fg">&#39;green&#39;</span><span class="ansi-blue-fg">]</span>
+<span class="ansi-green-intense-fg ansi-bold">      2</span> y2 <span class="ansi-blue-fg">=</span> cbronte_rates<span class="ansi-blue-fg">[</span><span class="ansi-blue-fg">:</span><span class="ansi-blue-fg">,</span> vocab <span class="ansi-blue-fg">==</span> <span class="ansi-blue-fg">&#39;green&#39;</span><span class="ansi-blue-fg">]</span>
+<span class="ansi-green-intense-fg ansi-bold">      3</span> chains <span class="ansi-blue-fg">=</span> sample_posterior<span class="ansi-blue-fg">(</span>y1<span class="ansi-blue-fg">,</span> y2<span class="ansi-blue-fg">,</span> mu0<span class="ansi-blue-fg">,</span> sigma20<span class="ansi-blue-fg">,</span> nu0<span class="ansi-blue-fg">,</span> delta0<span class="ansi-blue-fg">,</span> gamma20<span class="ansi-blue-fg">,</span> tau20<span class="ansi-blue-fg">,</span> S<span class="ansi-blue-fg">)</span>
+<span class="ansi-green-intense-fg ansi-bold">      4</span> delta_green <span class="ansi-blue-fg">=</span> chains<span class="ansi-blue-fg">[</span><span class="ansi-blue-fg">&#39;delta&#39;</span><span class="ansi-blue-fg">]</span>
+<span class="ansi-green-intense-fg ansi-bold">      5</span> 
+
+<span class="ansi-red-fg">NameError</span>: name &#39;austen_rates&#39; is not defined</pre>
+</div>
+</div>
+
+</div>
+</div>
+
+</div>
+
+<div class="{} cell border-box-sizing code_cell rendered">
+<div class="input">
+<div class="prompt input_prompt">In&nbsp;[11]:</div>
+<div class="inner_cell">
+	<div class="input_area">
+<div class=" highlight hl-ipython3"><pre><span></span><span class="n">words</span> <span class="o">=</span> <span class="p">[</span><span class="s1">&#39;dark&#39;</span><span class="p">,</span> <span class="s1">&#39;green&#39;</span><span class="p">]</span>
+<span class="n">ix</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">in1d</span><span class="p">(</span><span class="n">vocab</span><span class="p">,</span> <span class="n">words</span><span class="p">)</span>
+
+<span class="nd">@suppress</span>
+<span class="k">assert</span> <span class="nb">all</span><span class="p">(</span><span class="n">vocab</span><span class="p">[</span><span class="n">ix</span><span class="p">]</span> <span class="o">==</span> <span class="n">words</span><span class="p">)</span>  <span class="c1"># order matters for subsequent display</span>
+
+<span class="n">keyness</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">asarray</span><span class="p">([</span><span class="n">np</span><span class="o">.</span><span class="n">mean</span><span class="p">(</span><span class="n">delta_dark</span> <span class="o">&lt;</span> <span class="mi">0</span><span class="p">),</span> <span class="n">np</span><span class="o">.</span><span class="n">mean</span><span class="p">(</span><span class="n">delta_green</span> <span class="o">&lt;</span> <span class="mi">0</span><span class="p">)])</span>
+</pre></div>
+
+	</div>
+</div>
+</div>
+
+<div class="output_wrapper">
+<div class="output">
+
+
+<div class="output_area">
+
+	<div class="prompt"></div>
+
+
+<div class="output_subarea output_text output_error">
+<pre>
+<span class="ansi-cyan-fg">  File </span><span class="ansi-green-fg">&#34;&lt;ipython-input-11-ed77bf5800e8&gt;&#34;</span><span class="ansi-cyan-fg">, line </span><span class="ansi-green-fg">5</span>
+<span class="ansi-red-fg">    assert all(vocab[ix] == words)  # order matters for subsequent display</span>
+         ^
+<span class="ansi-red-fg">SyntaxError</span><span class="ansi-red-fg">:</span> invalid syntax
+</pre>
+</div>
+</div>
+
+</div>
+</div>
+
+</div>
+
+<div class="{} cell border-box-sizing text_cell rendered"><div class="prompt input_prompt">
+</div><div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html">
+<p>As ‘dark’ is more distinctive of Brontë than ‘green’ is, the probabilities
+(our measure of distinctiveness or keyness) reflect this.</p>
+<p>If we want to apply this “feature selection” method <em>en masse</em> to every word
+occurring in the corpus, we need only write one short loop and make an
+adjustment for the fact that we don’t care whether or not $ \delta $ is
+positive or negative:</p>
+
+</div>
+</div>
+</div>
+
+<div class="{} cell border-box-sizing code_cell rendered">
+<div class="input">
+<div class="prompt input_prompt">In&nbsp;[12]:</div>
+<div class="inner_cell">
+	<div class="input_area">
+<div class=" highlight hl-ipython3"><pre><span></span><span class="c1"># fewer samples to speed things up, this may take several minutes to run</span>
+<span class="n">S</span> <span class="o">=</span> <span class="mi">200</span>
+
+<span class="k">def</span> <span class="nf">delta_confidence</span><span class="p">(</span><span class="n">rates_one_word</span><span class="p">):</span>
+    <span class="n">austen_rates</span> <span class="o">=</span> <span class="n">rates_one_word</span><span class="p">[</span><span class="mi">0</span><span class="p">:</span><span class="mi">3</span><span class="p">]</span>
+    <span class="n">bronte_rates</span> <span class="o">=</span> <span class="n">rates_one_word</span><span class="p">[</span><span class="mi">3</span><span class="p">:</span><span class="mi">6</span><span class="p">]</span>
+    <span class="n">chains</span> <span class="o">=</span> <span class="n">sample_posterior</span><span class="p">(</span><span class="n">austen_rates</span><span class="p">,</span> <span class="n">bronte_rates</span><span class="p">,</span> <span class="n">mu0</span><span class="p">,</span> <span class="n">sigma20</span><span class="p">,</span> <span class="n">nu0</span><span class="p">,</span>
+                              <span class="n">delta0</span><span class="p">,</span> <span class="n">gamma20</span><span class="p">,</span> <span class="n">tau20</span><span class="p">,</span> <span class="n">S</span><span class="p">)</span>
+    <span class="n">delta</span> <span class="o">=</span> <span class="n">chains</span><span class="p">[</span><span class="s1">&#39;delta&#39;</span><span class="p">]</span>
+    <span class="k">return</span> <span class="n">np</span><span class="o">.</span><span class="n">max</span><span class="p">([</span><span class="n">np</span><span class="o">.</span><span class="n">mean</span><span class="p">(</span><span class="n">delta</span> <span class="o">&lt;</span> <span class="mi">0</span><span class="p">),</span> <span class="n">np</span><span class="o">.</span><span class="n">mean</span><span class="p">(</span><span class="n">delta</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">)])</span>
+</pre></div>
+
+	</div>
+</div>
+</div>
+
+</div>
+
+<div class="{} cell border-box-sizing text_cell rendered"><div class="prompt input_prompt">
+</div><div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html">
+<div class="highlight"><pre><span></span><span class="c1"># apply the function over all columns</span>
+<span class="n">In</span> <span class="p">[</span><span class="mi">117</span><span class="p">]:</span> <span class="n">keyness</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">apply_along_axis</span><span class="p">(</span><span class="n">delta_confidence</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">arr</span><span class="o">=</span><span class="n">rates</span><span class="p">)</span>
+</pre></div>
+
+</div>
+</div>
+</div>
+
+<div class="{} cell border-box-sizing code_cell rendered">
+<div class="input">
+<div class="prompt input_prompt">In&nbsp;[13]:</div>
+<div class="inner_cell">
+	<div class="input_area">
+<div class=" highlight hl-ipython3"><pre><span></span><span class="n">ranking</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">argsort</span><span class="p">(</span><span class="n">keyness</span><span class="p">)[::</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span>  <span class="c1"># from highest to lowest; [::-1] reverses order.</span>
+
+<span class="c1"># print the top 10 words along with their rates and the difference</span>
+<span class="n">vocab</span><span class="p">[</span><span class="n">ranking</span><span class="p">][</span><span class="mi">0</span><span class="p">:</span><span class="mi">10</span><span class="p">]</span>
+</pre></div>
+
+	</div>
+</div>
+</div>
+
+<div class="output_wrapper">
+<div class="output">
+
+
+<div class="output_area">
+
+	<div class="prompt"></div>
+
+
+<div class="output_subarea output_text output_error">
+<pre>
+<span class="ansi-red-fg">---------------------------------------------------------------------------</span>
+<span class="ansi-red-fg">NameError</span>                                 Traceback (most recent call last)
+<span class="ansi-green-fg">&lt;ipython-input-13-940773bb84d6&gt;</span> in <span class="ansi-cyan-fg">&lt;module&gt;</span>
+<span class="ansi-green-fg">----&gt; 1</span><span class="ansi-red-fg"> </span>ranking <span class="ansi-blue-fg">=</span> np<span class="ansi-blue-fg">.</span>argsort<span class="ansi-blue-fg">(</span>keyness<span class="ansi-blue-fg">)</span><span class="ansi-blue-fg">[</span><span class="ansi-blue-fg">:</span><span class="ansi-blue-fg">:</span><span class="ansi-blue-fg">-</span><span class="ansi-cyan-fg">1</span><span class="ansi-blue-fg">]</span>  <span class="ansi-red-fg"># from highest to lowest; [::-1] reverses order.</span>
+<span class="ansi-green-intense-fg ansi-bold">      2</span> 
+<span class="ansi-green-intense-fg ansi-bold">      3</span> <span class="ansi-red-fg"># print the top 10 words along with their rates and the difference</span>
+<span class="ansi-green-intense-fg ansi-bold">      4</span> vocab<span class="ansi-blue-fg">[</span>ranking<span class="ansi-blue-fg">]</span><span class="ansi-blue-fg">[</span><span class="ansi-cyan-fg">0</span><span class="ansi-blue-fg">:</span><span class="ansi-cyan-fg">10</span><span class="ansi-blue-fg">]</span>
+
+<span class="ansi-red-fg">NameError</span>: name &#39;keyness&#39; is not defined</pre>
+</div>
+</div>
+
+</div>
+</div>
+
+</div>
+
+<div class="{} cell border-box-sizing text_cell rendered"><div class="prompt input_prompt">
+</div><div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html">
+<p>This produces a useful ordering of characteristic words. Unlikely <a href="https://en.wikipedia.org/wiki/Frequentist_inference">frequentist</a> methods discussed below
+(chi-squared and log likelihood) this approach considers the variability of
+observations within groups. This method will also work for small corpora
+provided useful prior information is available. To the extent that we are
+interested in a close reading of differences of vocabulary use, the Bayesian
+method should be preferred. <sup><a href=#fn-underwood id=fn-underwood-link>[2]</a></sup></p>
+<p><a id='chi2'></a></p>
+
+</div>
+</div>
+</div>
+
+<div class="{} cell border-box-sizing text_cell rendered"><div class="prompt input_prompt">
+</div><div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html">
+<h2 id="Log-likelihood-ratio-and-$-\chi^2-$-feature-selection">Log likelihood ratio and $ \chi^2 $ feature selection<a class="anchor-link" href="#Log-likelihood-ratio-and-$-\chi^2-$-feature-selection">&#182;</a></h2><p>We can recast our discussions about measuring distinctiveness in terms of
+hypothesis testing. This turns out to be a satisfying way of thinking about the
+problem and it also allows us to introduce a range of feature selection methods,
+including the log likelihood test and the $ \chi^2 $ test.</p>
+<p>One hypothesis that we might test comes as no surprise: rather than two groups
+of texts characterized by different word rates, this hypothesis claims that
+there is, in fact, a single group. Words are examined one at a time; those words
+for which this hypothesis seems most wrong will be counted as distinctive
+(classical statistics is always a workout in counterfactual language).</p>
+<p>Consider again the word “green”. Taking all the Austen texts together, the word
+“green” occurs 11 times out of ~370,000 words (0.03 per 1,000 words). In the
+novels by Brontë, “green” occurs 96 times out of ~400,000 (0.24 per 1,000
+words). We do not really need statistics to tell us that this is a large
+difference: picking a word from each author-specific corpus at random, one is ten
+times more likely to find “green” in the Brontë corpus. To summarize the
+appearance of the word “green” we may assemble a table with the following code:</p>
+
+</div>
+</div>
+</div>
+
+<div class="{} cell border-box-sizing code_cell rendered">
+<div class="input">
+<div class="prompt input_prompt">In&nbsp;[14]:</div>
+<div class="inner_cell">
+	<div class="input_area">
+<div class=" highlight hl-ipython3"><pre><span></span><span class="n">green_austen</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">dtm</span><span class="p">[</span><span class="n">austen_indices</span><span class="p">,</span> <span class="n">vocab</span> <span class="o">==</span> <span class="s2">&quot;green&quot;</span><span class="p">])</span>
+<span class="n">nongreen_austen</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">dtm</span><span class="p">[</span><span class="n">austen_indices</span><span class="p">,</span> <span class="p">:])</span> <span class="o">-</span> <span class="n">green_austen</span>
+<span class="n">green_cbronte</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">dtm</span><span class="p">[</span><span class="n">cbronte_indices</span><span class="p">,</span> <span class="n">vocab</span> <span class="o">==</span> <span class="s2">&quot;green&quot;</span><span class="p">])</span>
+<span class="n">nongreen_cbronte</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">dtm</span><span class="p">[</span><span class="n">cbronte_indices</span><span class="p">,</span> <span class="p">:])</span> <span class="o">-</span> <span class="n">green_cbronte</span>
+
+<span class="n">green_table</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([[</span><span class="n">green_austen</span><span class="p">,</span> <span class="n">nongreen_austen</span><span class="p">],</span>
+                        <span class="p">[</span><span class="n">green_cbronte</span><span class="p">,</span> <span class="n">nongreen_cbronte</span><span class="p">]])</span>
+<span class="n">green_table</span>
+</pre></div>
+
+	</div>
+</div>
+</div>
+
+<div class="output_wrapper">
+<div class="output">
+
+
+<div class="output_area">
+
+	<div class="prompt"></div>
+
+
+<div class="output_subarea output_text output_error">
+<pre>
+<span class="ansi-red-fg">---------------------------------------------------------------------------</span>
+<span class="ansi-red-fg">NameError</span>                                 Traceback (most recent call last)
+<span class="ansi-green-fg">&lt;ipython-input-14-08472b4e3673&gt;</span> in <span class="ansi-cyan-fg">&lt;module&gt;</span>
+<span class="ansi-green-fg">----&gt; 1</span><span class="ansi-red-fg"> </span>green_austen <span class="ansi-blue-fg">=</span> np<span class="ansi-blue-fg">.</span>sum<span class="ansi-blue-fg">(</span>dtm<span class="ansi-blue-fg">[</span>austen_indices<span class="ansi-blue-fg">,</span> vocab <span class="ansi-blue-fg">==</span> <span class="ansi-blue-fg">&#34;green&#34;</span><span class="ansi-blue-fg">]</span><span class="ansi-blue-fg">)</span>
+<span class="ansi-green-intense-fg ansi-bold">      2</span> nongreen_austen <span class="ansi-blue-fg">=</span> np<span class="ansi-blue-fg">.</span>sum<span class="ansi-blue-fg">(</span>dtm<span class="ansi-blue-fg">[</span>austen_indices<span class="ansi-blue-fg">,</span> <span class="ansi-blue-fg">:</span><span class="ansi-blue-fg">]</span><span class="ansi-blue-fg">)</span> <span class="ansi-blue-fg">-</span> green_austen
+<span class="ansi-green-intense-fg ansi-bold">      3</span> green_cbronte <span class="ansi-blue-fg">=</span> np<span class="ansi-blue-fg">.</span>sum<span class="ansi-blue-fg">(</span>dtm<span class="ansi-blue-fg">[</span>cbronte_indices<span class="ansi-blue-fg">,</span> vocab <span class="ansi-blue-fg">==</span> <span class="ansi-blue-fg">&#34;green&#34;</span><span class="ansi-blue-fg">]</span><span class="ansi-blue-fg">)</span>
+<span class="ansi-green-intense-fg ansi-bold">      4</span> nongreen_cbronte <span class="ansi-blue-fg">=</span> np<span class="ansi-blue-fg">.</span>sum<span class="ansi-blue-fg">(</span>dtm<span class="ansi-blue-fg">[</span>cbronte_indices<span class="ansi-blue-fg">,</span> <span class="ansi-blue-fg">:</span><span class="ansi-blue-fg">]</span><span class="ansi-blue-fg">)</span> <span class="ansi-blue-fg">-</span> green_cbronte
+<span class="ansi-green-intense-fg ansi-bold">      5</span> 
+
+<span class="ansi-red-fg">NameError</span>: name &#39;dtm&#39; is not defined</pre>
+</div>
+</div>
+
+</div>
+</div>
+
+</div>
+
+<div class="{} cell border-box-sizing text_cell rendered"><div class="prompt input_prompt">
+</div><div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html">
+<p>The hypothesis being tested is that the grouping of the counts by author is
+unnecessary, that $ P(word = "green" | author = "Austen") = P(word
+= "green" | author != "Austen") $. If this were the case, then the rate of
+“green” in the corpus is the same, namely 0.14 per 1,000 words, and we would
+anticipate seeing the following frequencies given the total number of words
+for each group of texts:</p>
+
+</div>
+</div>
+</div>
+
+<div class="{} cell border-box-sizing code_cell rendered">
+<div class="input">
+<div class="prompt input_prompt">In&nbsp;[15]:</div>
+<div class="inner_cell">
+	<div class="input_area">
+<div class=" highlight hl-ipython3"><pre><span></span><span class="n">prob_green</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">dtm</span><span class="p">[:,</span> <span class="n">vocab</span> <span class="o">==</span> <span class="s2">&quot;green&quot;</span><span class="p">])</span> <span class="o">/</span> <span class="n">np</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">dtm</span><span class="p">)</span>
+<span class="n">prob_notgreen</span> <span class="o">=</span> <span class="mi">1</span> <span class="o">-</span> <span class="n">prob_green</span>
+<span class="n">labels</span> <span class="o">=</span> <span class="p">[]</span>
+<span class="k">for</span> <span class="n">fn</span> <span class="ow">in</span> <span class="n">filenames</span><span class="p">:</span>
+    <span class="n">label</span> <span class="o">=</span> <span class="s2">&quot;Austen&quot;</span> <span class="k">if</span> <span class="s2">&quot;Austen&quot;</span> <span class="ow">in</span> <span class="n">fn</span> <span class="k">else</span> <span class="s2">&quot;CBrontë&quot;</span>
+    <span class="n">labels</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">label</span><span class="p">)</span>
+<span class="n">n_austen</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">dtm</span><span class="p">[</span><span class="n">labels</span> <span class="o">==</span> <span class="s2">&quot;Austen&quot;</span><span class="p">,</span> <span class="p">:])</span>
+<span class="n">n_cbronte</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">dtm</span><span class="p">[</span><span class="n">labels</span> <span class="o">!=</span> <span class="s2">&quot;Austen&quot;</span><span class="p">,</span> <span class="p">:])</span>
+
+<span class="n">expected_table</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([[</span><span class="n">prob_green</span> <span class="o">*</span> <span class="n">n_austen</span><span class="p">,</span> <span class="n">prob_notgreen</span> <span class="o">*</span> <span class="n">n_austen</span><span class="p">],</span>
+                           <span class="p">[</span><span class="n">prob_green</span> <span class="o">*</span> <span class="n">n_cbronte</span><span class="p">,</span> <span class="n">prob_notgreen</span> <span class="o">*</span> <span class="n">nongreen_cbronte</span><span class="p">]])</span>
+<span class="n">expected_table</span>
+
+<span class="c1"># same result, but more concise and more general</span>
+<span class="kn">from</span> <span class="nn">sklearn.preprocessing</span> <span class="kn">import</span> <span class="n">LabelBinarizer</span>
+<span class="n">X</span> <span class="o">=</span> <span class="n">dtm</span><span class="p">[:,</span> <span class="n">vocab</span> <span class="o">==</span> <span class="s2">&quot;green&quot;</span><span class="p">]</span>
+<span class="n">X</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">X</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">dtm</span><span class="p">[:,</span> <span class="n">vocab</span> <span class="o">!=</span> <span class="s2">&quot;green&quot;</span><span class="p">],</span> <span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">keepdims</span><span class="o">=</span><span class="kc">True</span><span class="p">),</span> <span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
+<span class="n">y</span> <span class="o">=</span> <span class="n">LabelBinarizer</span><span class="p">()</span><span class="o">.</span><span class="n">fit_transform</span><span class="p">(</span><span class="n">labels</span><span class="p">)</span>
+<span class="n">y</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="mi">1</span> <span class="o">-</span> <span class="n">y</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
+<span class="n">green_table</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">dot</span><span class="p">(</span><span class="n">y</span><span class="o">.</span><span class="n">T</span><span class="p">,</span> <span class="n">X</span><span class="p">)</span>
+<span class="n">green_table</span>
+
+<span class="n">feature_count</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">X</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">keepdims</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+<span class="n">class_prob</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">mean</span><span class="p">(</span><span class="n">y</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">keepdims</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+<span class="n">expected_table</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">dot</span><span class="p">(</span><span class="n">class_prob</span><span class="o">.</span><span class="n">T</span><span class="p">,</span> <span class="n">feature_count</span><span class="p">)</span>
+</pre></div>
+
+	</div>
+</div>
+</div>
+
+<div class="output_wrapper">
+<div class="output">
+
+
+<div class="output_area">
+
+	<div class="prompt"></div>
+
+
+<div class="output_subarea output_text output_error">
+<pre>
+<span class="ansi-red-fg">---------------------------------------------------------------------------</span>
+<span class="ansi-red-fg">NameError</span>                                 Traceback (most recent call last)
+<span class="ansi-green-fg">&lt;ipython-input-15-9275a0c0ab6f&gt;</span> in <span class="ansi-cyan-fg">&lt;module&gt;</span>
+<span class="ansi-green-fg">----&gt; 1</span><span class="ansi-red-fg"> </span>prob_green <span class="ansi-blue-fg">=</span> np<span class="ansi-blue-fg">.</span>sum<span class="ansi-blue-fg">(</span>dtm<span class="ansi-blue-fg">[</span><span class="ansi-blue-fg">:</span><span class="ansi-blue-fg">,</span> vocab <span class="ansi-blue-fg">==</span> <span class="ansi-blue-fg">&#34;green&#34;</span><span class="ansi-blue-fg">]</span><span class="ansi-blue-fg">)</span> <span class="ansi-blue-fg">/</span> np<span class="ansi-blue-fg">.</span>sum<span class="ansi-blue-fg">(</span>dtm<span class="ansi-blue-fg">)</span>
+<span class="ansi-green-intense-fg ansi-bold">      2</span> prob_notgreen <span class="ansi-blue-fg">=</span> <span class="ansi-cyan-fg">1</span> <span class="ansi-blue-fg">-</span> prob_green
+<span class="ansi-green-intense-fg ansi-bold">      3</span> labels <span class="ansi-blue-fg">=</span> <span class="ansi-blue-fg">[</span><span class="ansi-blue-fg">]</span>
+<span class="ansi-green-intense-fg ansi-bold">      4</span> <span class="ansi-green-fg">for</span> fn <span class="ansi-green-fg">in</span> filenames<span class="ansi-blue-fg">:</span>
+<span class="ansi-green-intense-fg ansi-bold">      5</span>     label <span class="ansi-blue-fg">=</span> <span class="ansi-blue-fg">&#34;Austen&#34;</span> <span class="ansi-green-fg">if</span> <span class="ansi-blue-fg">&#34;Austen&#34;</span> <span class="ansi-green-fg">in</span> fn <span class="ansi-green-fg">else</span> <span class="ansi-blue-fg">&#34;CBrontë&#34;</span>
+
+<span class="ansi-red-fg">NameError</span>: name &#39;dtm&#39; is not defined</pre>
+</div>
+</div>
+
+</div>
+</div>
+
+</div>
+
+<div class="{} cell border-box-sizing text_cell rendered"><div class="prompt input_prompt">
+</div><div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html">
+<p>In classical statistics, hypothesis tests typically have a quantity called
+a test statistic associated with them. If the test statistic is greater than
+a critical value the hypothesis is rejected. In this case, the test statistic is
+identical with our measure of distinctiveness. The test commonly used to analyze
+the present hypothesis (that two distinct groups are unnecessary) is the log
+likelihood ratio test, and its statistic is called the log likelihood ratio
+(alternatively a <a href="http://en.wikipedia.org/wiki/G-test">G-test</a> statistic or
+<a href="http://acl.ldc.upenn.edu/J/J93/J93-1003.pdf">Dunning log likelihood</a>
+<a href="references.html#dunning-accurate-1993">[Dun93]</a>).  Various symbols are associated with this
+statistic, including $ G $, $ G^2 $, $ l $,  and $ \lambda $.
+(The theoretical underpinnings of the log likelihood ratio test and its
+application to corpus analysis are covered in chapter 8 of Casella and Berger
+(2001) and Dunning (1993) <a href="references.html#casella-statistical-2001">[CB01]</a>
+<a href="references.html#dunning-accurate-1993">[Dun93]</a>.)</p>
+<p>The log likelihood ratio is calculated as follows:</p>
+$$
+\sum_i O_i \times \ln \frac{O_i}{E_i}
+$$<p>where $ i $ indexes the cells. (Note the similarity of this formula to the
+calculation of <a href="#mutual-information">mutual information</a>.) In Python:</p>
+
+</div>
+</div>
+</div>
+
+<div class="{} cell border-box-sizing code_cell rendered">
+<div class="input">
+<div class="prompt input_prompt">In&nbsp;[16]:</div>
+<div class="inner_cell">
+	<div class="input_area">
+<div class=" highlight hl-ipython3"><pre><span></span><span class="n">G</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">green_table</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">log</span><span class="p">(</span><span class="n">green_table</span> <span class="o">/</span> <span class="n">expected_table</span><span class="p">))</span>
+</pre></div>
+
+	</div>
+</div>
+</div>
+
+<div class="output_wrapper">
+<div class="output">
+
+
+<div class="output_area">
+
+	<div class="prompt"></div>
+
+
+<div class="output_subarea output_text output_error">
+<pre>
+<span class="ansi-red-fg">---------------------------------------------------------------------------</span>
+<span class="ansi-red-fg">NameError</span>                                 Traceback (most recent call last)
+<span class="ansi-green-fg">&lt;ipython-input-16-6fdd58903bf1&gt;</span> in <span class="ansi-cyan-fg">&lt;module&gt;</span>
+<span class="ansi-green-fg">----&gt; 1</span><span class="ansi-red-fg"> </span>G <span class="ansi-blue-fg">=</span> np<span class="ansi-blue-fg">.</span>sum<span class="ansi-blue-fg">(</span>green_table <span class="ansi-blue-fg">*</span> np<span class="ansi-blue-fg">.</span>log<span class="ansi-blue-fg">(</span>green_table <span class="ansi-blue-fg">/</span> expected_table<span class="ansi-blue-fg">)</span><span class="ansi-blue-fg">)</span>
+
+<span class="ansi-red-fg">NameError</span>: name &#39;green_table&#39; is not defined</pre>
+</div>
+</div>
+
+</div>
+</div>
+
+</div>
+
+<div class="{} cell border-box-sizing text_cell rendered"><div class="prompt input_prompt">
+</div><div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html">
+<p>The higher the value of the test statistic, the more pronounced the deviation is
+from the hypothesis—and, for our purposes, the more “distinctive” the word is.</p>
+<p>Pearson’s $ \chi^2 $ test statistic approximates the log likelihood ratio
+test ($ \chi^2 $ is read chi-squared). It is computationally easier to
+calculate. The Python library <code>scikit-learn</code> provides a function
+<code>sklearn.feature_selection.chi2</code> that allows us to use this test statistic as
+a feature selection method:</p>
+
+</div>
+</div>
+</div>
+
+<div class="{} cell border-box-sizing code_cell rendered">
+<div class="input">
+<div class="prompt input_prompt">In&nbsp;[17]:</div>
+<div class="inner_cell">
+	<div class="input_area">
+<div class=" highlight hl-ipython3"><pre><span></span><span class="kn">from</span> <span class="nn">sklearn.feature_selection</span> <span class="kn">import</span> <span class="n">chi2</span>
+<span class="n">labels</span> <span class="o">=</span> <span class="p">[]</span>
+<span class="k">for</span> <span class="n">fn</span> <span class="ow">in</span> <span class="n">filenames</span><span class="p">:</span>
+    <span class="n">label</span> <span class="o">=</span> <span class="s2">&quot;Austen&quot;</span> <span class="k">if</span> <span class="s2">&quot;Austen&quot;</span> <span class="ow">in</span> <span class="n">fn</span> <span class="k">else</span> <span class="s2">&quot;CBrontë&quot;</span>
+    <span class="n">labels</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">label</span><span class="p">)</span>
+
+<span class="c1"># chi2 returns two arrays, the chi2 test statistic and an</span>
+<span class="c1"># array of &quot;p-values&quot;, which we&#39;ll ignore</span>
+<span class="n">keyness</span><span class="p">,</span> <span class="n">_</span> <span class="o">=</span> <span class="n">chi2</span><span class="p">(</span><span class="n">dtm</span><span class="p">,</span> <span class="n">labels</span><span class="p">)</span>
+<span class="n">ranking</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">argsort</span><span class="p">(</span><span class="n">keyness</span><span class="p">)[::</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span>
+<span class="n">vocab</span><span class="p">[</span><span class="n">ranking</span><span class="p">][</span><span class="mi">0</span><span class="p">:</span><span class="mi">10</span><span class="p">]</span>
+</pre></div>
+
+	</div>
+</div>
+</div>
+
+<div class="output_wrapper">
+<div class="output">
+
+
+<div class="output_area">
+
+	<div class="prompt"></div>
+
+
+<div class="output_subarea output_text output_error">
+<pre>
+<span class="ansi-red-fg">---------------------------------------------------------------------------</span>
+<span class="ansi-red-fg">NameError</span>                                 Traceback (most recent call last)
+<span class="ansi-green-fg">&lt;ipython-input-17-be3a37211b2c&gt;</span> in <span class="ansi-cyan-fg">&lt;module&gt;</span>
+<span class="ansi-green-intense-fg ansi-bold">      1</span> <span class="ansi-green-fg">from</span> sklearn<span class="ansi-blue-fg">.</span>feature_selection <span class="ansi-green-fg">import</span> chi2
+<span class="ansi-green-intense-fg ansi-bold">      2</span> labels <span class="ansi-blue-fg">=</span> <span class="ansi-blue-fg">[</span><span class="ansi-blue-fg">]</span>
+<span class="ansi-green-fg">----&gt; 3</span><span class="ansi-red-fg"> </span><span class="ansi-green-fg">for</span> fn <span class="ansi-green-fg">in</span> filenames<span class="ansi-blue-fg">:</span>
+<span class="ansi-green-intense-fg ansi-bold">      4</span>     label <span class="ansi-blue-fg">=</span> <span class="ansi-blue-fg">&#34;Austen&#34;</span> <span class="ansi-green-fg">if</span> <span class="ansi-blue-fg">&#34;Austen&#34;</span> <span class="ansi-green-fg">in</span> fn <span class="ansi-green-fg">else</span> <span class="ansi-blue-fg">&#34;CBrontë&#34;</span>
+<span class="ansi-green-intense-fg ansi-bold">      5</span>     labels<span class="ansi-blue-fg">.</span>append<span class="ansi-blue-fg">(</span>label<span class="ansi-blue-fg">)</span>
+
+<span class="ansi-red-fg">NameError</span>: name &#39;filenames&#39; is not defined</pre>
+</div>
+</div>
+
+</div>
+</div>
+
+</div>
+
+<div class="{} cell border-box-sizing text_cell rendered"><div class="prompt input_prompt">
+</div><div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html">
+<blockquote><p><strong>Note</strong></p>
+<p>Logarithms are expensive. Calculating the log likelihood ratio over
+a vocabulary of 10,000 words will involve taking 40,000 logarithms. The
+$ \chi^2 $ test statistic, by contrast, involves taking the square of
+a quantity the same number of times. On my computer, calculating the
+logarithm takes about twenty times longer than taking the square (simple
+multiplication):</p>
+</blockquote>
+
+</div>
+</div>
+</div>
+
+<div class="{} cell border-box-sizing code_cell rendered">
+<div class="input">
+<div class="prompt input_prompt">In&nbsp;[18]:</div>
+<div class="inner_cell">
+	<div class="input_area">
+<div class=" highlight hl-ipython3"><pre><span></span><span class="kn">import</span> <span class="nn">timeit</span>
+<span class="n">time_log</span> <span class="o">=</span> <span class="n">timeit</span><span class="o">.</span><span class="n">timeit</span><span class="p">(</span><span class="s2">&quot;import numpy as np; np.log(np.arange(40000))&quot;</span><span class="p">,</span> <span class="n">number</span><span class="o">=</span><span class="mi">100</span><span class="p">)</span>
+<span class="n">time_square</span> <span class="o">=</span> <span class="n">timeit</span><span class="o">.</span><span class="n">timeit</span><span class="p">(</span><span class="s2">&quot;import numpy as np; np.square(np.arange(40000))&quot;</span><span class="p">,</span> <span class="n">number</span><span class="o">=</span><span class="mi">100</span><span class="p">)</span>
+<span class="n">time_log</span> <span class="o">/</span> <span class="n">time_square</span>
+</pre></div>
+
+	</div>
+</div>
+</div>
+
+<div class="output_wrapper">
+<div class="output">
+
+
+<div class="output_area">
+
+	<div class="prompt"></div>
+
+
+<div class="output_subarea output_stream output_stderr output_text">
+<pre>/home/hautakivi/.pyenv/versions/3.6.1/lib/python3.6/timeit.py:6: RuntimeWarning: divide by zero encountered in log
+  times.  See also Tim Peters&#39; introduction to the Algorithms chapter in
+</pre>
+</div>
+</div>
+
+<div class="output_area">
+
+	<div class="prompt output_prompt">Out[18]:</div>
+
+
+
+
+<div class="output_text output_subarea output_execute_result">
+<pre>6.888908325055984</pre>
+</div>
+
+</div>
+
+</div>
+</div>
+
+</div>
+
+<div class="{} cell border-box-sizing text_cell rendered"><div class="prompt input_prompt">
+</div><div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html">
+<p><a id='mutual-information'></a></p>
+
+</div>
+</div>
+</div>
+
+<div class="{} cell border-box-sizing text_cell rendered"><div class="prompt input_prompt">
+</div><div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html">
+<h2 id="Mutual-information-feature-selection">Mutual information feature selection<a class="anchor-link" href="#Mutual-information-feature-selection">&#182;</a></h2><p>Feature selection based on mutual information also delivers good results.
+Good introductions to the method can be found in <a href="http://www.stat.cmu.edu/~cshalizi/350/">Cosma Shalizi’s Data Mining
+course</a> (<a href="http://www.stat.cmu.edu/~cshalizi/350/lectures/05/lecture-05.pdf">Finding Informative Features</a>) and in
+<a href="http://www-nlp.stanford.edu/IR-book/html/htmledition/feature-selection-1.html">section 13.5</a>
+in <a href="references.html#manning-introduction-2008">[MRS08]</a>.</p>
+
+</div>
+</div>
+</div>
+
+<div class="{} cell border-box-sizing text_cell rendered"><div class="prompt input_prompt">
+</div><div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html">
+<h2 id="Feature-selection-as-exploratory-data-analysis">Feature selection as exploratory data analysis<a class="anchor-link" href="#Feature-selection-as-exploratory-data-analysis">&#182;</a></h2><p>If nothing else, studying methods of feature selection forces us to think
+critically about what we mean when we say some characteristic is “distinctive”.</p>
+<p>In practice, these methods let us quickly identify features (when they exist)
+that appear more or less often in one group of texts.  As such, these methods
+are useful for dimensionality reduction and exploratory data analysis.  For
+example, if we suspect that there is a meaningful partition of a collection of
+texts, we can use one of the methods described above to pull out features that
+characterize the proposed groups of texts and explore whether those features
+make sense given other information. Or we may be confronted with a massive
+dataset—perhaps all 1-, 2-, and 3-grams in the corpus—and need to reduce the
+space of features so that our analyses can run on a computer with limited
+memory.</p>
+<p>Feature selection needs to be used with care when working with a small number of
+observations and a relatively large number of features—e.g., a corpus with of
+a small number of documents and a very large vocabulary. Feature selection is
+perfectly capable of pulling out features that are characteristic of any
+division of texts.</p>
+<blockquote><p><strong>Note</strong></p>
+<p>The shorthand $ n &lt;&lt; p $ is used to describe situations where
+the number of variables greatly outnumbers the number observations.
+$ n $ is the customary label for the number of observations and
+$ p $ refers to the number of covariates.</p>
+</blockquote>
+<p>A brief demonstration that feature selection “works” as expected can be seen by
+plotting the cosine distance among texts in the corpus before and after feature
+selection is applied. <code>chi2</code> is the feature selection used in the bottom
+figure and the top 50 words are used.</p>
+
+</div>
+</div>
+</div>
+
+<div class="{} cell border-box-sizing text_cell rendered"><div class="prompt input_prompt">
+</div><div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html">
+<h2 id="Exercises">Exercises<a class="anchor-link" href="#Exercises">&#182;</a></h2><ol>
+<li>Using the two groups of texts (Austen and C. Brontë), find the top 40
+characteristic words by the $ \chi^2 $ statistic. Feel free to use
+scikit-learn’s <code>chi2</code>.  </li>
+<li>The following is a random partition of the texts. Find the top 40
+characteristic words by the $ \chi^2 $ statistic. How do these
+compare with those you found in exercise 1?  </li>
+</ol>
+<ol>
+<li>Reconstruct the corpus using only these 40 words. Find the cosine distances
+between pairs of texts and visualize these using multi-dimensional scaling
+(see <a href="working_with_text.html#working-with-text">Working with text</a> for a refresher). Compare this plot to the MDS
+plot of the distances between texts using the full vocabulary.  </li>
+</ol>
+<p><p><a id=fn-lyon href=#fn-lyon-link><strong>[1]</strong></a> Unexpected spikes in word use happen all the time. Word usage in a large corpus
+is notoriously <em>bursty</em> <a href="references.html#church-poisson-1995">[CG95]</a>.
+Consider, for example, ten French novels, one of which is set in Lyon.
+While “Lyon” might appear in all novels, it would appear much (much) more
+frequently in the novel set in the city.]</p>
+<p><p><a id=fn-underwood href=#fn-underwood-link><strong>[2]</strong></a> Ted Underwood has written a <a href="http://tedunderwood.com/2011/11/09/identifying-the-terms-that-characterize-an-author-or-genre-why-dunnings-may-not-be-the-best-method/">blog post discussing some of the
+drawbacks of using the log likelihood and chi-squared test statistic in the
+context of literary studies</a>.]</p>
+
+</div>
+</div>
+</div>
+ 
+
+
+
+
+					</div>
+
+				</div>
+
+			</div>
+
+			<footer class="footer">
+
+				<p>&copy; Copyright <YEAR>, Built using the minimal jupinx template.</p>
+
+			</footer>
+
+		</div>
+
+		<script src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.1/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+		<script src="/_static/js/base.js"></script>
+
+	</body>
+</html>

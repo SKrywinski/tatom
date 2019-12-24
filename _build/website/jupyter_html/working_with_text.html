@@ -1,0 +1,983 @@
+<!doctype html>
+<html lang="en">
+	<head>
+		<meta charset="utf-8">
+
+		<title>Working with text &ndash; Documentation</title>
+
+		<meta name="viewport" content="width=device-width, initial-scale=1">
+		<meta name="author" content="">
+		<meta name="keywords" content="">
+		<meta name="description" content="">
+
+		<link rel="stylesheet" href="/_static/css/base.css">
+
+	</head>
+
+	<body>
+
+		<div class="wrapper">
+
+			<header class="header">
+
+				<div class="branding">
+
+					<p class="site-title"><a href="/">Documentation</a></p>
+
+					<p class="sr-only"><a href="#skip">Skip to content</a></p>
+
+				</div>
+
+				<div class="header-tools">
+
+
+					<div class="header-badge" id="executability_status_badge"></div>
+
+
+				</div>
+
+			</header>
+
+			<div class="main">
+
+				<div class="content">
+
+					<div id="skip"></div>
+
+					<div class="document">
+
+<div class="{} cell border-box-sizing text_cell rendered"><div class="prompt input_prompt">
+</div><div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html">
+<p><a id='index-0'></a></p>
+<p><a id='working-with-text'></a></p>
+
+</div>
+</div>
+</div>
+
+<div class="{} cell border-box-sizing text_cell rendered"><div class="prompt input_prompt">
+</div><div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html">
+<h1 id="Working-with-text">Working with text<a class="anchor-link" href="#Working-with-text">&#182;</a></h1><blockquote><p><strong>Note</strong></p>
+<p>This tutorial is available for interactive use
+with <a href="http://ipython.org/notebook.html">IPython Notebook</a>: &lt;a href=Working with text.ipynb download&gt;Working with text.ipynb&lt;/a&gt;.</p>
+</blockquote>
+
+</div>
+</div>
+</div>
+
+<div class="{} cell border-box-sizing text_cell rendered"><div class="prompt input_prompt">
+</div><div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html">
+<h2 id="Creating-a-document-term-matrix">Creating a document-term matrix<a class="anchor-link" href="#Creating-a-document-term-matrix">&#182;</a></h2><p>Word (or n-gram) frequencies are typical units of analysis when working with
+text collections.  It may come as a surprise that reducing a book to a list of
+word frequencies retains useful information, but practice has shown this to
+be the case. Treating texts as a list of word frequencies (a vector) also makes
+available a vast range of mathematical tools developed for <a href="http://en.wikipedia.org/wiki/Euclidean_vector#History">studying and
+manipulating vectors</a>.</p>
+<blockquote><p><strong>Note</strong></p>
+<p>Turning texts into unordered lists (or “bags”) of words is easy in
+Python.  <a href="http://fbkarsdorp.github.io/python-course/">Python Programming for the Humanities</a> includes a chapter entitled
+<a href="http://nbviewer.ipython.org/urls/raw.github.com/fbkarsdorp/python-course/master/Chapter%203%20-%20Text%20Preprocessing.ipynb">Text Processing</a>
+that describes the steps in detail.</p>
+</blockquote>
+<p>This tutorial assumes some prior exposure to text analysis so we will gather
+word frequencies (or term frequencies) associated with texts into
+a document-term matrix using the <a href="http://scikit-learn.sourceforge.net/dev/modules/generated/sklearn.feature_extraction.text.CountVectorizer.html">CountVectorizer</a>
+class from the <a href="http://scikit-learn.sourceforge.net/">scikit-learn</a> package.
+(For those familiar with R and the <a href="http://cran.r-project.org/web/packages/tm/">tm</a> package, this function performs
+the same operation as <code>DocumentTermMatrix</code> and takes recognizably similar
+arguments.)</p>
+<p>First we need to import the functions and classes we intend to use, along with
+the customary abbreviation for functions in the <code>numpy</code> package.</p>
+
+</div>
+</div>
+</div>
+
+<div class="{} cell border-box-sizing code_cell rendered">
+<div class="input">
+<div class="prompt input_prompt">In&nbsp;[1]:</div>
+<div class="inner_cell">
+	<div class="input_area">
+<div class=" highlight hl-ipython3"><pre><span></span><span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>  <span class="c1"># a conventional alias</span>
+<span class="kn">from</span> <span class="nn">sklearn.feature_extraction.text</span> <span class="kn">import</span> <span class="n">CountVectorizer</span>
+</pre></div>
+
+	</div>
+</div>
+</div>
+
+</div>
+
+<div class="{} cell border-box-sizing text_cell rendered"><div class="prompt input_prompt">
+</div><div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html">
+<p>Now we use the <a href="http://scikit-learn.sourceforge.net/dev/modules/generated/sklearn.feature_extraction.text.CountVectorizer.html">CountVectorizer</a>
+class to create a document-term matrix. <code>CountVectorizer</code> is customizable. For
+example, a list of “stop words” can be specified with the <code>stop_words</code>
+parameter. Other important parameters include:</p>
+<ul>
+<li><code>lowercase</code> (default <code>True</code>) convert all text to lowercase before
+tokenizing  </li>
+<li><code>min_df</code> (default <code>1</code>) remove terms from the vocabulary that occur in
+fewer than <code>min_df</code> documents (in a large corpus this may be set to
+<code>15</code> or higher to eliminate very rare words)  </li>
+<li><code>vocabulary</code> ignore words that do not appear in the provided list of words  </li>
+<li><code>strip_accents</code> remove accents  </li>
+<li><code>token_pattern</code> (default <code>u'(?u)\b\w\w+\b'</code>) regular expression
+identifying tokens–by default words that consist of a single character
+(e.g., ‘a’, ‘2’) are ignored, setting <code>token_pattern</code> to <code>'(?u)\b\w+\b'</code>
+will include these tokens  </li>
+<li><code>tokenizer</code> (default unused) use a custom function for tokenizing  </li>
+</ul>
+<p>For this example we will use texts by Jane Austen and Charlotte Brontë. These
+texts are available in <a href="datasets.html#datasets">Datasets</a>.</p>
+
+</div>
+</div>
+</div>
+
+<div class="{} cell border-box-sizing code_cell rendered">
+<div class="input">
+<div class="prompt input_prompt">In&nbsp;[2]:</div>
+<div class="inner_cell">
+	<div class="input_area">
+<div class=" highlight hl-ipython3"><pre><span></span><span class="n">filenames</span> <span class="o">=</span> <span class="p">[</span><span class="s1">&#39;data/austen-brontë/Austen_Emma.txt&#39;</span><span class="p">,</span>
+             <span class="s1">&#39;data/austen-brontë/Austen_Pride.txt&#39;</span><span class="p">,</span>
+             <span class="s1">&#39;data/austen-brontë/Austen_Sense.txt&#39;</span><span class="p">,</span>
+             <span class="s1">&#39;data/austen-brontë/CBronte_Jane.txt&#39;</span><span class="p">,</span>
+             <span class="s1">&#39;data/austen-brontë/CBronte_Professor.txt&#39;</span><span class="p">,</span>
+             <span class="s1">&#39;data/austen-brontë/CBronte_Villette.txt&#39;</span><span class="p">]</span>
+
+<span class="n">vectorizer</span> <span class="o">=</span> <span class="n">CountVectorizer</span><span class="p">(</span><span class="nb">input</span><span class="o">=</span><span class="s1">&#39;filename&#39;</span><span class="p">)</span>
+<span class="n">dtm</span> <span class="o">=</span> <span class="n">vectorizer</span><span class="o">.</span><span class="n">fit_transform</span><span class="p">(</span><span class="n">filenames</span><span class="p">)</span>  <span class="c1"># a sparse matrix</span>
+<span class="n">vocab</span> <span class="o">=</span> <span class="n">vectorizer</span><span class="o">.</span><span class="n">get_feature_names</span><span class="p">()</span>  <span class="c1"># a list</span>
+</pre></div>
+
+	</div>
+</div>
+</div>
+
+<div class="output_wrapper">
+<div class="output">
+
+
+<div class="output_area">
+
+	<div class="prompt"></div>
+
+
+<div class="output_subarea output_text output_error">
+<pre>
+<span class="ansi-red-fg">---------------------------------------------------------------------------</span>
+<span class="ansi-red-fg">FileNotFoundError</span>                         Traceback (most recent call last)
+<span class="ansi-green-fg">&lt;ipython-input-2-e814b3c4d13b&gt;</span> in <span class="ansi-cyan-fg">&lt;module&gt;</span>
+<span class="ansi-green-intense-fg ansi-bold">      7</span> 
+<span class="ansi-green-intense-fg ansi-bold">      8</span> vectorizer <span class="ansi-blue-fg">=</span> CountVectorizer<span class="ansi-blue-fg">(</span>input<span class="ansi-blue-fg">=</span><span class="ansi-blue-fg">&#39;filename&#39;</span><span class="ansi-blue-fg">)</span>
+<span class="ansi-green-fg">----&gt; 9</span><span class="ansi-red-fg"> </span>dtm <span class="ansi-blue-fg">=</span> vectorizer<span class="ansi-blue-fg">.</span>fit_transform<span class="ansi-blue-fg">(</span>filenames<span class="ansi-blue-fg">)</span>  <span class="ansi-red-fg"># a sparse matrix</span>
+<span class="ansi-green-intense-fg ansi-bold">     10</span> vocab <span class="ansi-blue-fg">=</span> vectorizer<span class="ansi-blue-fg">.</span>get_feature_names<span class="ansi-blue-fg">(</span><span class="ansi-blue-fg">)</span>  <span class="ansi-red-fg"># a list</span>
+
+<span class="ansi-green-fg">~/.local/share/virtualenvs/tatom-zRpuh5iC/lib/python3.6/site-packages/sklearn/feature_extraction/text.py</span> in <span class="ansi-cyan-fg">fit_transform</span><span class="ansi-blue-fg">(self, raw_documents, y)</span>
+<span class="ansi-green-intense-fg ansi-bold">   1218</span> 
+<span class="ansi-green-intense-fg ansi-bold">   1219</span>         vocabulary, X = self._count_vocab(raw_documents,
+<span class="ansi-green-fg">-&gt; 1220</span><span class="ansi-red-fg">                                           self.fixed_vocabulary_)
+</span><span class="ansi-green-intense-fg ansi-bold">   1221</span> 
+<span class="ansi-green-intense-fg ansi-bold">   1222</span>         <span class="ansi-green-fg">if</span> self<span class="ansi-blue-fg">.</span>binary<span class="ansi-blue-fg">:</span>
+
+<span class="ansi-green-fg">~/.local/share/virtualenvs/tatom-zRpuh5iC/lib/python3.6/site-packages/sklearn/feature_extraction/text.py</span> in <span class="ansi-cyan-fg">_count_vocab</span><span class="ansi-blue-fg">(self, raw_documents, fixed_vocab)</span>
+<span class="ansi-green-intense-fg ansi-bold">   1129</span>         <span class="ansi-green-fg">for</span> doc <span class="ansi-green-fg">in</span> raw_documents<span class="ansi-blue-fg">:</span>
+<span class="ansi-green-intense-fg ansi-bold">   1130</span>             feature_counter <span class="ansi-blue-fg">=</span> <span class="ansi-blue-fg">{</span><span class="ansi-blue-fg">}</span>
+<span class="ansi-green-fg">-&gt; 1131</span><span class="ansi-red-fg">             </span><span class="ansi-green-fg">for</span> feature <span class="ansi-green-fg">in</span> analyze<span class="ansi-blue-fg">(</span>doc<span class="ansi-blue-fg">)</span><span class="ansi-blue-fg">:</span>
+<span class="ansi-green-intense-fg ansi-bold">   1132</span>                 <span class="ansi-green-fg">try</span><span class="ansi-blue-fg">:</span>
+<span class="ansi-green-intense-fg ansi-bold">   1133</span>                     feature_idx <span class="ansi-blue-fg">=</span> vocabulary<span class="ansi-blue-fg">[</span>feature<span class="ansi-blue-fg">]</span>
+
+<span class="ansi-green-fg">~/.local/share/virtualenvs/tatom-zRpuh5iC/lib/python3.6/site-packages/sklearn/feature_extraction/text.py</span> in <span class="ansi-cyan-fg">_analyze</span><span class="ansi-blue-fg">(doc, analyzer, tokenizer, ngrams, preprocessor, decoder, stop_words)</span>
+<span class="ansi-green-intense-fg ansi-bold">     96</span> 
+<span class="ansi-green-intense-fg ansi-bold">     97</span>     <span class="ansi-green-fg">if</span> decoder <span class="ansi-green-fg">is</span> <span class="ansi-green-fg">not</span> <span class="ansi-green-fg">None</span><span class="ansi-blue-fg">:</span>
+<span class="ansi-green-fg">---&gt; 98</span><span class="ansi-red-fg">         </span>doc <span class="ansi-blue-fg">=</span> decoder<span class="ansi-blue-fg">(</span>doc<span class="ansi-blue-fg">)</span>
+<span class="ansi-green-intense-fg ansi-bold">     99</span>     <span class="ansi-green-fg">if</span> analyzer <span class="ansi-green-fg">is</span> <span class="ansi-green-fg">not</span> <span class="ansi-green-fg">None</span><span class="ansi-blue-fg">:</span>
+<span class="ansi-green-intense-fg ansi-bold">    100</span>         doc <span class="ansi-blue-fg">=</span> analyzer<span class="ansi-blue-fg">(</span>doc<span class="ansi-blue-fg">)</span>
+
+<span class="ansi-green-fg">~/.local/share/virtualenvs/tatom-zRpuh5iC/lib/python3.6/site-packages/sklearn/feature_extraction/text.py</span> in <span class="ansi-cyan-fg">decode</span><span class="ansi-blue-fg">(self, doc)</span>
+<span class="ansi-green-intense-fg ansi-bold">    206</span>         &#34;&#34;&#34;
+<span class="ansi-green-intense-fg ansi-bold">    207</span>         <span class="ansi-green-fg">if</span> self<span class="ansi-blue-fg">.</span>input <span class="ansi-blue-fg">==</span> <span class="ansi-blue-fg">&#39;filename&#39;</span><span class="ansi-blue-fg">:</span>
+<span class="ansi-green-fg">--&gt; 208</span><span class="ansi-red-fg">             </span><span class="ansi-green-fg">with</span> open<span class="ansi-blue-fg">(</span>doc<span class="ansi-blue-fg">,</span> <span class="ansi-blue-fg">&#39;rb&#39;</span><span class="ansi-blue-fg">)</span> <span class="ansi-green-fg">as</span> fh<span class="ansi-blue-fg">:</span>
+<span class="ansi-green-intense-fg ansi-bold">    209</span>                 doc <span class="ansi-blue-fg">=</span> fh<span class="ansi-blue-fg">.</span>read<span class="ansi-blue-fg">(</span><span class="ansi-blue-fg">)</span>
+<span class="ansi-green-intense-fg ansi-bold">    210</span> 
+
+<span class="ansi-red-fg">FileNotFoundError</span>: [Errno 2] No such file or directory: &#39;data/austen-brontë/Austen_Emma.txt&#39;</pre>
+</div>
+</div>
+
+</div>
+</div>
+
+</div>
+
+<div class="{} cell border-box-sizing text_cell rendered"><div class="prompt input_prompt">
+</div><div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html">
+<p>Now we have a document-term matrix and a vocabulary list. Before we can query
+the matrix and find out, for example, how many times the word ‘house’ occurs in
+<em>Emma</em> (the first text in <code>filenames</code>), we need to convert this matrix from
+its current format, a <a href="http://docs.scipy.org/doc/scipy/reference/sparse.html">sparse matrix</a>, into a normal NumPy
+array. We will also convert the Python list storing our vocabulary, <code>vocab</code>,
+into a NumPy array, as an array supports a greater variety of operations than
+a list.</p>
+
+</div>
+</div>
+</div>
+
+<div class="{} cell border-box-sizing code_cell rendered">
+<div class="input">
+<div class="prompt input_prompt">In&nbsp;[3]:</div>
+<div class="inner_cell">
+	<div class="input_area">
+<div class=" highlight hl-ipython3"><pre><span></span><span class="c1"># for reference, note the current class of `dtm`</span>
+<span class="nb">type</span><span class="p">(</span><span class="n">dtm</span><span class="p">)</span>
+<span class="n">dtm</span> <span class="o">=</span> <span class="n">dtm</span><span class="o">.</span><span class="n">toarray</span><span class="p">()</span>  <span class="c1"># convert to a regular array</span>
+<span class="n">vocab</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">vocab</span><span class="p">)</span>
+</pre></div>
+
+	</div>
+</div>
+</div>
+
+<div class="output_wrapper">
+<div class="output">
+
+
+<div class="output_area">
+
+	<div class="prompt"></div>
+
+
+<div class="output_subarea output_text output_error">
+<pre>
+<span class="ansi-red-fg">---------------------------------------------------------------------------</span>
+<span class="ansi-red-fg">NameError</span>                                 Traceback (most recent call last)
+<span class="ansi-green-fg">&lt;ipython-input-3-bea04dd6e074&gt;</span> in <span class="ansi-cyan-fg">&lt;module&gt;</span>
+<span class="ansi-green-intense-fg ansi-bold">      1</span> <span class="ansi-red-fg"># for reference, note the current class of `dtm`</span>
+<span class="ansi-green-fg">----&gt; 2</span><span class="ansi-red-fg"> </span>type<span class="ansi-blue-fg">(</span>dtm<span class="ansi-blue-fg">)</span>
+<span class="ansi-green-intense-fg ansi-bold">      3</span> dtm <span class="ansi-blue-fg">=</span> dtm<span class="ansi-blue-fg">.</span>toarray<span class="ansi-blue-fg">(</span><span class="ansi-blue-fg">)</span>  <span class="ansi-red-fg"># convert to a regular array</span>
+<span class="ansi-green-intense-fg ansi-bold">      4</span> vocab <span class="ansi-blue-fg">=</span> np<span class="ansi-blue-fg">.</span>array<span class="ansi-blue-fg">(</span>vocab<span class="ansi-blue-fg">)</span>
+
+<span class="ansi-red-fg">NameError</span>: name &#39;dtm&#39; is not defined</pre>
+</div>
+</div>
+
+</div>
+</div>
+
+</div>
+
+<div class="{} cell border-box-sizing text_cell rendered"><div class="prompt input_prompt">
+</div><div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html">
+<blockquote><p><strong>Note</strong></p>
+<p>A sparse matrix only records non-zero entries and is used to store
+matrices that contain a significant number of entries that are zero. To
+understand why this matters enough that <code>CountVectorizer</code> returns a sparse
+matrix by default, consider a 4000 by 50000 matrix of word frequencies that
+is 60% zeros. In Python an integer takes up four bytes, so using a sparse
+matrix saves almost 500M of memory, which is a considerable amount of
+computer memory in the 2010s. (Recall that Python objects such as arrays are stored in
+memory, not on disk). If you are working with a very large collection
+of texts, you may encounter memory errors after issuing the commands above.
+Provided your corpus is not truly massive, it may be advisable to locate
+a machine with a greater amount of memory. For example, these days it is possible to
+rent a machine with 64G of memory by the hour. Conducting experiments
+on a random subsample (small enough to fit into memory) is also recommended.</p>
+</blockquote>
+<p>With this preparatory work behind us, querying the document-term matrix is
+simple. For example, the following demonstrate two ways finding how many times
+the word ‘house’ occurs in the first text, <em>Emma</em>:</p>
+
+</div>
+</div>
+</div>
+
+<div class="{} cell border-box-sizing code_cell rendered">
+<div class="input">
+<div class="prompt input_prompt">In&nbsp;[4]:</div>
+<div class="inner_cell">
+	<div class="input_area">
+<div class=" highlight hl-ipython3"><pre><span></span><span class="c1"># the first file, indexed by 0 in Python, is *Emma*</span>
+<span class="n">filenames</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">==</span> <span class="s1">&#39;data/austen-brontë/Austen_Emma.txt&#39;</span>
+
+<span class="c1"># use the standard Python list method index(...)</span>
+<span class="c1"># list(vocab) or vocab.tolist() will take vocab (an array) and return a list</span>
+<span class="n">house_idx</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="n">vocab</span><span class="p">)</span><span class="o">.</span><span class="n">index</span><span class="p">(</span><span class="s1">&#39;house&#39;</span><span class="p">)</span>
+<span class="n">dtm</span><span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="n">house_idx</span><span class="p">]</span>
+
+<span class="c1"># using NumPy indexing will be more natural for many</span>
+<span class="c1"># in R this would be essentially the same, dtm[1, vocab == &#39;house&#39;]</span>
+<span class="n">dtm</span><span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="n">vocab</span> <span class="o">==</span> <span class="s1">&#39;house&#39;</span><span class="p">]</span>
+</pre></div>
+
+	</div>
+</div>
+</div>
+
+<div class="output_wrapper">
+<div class="output">
+
+
+<div class="output_area">
+
+	<div class="prompt"></div>
+
+
+<div class="output_subarea output_text output_error">
+<pre>
+<span class="ansi-red-fg">---------------------------------------------------------------------------</span>
+<span class="ansi-red-fg">NameError</span>                                 Traceback (most recent call last)
+<span class="ansi-green-fg">&lt;ipython-input-4-29dad2bbfac6&gt;</span> in <span class="ansi-cyan-fg">&lt;module&gt;</span>
+<span class="ansi-green-intense-fg ansi-bold">      4</span> <span class="ansi-red-fg"># use the standard Python list method index(...)</span>
+<span class="ansi-green-intense-fg ansi-bold">      5</span> <span class="ansi-red-fg"># list(vocab) or vocab.tolist() will take vocab (an array) and return a list</span>
+<span class="ansi-green-fg">----&gt; 6</span><span class="ansi-red-fg"> </span>house_idx <span class="ansi-blue-fg">=</span> list<span class="ansi-blue-fg">(</span>vocab<span class="ansi-blue-fg">)</span><span class="ansi-blue-fg">.</span>index<span class="ansi-blue-fg">(</span><span class="ansi-blue-fg">&#39;house&#39;</span><span class="ansi-blue-fg">)</span>
+<span class="ansi-green-intense-fg ansi-bold">      7</span> dtm<span class="ansi-blue-fg">[</span><span class="ansi-cyan-fg">0</span><span class="ansi-blue-fg">,</span> house_idx<span class="ansi-blue-fg">]</span>
+<span class="ansi-green-intense-fg ansi-bold">      8</span> 
+
+<span class="ansi-red-fg">NameError</span>: name &#39;vocab&#39; is not defined</pre>
+</div>
+</div>
+
+</div>
+</div>
+
+</div>
+
+<div class="{} cell border-box-sizing text_cell rendered"><div class="prompt input_prompt">
+</div><div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html">
+<p>Although dtm is technically a NumPy array, I will keep referring to dtm as
+a matrix. Note that NumPy arrays do support matrix operations such as dot
+product. (If <code>X</code> and <code>Y</code> have compatible dimensions, <code>X.dot(Y)</code> is the
+matrix product $ XY $.)</p>
+<blockquote><p><strong>Note</strong></p>
+<p>NumPy does make available a <a href="http://docs.scipy.org/doc/numpy/reference/generated/numpy.matrix.html">matrix</a>
+data structure which can be useful if you are doing lots of matrix
+operations such as matrix product, inverse, and so forth. In general,
+however, it is best to stick to NumPy arrays. In fact, if you are
+using Python 3.5 you can make use of the matrix multiplication operator <code>@</code>
+and dispense with any need for the <code>matrix</code> type.</p>
+</blockquote>
+<p>Just so we have a sense of what we have just created, here is a section of the
+document-term matrix for a handful of selected words:</p>
+
+</div>
+</div>
+</div>
+
+<div class="{} cell border-box-sizing text_cell rendered"><div class="prompt input_prompt">
+</div><div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html">
+<h2 id="Comparing-texts">Comparing texts<a class="anchor-link" href="#Comparing-texts">&#182;</a></h2><p>Arranging our texts in a document-term matrix make available a range of
+exploratory procedures. For example, calculating a measure of similarity between
+texts becomes simple. Since each row of the document-term matrix is a sequence
+of a novel’s word frequencies, it is possible to put mathematical notions of
+similarity (or distance) between sequences of numbers in service of calculating
+the similarity (or distnace) between any two novels. One frequently used measure
+of distance between vectors (a measure easily converted into a measure of similarity) is <a href="https://en.wikipedia.org/wiki/Euclidean_distance">Euclidean
+distance</a>. The Euclidean
+distance between two vectors in the plane should be familiar from geometry, as
+it is the length of the hypotenuse that joins the two vectors. For instance,
+consider the Euclidean distance between the vectors $ \vec{x} = (1, 3) $ and
+$ \vec{y} = (4, 2) $. The distance between the two vectors is
+$ \sqrt{(1-4)^2 + (3-2)^2} = \sqrt{10} $.</p>
+<blockquote><p><strong>Note</strong></p>
+<p>Measures of distance can be converted into measures of similarity. If your
+measures of distance are all between zero and one, then a measure of
+similarity could be one minus the distance. (The inverse of the distance
+would also serve as a measure of similarity.)</p>
+</blockquote>
+<p>Distance between two vectors&gt;<strong>Note</strong>
+&gt;</p>
+<blockquote><p>More generally, given two vectors $ \vec{x} $ and $ \vec{y} $
+in $ p $-dimensional space,  the Euclidean distance between the two
+vectors is given by</p>
+</blockquote>
+<p>$ ||\vec{x} - \vec{y}|| = \sqrt{\sum_{i=1}^p (x_i - y_i)^2} $</p>
+<p>This concept of distance is not restricted to two dimensions. For example, it is
+not difficult to imagine the figure above translated into three dimensions. We can also persuade ourselves that the measure of distance extends to an arbitrary number of dimensions; for any two matched components in a pair of vectors (such as $ x_2 $ and $ y_2 $), differences increase the distance.</p>
+<p>Since two novels in our corpus now have an expression as vectors, we can
+calculate the Euclidean distance between them. We can do this by hand or we can
+avail ourselves of the <code>scikit-learn</code> function <code>euclidean_distances</code>.</p>
+
+</div>
+</div>
+</div>
+
+<div class="{} cell border-box-sizing code_cell rendered">
+<div class="input">
+<div class="prompt input_prompt">In&nbsp;[5]:</div>
+<div class="inner_cell">
+	<div class="input_area">
+<div class=" highlight hl-ipython3"><pre><span></span><span class="c1"># &quot;by hand&quot;</span>
+<span class="n">n</span><span class="p">,</span> <span class="n">_</span> <span class="o">=</span> <span class="n">dtm</span><span class="o">.</span><span class="n">shape</span>
+<span class="n">dist</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">((</span><span class="n">n</span><span class="p">,</span> <span class="n">n</span><span class="p">))</span>
+<span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">n</span><span class="p">):</span>
+    <span class="k">for</span> <span class="n">j</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">n</span><span class="p">):</span>
+        <span class="n">x</span><span class="p">,</span> <span class="n">y</span> <span class="o">=</span> <span class="n">dtm</span><span class="p">[</span><span class="n">i</span><span class="p">,</span> <span class="p">:],</span> <span class="n">dtm</span><span class="p">[</span><span class="n">j</span><span class="p">,</span> <span class="p">:]</span>
+        <span class="n">dist</span><span class="p">[</span><span class="n">i</span><span class="p">,</span> <span class="n">j</span><span class="p">]</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">sqrt</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">sum</span><span class="p">((</span><span class="n">x</span> <span class="o">-</span> <span class="n">y</span><span class="p">)</span><span class="o">**</span><span class="mi">2</span><span class="p">))</span>
+
+<span class="kn">from</span> <span class="nn">sklearn.metrics.pairwise</span> <span class="kn">import</span> <span class="n">euclidean_distances</span>
+<span class="n">dist</span> <span class="o">=</span> <span class="n">euclidean_distances</span><span class="p">(</span><span class="n">dtm</span><span class="p">)</span>
+
+<span class="n">np</span><span class="o">.</span><span class="n">round</span><span class="p">(</span><span class="n">dist</span><span class="p">,</span> <span class="mi">1</span><span class="p">)</span>
+<span class="c1"># *Pride and Prejudice* is index 1 and *Jane Eyre* is index 3</span>
+<span class="n">filenames</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">==</span> <span class="s1">&#39;data/austen-brontë/Austen_Pride.txt&#39;</span>
+<span class="n">filenames</span><span class="p">[</span><span class="mi">3</span><span class="p">]</span> <span class="o">==</span> <span class="s1">&#39;data/austen-brontë/CBronte_Jane.txt&#39;</span>
+
+<span class="c1"># the distance between *Pride and Prejudice* and *Jane Eyre*</span>
+<span class="n">dist</span><span class="p">[</span><span class="mi">1</span><span class="p">,</span> <span class="mi">3</span><span class="p">]</span>
+
+<span class="c1"># which is greater than the distance between *Jane Eyre* and *Villette* (index 5)</span>
+<span class="n">dist</span><span class="p">[</span><span class="mi">1</span><span class="p">,</span> <span class="mi">3</span><span class="p">]</span> <span class="o">&gt;</span> <span class="n">dist</span><span class="p">[</span><span class="mi">3</span><span class="p">,</span> <span class="mi">5</span><span class="p">]</span>
+
+<span class="nd">@suppress</span>
+<span class="k">assert</span> <span class="n">dist</span><span class="p">[</span><span class="mi">1</span><span class="p">,</span> <span class="mi">3</span><span class="p">]</span> <span class="o">&gt;</span> <span class="n">dist</span><span class="p">[</span><span class="mi">3</span><span class="p">,</span> <span class="mi">5</span><span class="p">]</span>
+</pre></div>
+
+	</div>
+</div>
+</div>
+
+<div class="output_wrapper">
+<div class="output">
+
+
+<div class="output_area">
+
+	<div class="prompt"></div>
+
+
+<div class="output_subarea output_text output_error">
+<pre>
+<span class="ansi-cyan-fg">  File </span><span class="ansi-green-fg">&#34;&lt;ipython-input-5-3d11adc2f691&gt;&#34;</span><span class="ansi-cyan-fg">, line </span><span class="ansi-green-fg">24</span>
+<span class="ansi-red-fg">    assert dist[1, 3] &gt; dist[3, 5]</span>
+         ^
+<span class="ansi-red-fg">SyntaxError</span><span class="ansi-red-fg">:</span> invalid syntax
+</pre>
+</div>
+</div>
+
+</div>
+</div>
+
+</div>
+
+<div class="{} cell border-box-sizing text_cell rendered"><div class="prompt input_prompt">
+</div><div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html">
+<p>And if we want to use a measure of distance that takes into consideration the
+length of the novels (an excellent idea), we can calculate the <a href="http://www.gettingcirrius.com/2010/12/calculating-similarity-part-1-cosine.html">cosine
+similarity</a>
+by importing <code>sklearn.metrics.pairwise.cosine_similarity</code> and use it in place
+of euclidean_distances.</p>
+<p>Keep in mind that cosine similarity is a measure of similarity (rather than
+distance) that ranges between 0 and 1 (as it is the cosine of the angle between
+the two vectors).  In order to get a measure of distance (or dissimilarity), we
+need to “flip” the measure so that a larger angle receives a larger value. The
+distance measure derived from cosine similarity is therefore one minus the
+cosine similarity between two vectors.</p>
+
+</div>
+</div>
+</div>
+
+<div class="{} cell border-box-sizing code_cell rendered">
+<div class="input">
+<div class="prompt input_prompt">In&nbsp;[6]:</div>
+<div class="inner_cell">
+	<div class="input_area">
+<div class=" highlight hl-ipython3"><pre><span></span><span class="kn">from</span> <span class="nn">sklearn.metrics.pairwise</span> <span class="kn">import</span> <span class="n">cosine_similarity</span>
+<span class="n">dist</span> <span class="o">=</span> <span class="mi">1</span> <span class="o">-</span> <span class="n">cosine_similarity</span><span class="p">(</span><span class="n">dtm</span><span class="p">)</span>
+<span class="n">np</span><span class="o">.</span><span class="n">round</span><span class="p">(</span><span class="n">dist</span><span class="p">,</span> <span class="mi">2</span><span class="p">)</span>
+
+<span class="c1"># the distance between *Pride and Prejudice* (index 1)</span>
+<span class="c1"># and *Jane Eyre* (index 3) is</span>
+<span class="n">dist</span><span class="p">[</span><span class="mi">1</span><span class="p">,</span> <span class="mi">3</span><span class="p">]</span>
+
+<span class="c1"># which is greater than the distance between *Jane Eyre* and</span>
+<span class="c1"># *Villette* (index 5)</span>
+<span class="n">dist</span><span class="p">[</span><span class="mi">1</span><span class="p">,</span> <span class="mi">3</span><span class="p">]</span> <span class="o">&gt;</span> <span class="n">dist</span><span class="p">[</span><span class="mi">3</span><span class="p">,</span> <span class="mi">5</span><span class="p">]</span>
+</pre></div>
+
+	</div>
+</div>
+</div>
+
+<div class="output_wrapper">
+<div class="output">
+
+
+<div class="output_area">
+
+	<div class="prompt"></div>
+
+
+<div class="output_subarea output_text output_error">
+<pre>
+<span class="ansi-red-fg">---------------------------------------------------------------------------</span>
+<span class="ansi-red-fg">NameError</span>                                 Traceback (most recent call last)
+<span class="ansi-green-fg">&lt;ipython-input-6-1fe7bede93fa&gt;</span> in <span class="ansi-cyan-fg">&lt;module&gt;</span>
+<span class="ansi-green-intense-fg ansi-bold">      1</span> <span class="ansi-green-fg">from</span> sklearn<span class="ansi-blue-fg">.</span>metrics<span class="ansi-blue-fg">.</span>pairwise <span class="ansi-green-fg">import</span> cosine_similarity
+<span class="ansi-green-fg">----&gt; 2</span><span class="ansi-red-fg"> </span>dist <span class="ansi-blue-fg">=</span> <span class="ansi-cyan-fg">1</span> <span class="ansi-blue-fg">-</span> cosine_similarity<span class="ansi-blue-fg">(</span>dtm<span class="ansi-blue-fg">)</span>
+<span class="ansi-green-intense-fg ansi-bold">      3</span> np<span class="ansi-blue-fg">.</span>round<span class="ansi-blue-fg">(</span>dist<span class="ansi-blue-fg">,</span> <span class="ansi-cyan-fg">2</span><span class="ansi-blue-fg">)</span>
+<span class="ansi-green-intense-fg ansi-bold">      4</span> 
+<span class="ansi-green-intense-fg ansi-bold">      5</span> <span class="ansi-red-fg"># the distance between *Pride and Prejudice* (index 1)</span>
+
+<span class="ansi-red-fg">NameError</span>: name &#39;dtm&#39; is not defined</pre>
+</div>
+</div>
+
+</div>
+</div>
+
+</div>
+
+<div class="{} cell border-box-sizing text_cell rendered"><div class="prompt input_prompt">
+</div><div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html">
+<p>Those interested in doing the calculation for themselves can use the following
+steps:</p>
+
+</div>
+</div>
+</div>
+
+<div class="{} cell border-box-sizing code_cell rendered">
+<div class="input">
+<div class="prompt input_prompt">In&nbsp;[7]:</div>
+<div class="inner_cell">
+	<div class="input_area">
+<div class=" highlight hl-ipython3"><pre><span></span><span class="n">norms</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">sqrt</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">dtm</span> <span class="o">*</span> <span class="n">dtm</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">keepdims</span><span class="o">=</span><span class="kc">True</span><span class="p">))</span>  <span class="c1"># multiplication between arrays is element-wise</span>
+<span class="n">dtm_normed</span> <span class="o">=</span> <span class="n">dtm</span> <span class="o">/</span> <span class="n">norms</span>
+<span class="n">similarities</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">dot</span><span class="p">(</span><span class="n">dtm_normed</span><span class="p">,</span> <span class="n">dtm_normed</span><span class="o">.</span><span class="n">T</span><span class="p">)</span>
+<span class="n">np</span><span class="o">.</span><span class="n">round</span><span class="p">(</span><span class="n">similarities</span><span class="p">,</span> <span class="mi">2</span><span class="p">)</span>
+<span class="c1"># similarities between *Pride and Prejudice* and *Jane Eyre* is</span>
+<span class="n">similarities</span><span class="p">[</span><span class="mi">1</span><span class="p">,</span> <span class="mi">3</span><span class="p">]</span>
+</pre></div>
+
+	</div>
+</div>
+</div>
+
+<div class="output_wrapper">
+<div class="output">
+
+
+<div class="output_area">
+
+	<div class="prompt"></div>
+
+
+<div class="output_subarea output_text output_error">
+<pre>
+<span class="ansi-red-fg">---------------------------------------------------------------------------</span>
+<span class="ansi-red-fg">NameError</span>                                 Traceback (most recent call last)
+<span class="ansi-green-fg">&lt;ipython-input-7-5cda9343d2d4&gt;</span> in <span class="ansi-cyan-fg">&lt;module&gt;</span>
+<span class="ansi-green-fg">----&gt; 1</span><span class="ansi-red-fg"> </span>norms <span class="ansi-blue-fg">=</span> np<span class="ansi-blue-fg">.</span>sqrt<span class="ansi-blue-fg">(</span>np<span class="ansi-blue-fg">.</span>sum<span class="ansi-blue-fg">(</span>dtm <span class="ansi-blue-fg">*</span> dtm<span class="ansi-blue-fg">,</span> axis<span class="ansi-blue-fg">=</span><span class="ansi-cyan-fg">1</span><span class="ansi-blue-fg">,</span> keepdims<span class="ansi-blue-fg">=</span><span class="ansi-green-fg">True</span><span class="ansi-blue-fg">)</span><span class="ansi-blue-fg">)</span>  <span class="ansi-red-fg"># multiplication between arrays is element-wise</span>
+<span class="ansi-green-intense-fg ansi-bold">      2</span> dtm_normed <span class="ansi-blue-fg">=</span> dtm <span class="ansi-blue-fg">/</span> norms
+<span class="ansi-green-intense-fg ansi-bold">      3</span> similarities <span class="ansi-blue-fg">=</span> np<span class="ansi-blue-fg">.</span>dot<span class="ansi-blue-fg">(</span>dtm_normed<span class="ansi-blue-fg">,</span> dtm_normed<span class="ansi-blue-fg">.</span>T<span class="ansi-blue-fg">)</span>
+<span class="ansi-green-intense-fg ansi-bold">      4</span> np<span class="ansi-blue-fg">.</span>round<span class="ansi-blue-fg">(</span>similarities<span class="ansi-blue-fg">,</span> <span class="ansi-cyan-fg">2</span><span class="ansi-blue-fg">)</span>
+<span class="ansi-green-intense-fg ansi-bold">      5</span> <span class="ansi-red-fg"># similarities between *Pride and Prejudice* and *Jane Eyre* is</span>
+
+<span class="ansi-red-fg">NameError</span>: name &#39;dtm&#39; is not defined</pre>
+</div>
+</div>
+
+</div>
+</div>
+
+</div>
+
+<div class="{} cell border-box-sizing text_cell rendered"><div class="prompt input_prompt">
+</div><div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html">
+<h2 id="Visualizing-distances">Visualizing distances<a class="anchor-link" href="#Visualizing-distances">&#182;</a></h2><p>It is often desirable to visualize the pairwise distances between our texts.
+A general approach to visualizing distances is to assign a point in a plane to
+each text, making sure that the distance between points is proportional to the
+pairwise distances we calculated. This kind of visualization is common enough
+that it has a name, “<a href="https://en.wikipedia.org/wiki/Multidimensional_scaling">multidimensional scaling</a>” (MDS) and family of
+functions in <code>scikit-learn</code> (and R too, see <code>mdscale</code>).</p>
+
+</div>
+</div>
+</div>
+
+<div class="{} cell border-box-sizing code_cell rendered">
+<div class="input">
+<div class="prompt input_prompt">In&nbsp;[8]:</div>
+<div class="inner_cell">
+	<div class="input_area">
+<div class=" highlight hl-ipython3"><pre><span></span><span class="kn">import</span> <span class="nn">os</span>  <span class="c1"># for os.path.basename</span>
+<span class="kn">import</span> <span class="nn">matplotlib.pyplot</span> <span class="k">as</span> <span class="nn">plt</span>
+<span class="kn">from</span> <span class="nn">sklearn.manifold</span> <span class="kn">import</span> <span class="n">MDS</span>
+
+<span class="c1"># two components as we&#39;re plotting points in a two-dimensional plane</span>
+<span class="c1"># &quot;precomputed&quot; because we provide a distance matrix</span>
+<span class="c1"># we will also specify `random_state` so the plot is reproducible.</span>
+<span class="n">mds</span> <span class="o">=</span> <span class="n">MDS</span><span class="p">(</span><span class="n">n_components</span><span class="o">=</span><span class="mi">2</span><span class="p">,</span> <span class="n">dissimilarity</span><span class="o">=</span><span class="s2">&quot;precomputed&quot;</span><span class="p">,</span> <span class="n">random_state</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
+<span class="n">pos</span> <span class="o">=</span> <span class="n">mds</span><span class="o">.</span><span class="n">fit_transform</span><span class="p">(</span><span class="n">dist</span><span class="p">)</span>  <span class="c1"># shape (n_components, n_samples)</span>
+</pre></div>
+
+	</div>
+</div>
+</div>
+
+<div class="output_wrapper">
+<div class="output">
+
+
+<div class="output_area">
+
+	<div class="prompt"></div>
+
+
+<div class="output_subarea output_text output_error">
+<pre>
+<span class="ansi-red-fg">---------------------------------------------------------------------------</span>
+<span class="ansi-red-fg">NameError</span>                                 Traceback (most recent call last)
+<span class="ansi-green-fg">&lt;ipython-input-8-41b173de1d7c&gt;</span> in <span class="ansi-cyan-fg">&lt;module&gt;</span>
+<span class="ansi-green-intense-fg ansi-bold">      7</span> <span class="ansi-red-fg"># we will also specify `random_state` so the plot is reproducible.</span>
+<span class="ansi-green-intense-fg ansi-bold">      8</span> mds <span class="ansi-blue-fg">=</span> MDS<span class="ansi-blue-fg">(</span>n_components<span class="ansi-blue-fg">=</span><span class="ansi-cyan-fg">2</span><span class="ansi-blue-fg">,</span> dissimilarity<span class="ansi-blue-fg">=</span><span class="ansi-blue-fg">&#34;precomputed&#34;</span><span class="ansi-blue-fg">,</span> random_state<span class="ansi-blue-fg">=</span><span class="ansi-cyan-fg">1</span><span class="ansi-blue-fg">)</span>
+<span class="ansi-green-fg">----&gt; 9</span><span class="ansi-red-fg"> </span>pos <span class="ansi-blue-fg">=</span> mds<span class="ansi-blue-fg">.</span>fit_transform<span class="ansi-blue-fg">(</span>dist<span class="ansi-blue-fg">)</span>  <span class="ansi-red-fg"># shape (n_components, n_samples)</span>
+
+<span class="ansi-red-fg">NameError</span>: name &#39;dist&#39; is not defined</pre>
+</div>
+</div>
+
+</div>
+</div>
+
+</div>
+
+<div class="{} cell border-box-sizing code_cell rendered">
+<div class="input">
+<div class="prompt input_prompt">In&nbsp;[9]:</div>
+<div class="inner_cell">
+	<div class="input_area">
+<div class=" highlight hl-ipython3"><pre><span></span><span class="n">xs</span><span class="p">,</span> <span class="n">ys</span> <span class="o">=</span> <span class="n">pos</span><span class="p">[:,</span> <span class="mi">0</span><span class="p">],</span> <span class="n">pos</span><span class="p">[:,</span> <span class="mi">1</span><span class="p">]</span>
+<span class="c1"># short versions of filenames:</span>
+<span class="c1"># convert &#39;data/austen-brontë/Austen_Emma.txt&#39; to &#39;Austen_Emma&#39;</span>
+<span class="n">names</span> <span class="o">=</span> <span class="p">[</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">basename</span><span class="p">(</span><span class="n">fn</span><span class="p">)</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s1">&#39;.txt&#39;</span><span class="p">,</span> <span class="s1">&#39;&#39;</span><span class="p">)</span> <span class="k">for</span> <span class="n">fn</span> <span class="ow">in</span> <span class="n">filenames</span><span class="p">]</span>
+<span class="c1"># color-blind-friendly palette</span>
+<span class="k">for</span> <span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="n">name</span> <span class="ow">in</span> <span class="nb">zip</span><span class="p">(</span><span class="n">xs</span><span class="p">,</span> <span class="n">ys</span><span class="p">,</span> <span class="n">names</span><span class="p">):</span>
+    <span class="n">color</span> <span class="o">=</span> <span class="s1">&#39;orange&#39;</span> <span class="k">if</span> <span class="s2">&quot;Austen&quot;</span> <span class="ow">in</span> <span class="n">name</span> <span class="k">else</span> <span class="s1">&#39;skyblue&#39;</span>
+    <span class="n">plt</span><span class="o">.</span><span class="n">scatter</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="n">c</span><span class="o">=</span><span class="n">color</span><span class="p">)</span>
+    <span class="n">plt</span><span class="o">.</span><span class="n">text</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="n">name</span><span class="p">)</span>
+
+<span class="nd">@suppress</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">tight_layout</span><span class="p">()</span>
+
+<span class="nd">@savefig</span> <span class="n">plot_getting_started_cosine_mds</span><span class="o">.</span><span class="n">png</span> <span class="n">width</span><span class="o">=</span><span class="mi">8</span><span class="ow">in</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">show</span><span class="p">()</span>
+</pre></div>
+
+	</div>
+</div>
+</div>
+
+<div class="output_wrapper">
+<div class="output">
+
+
+<div class="output_area">
+
+	<div class="prompt"></div>
+
+
+<div class="output_subarea output_text output_error">
+<pre>
+<span class="ansi-cyan-fg">  File </span><span class="ansi-green-fg">&#34;&lt;ipython-input-9-b6617877985b&gt;&#34;</span><span class="ansi-cyan-fg">, line </span><span class="ansi-green-fg">12</span>
+<span class="ansi-red-fg">    plt.tight_layout()</span>
+      ^
+<span class="ansi-red-fg">SyntaxError</span><span class="ansi-red-fg">:</span> invalid syntax
+</pre>
+</div>
+</div>
+
+</div>
+</div>
+
+</div>
+
+<div class="{} cell border-box-sizing text_cell rendered"><div class="prompt input_prompt">
+</div><div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html">
+<p>We can also do MDS in three dimensions:</p>
+
+</div>
+</div>
+</div>
+
+<div class="{} cell border-box-sizing code_cell rendered">
+<div class="input">
+<div class="prompt input_prompt">In&nbsp;[10]:</div>
+<div class="inner_cell">
+	<div class="input_area">
+<div class=" highlight hl-ipython3"><pre><span></span><span class="c1"># après Jeremy M. Stober, Tim Vieira</span>
+<span class="c1"># https://github.com/timvieira/viz/blob/master/mds.py</span>
+
+<span class="n">mds</span> <span class="o">=</span> <span class="n">MDS</span><span class="p">(</span><span class="n">n_components</span><span class="o">=</span><span class="mi">3</span><span class="p">,</span> <span class="n">dissimilarity</span><span class="o">=</span><span class="s2">&quot;precomputed&quot;</span><span class="p">,</span> <span class="n">random_state</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
+<span class="n">pos</span> <span class="o">=</span> <span class="n">mds</span><span class="o">.</span><span class="n">fit_transform</span><span class="p">(</span><span class="n">dist</span><span class="p">)</span>
+</pre></div>
+
+	</div>
+</div>
+</div>
+
+<div class="output_wrapper">
+<div class="output">
+
+
+<div class="output_area">
+
+	<div class="prompt"></div>
+
+
+<div class="output_subarea output_text output_error">
+<pre>
+<span class="ansi-red-fg">---------------------------------------------------------------------------</span>
+<span class="ansi-red-fg">NameError</span>                                 Traceback (most recent call last)
+<span class="ansi-green-fg">&lt;ipython-input-10-ec70c70047b6&gt;</span> in <span class="ansi-cyan-fg">&lt;module&gt;</span>
+<span class="ansi-green-intense-fg ansi-bold">      3</span> 
+<span class="ansi-green-intense-fg ansi-bold">      4</span> mds <span class="ansi-blue-fg">=</span> MDS<span class="ansi-blue-fg">(</span>n_components<span class="ansi-blue-fg">=</span><span class="ansi-cyan-fg">3</span><span class="ansi-blue-fg">,</span> dissimilarity<span class="ansi-blue-fg">=</span><span class="ansi-blue-fg">&#34;precomputed&#34;</span><span class="ansi-blue-fg">,</span> random_state<span class="ansi-blue-fg">=</span><span class="ansi-cyan-fg">1</span><span class="ansi-blue-fg">)</span>
+<span class="ansi-green-fg">----&gt; 5</span><span class="ansi-red-fg"> </span>pos <span class="ansi-blue-fg">=</span> mds<span class="ansi-blue-fg">.</span>fit_transform<span class="ansi-blue-fg">(</span>dist<span class="ansi-blue-fg">)</span>
+
+<span class="ansi-red-fg">NameError</span>: name &#39;dist&#39; is not defined</pre>
+</div>
+</div>
+
+</div>
+</div>
+
+</div>
+
+<div class="{} cell border-box-sizing code_cell rendered">
+<div class="input">
+<div class="prompt input_prompt">In&nbsp;[11]:</div>
+<div class="inner_cell">
+	<div class="input_area">
+<div class=" highlight hl-ipython3"><pre><span></span><span class="kn">from</span> <span class="nn">mpl_toolkits.mplot3d</span> <span class="kn">import</span> <span class="n">Axes3D</span>
+<span class="n">fig</span> <span class="o">=</span> <span class="n">plt</span><span class="o">.</span><span class="n">figure</span><span class="p">()</span>
+<span class="n">ax</span> <span class="o">=</span> <span class="n">fig</span><span class="o">.</span><span class="n">add_subplot</span><span class="p">(</span><span class="mi">111</span><span class="p">,</span> <span class="n">projection</span><span class="o">=</span><span class="s1">&#39;3d&#39;</span><span class="p">)</span>
+<span class="n">ax</span><span class="o">.</span><span class="n">scatter</span><span class="p">(</span><span class="n">pos</span><span class="p">[:,</span> <span class="mi">0</span><span class="p">],</span> <span class="n">pos</span><span class="p">[:,</span> <span class="mi">1</span><span class="p">],</span> <span class="n">pos</span><span class="p">[:,</span> <span class="mi">2</span><span class="p">])</span>
+<span class="k">for</span> <span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="n">z</span><span class="p">,</span> <span class="n">s</span> <span class="ow">in</span> <span class="nb">zip</span><span class="p">(</span><span class="n">pos</span><span class="p">[:,</span> <span class="mi">0</span><span class="p">],</span> <span class="n">pos</span><span class="p">[:,</span> <span class="mi">1</span><span class="p">],</span> <span class="n">pos</span><span class="p">[:,</span> <span class="mi">2</span><span class="p">],</span> <span class="n">names</span><span class="p">):</span>
+    <span class="n">ax</span><span class="o">.</span><span class="n">text</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="n">z</span><span class="p">,</span> <span class="n">s</span><span class="p">)</span>
+
+<span class="nd">@savefig</span> <span class="n">plot_getting_started_cosine_mds_3d</span><span class="o">.</span><span class="n">png</span> <span class="n">width</span><span class="o">=</span><span class="mi">7</span><span class="ow">in</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">show</span><span class="p">()</span>
+</pre></div>
+
+	</div>
+</div>
+</div>
+
+<div class="output_wrapper">
+<div class="output">
+
+
+<div class="output_area">
+
+	<div class="prompt"></div>
+
+
+<div class="output_subarea output_text output_error">
+<pre>
+<span class="ansi-cyan-fg">  File </span><span class="ansi-green-fg">&#34;&lt;ipython-input-11-b2ea5c84ea9f&gt;&#34;</span><span class="ansi-cyan-fg">, line </span><span class="ansi-green-fg">8</span>
+<span class="ansi-red-fg">    @savefig plot_getting_started_cosine_mds_3d.png width=7in</span>
+                                              ^
+<span class="ansi-red-fg">SyntaxError</span><span class="ansi-red-fg">:</span> invalid syntax
+</pre>
+</div>
+</div>
+
+</div>
+</div>
+
+</div>
+
+<div class="{} cell border-box-sizing text_cell rendered"><div class="prompt input_prompt">
+</div><div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html">
+<h2 id="Clustering-texts-based-on-distance">Clustering texts based on distance<a class="anchor-link" href="#Clustering-texts-based-on-distance">&#182;</a></h2><p>Clustering texts into discrete groups of similar texts is often a useful
+exploratory step. For example, a researcher may be wondering if certain textual
+features partition a collection of texts by author or by genre. Pairwise
+distances alone do not produce any kind of classification. To put a set of
+distance measurements to work in classification requires additional assumptions,
+such as a definition of a group or cluster.</p>
+<p>The ideas underlying the transition from distances to clusters are, for the most
+part, common sense. Any clustering of texts should result in texts that are
+closer to each other (in the distance matrix) residing in the same cluster.
+There are many ways of satisfying this requirement; there no unique clustering
+based on distances that is the “best”. One strategy for clustering in
+circulation is called <a href="https://en.wikipedia.org/wiki/Ward%27s_method">Ward’s method</a>. Rather than producing
+a single clustering, Ward’s method produces a hierarchy of clusterings, as we
+will see in a moment. All that Ward’s method requires is a set of pairwise
+distance measurements–such as those we calculated a moment ago.  Ward’s method
+produces a hierarchical clustering of texts via the following procedure:</p>
+<ol>
+<li>Start with each text in its own cluster  </li>
+<li>Until only a single cluster remains,  <ul>
+<li>Find the closest clusters and merge them. The distance between two clusters
+is the change in the sum of squared distances when they are merged.  </li>
+</ul>
+</li>
+<li>Return a tree containing a record of cluster-merges.  </li>
+</ol>
+<p>The function <a href="http://docs.scipy.org/doc/scipy/reference/cluster.hierarchy.html">scipy.cluster.hierarchy.ward</a> performs
+this algorithm and returns a tree of cluster-merges. The hierarchy of clusters
+can be visualized using <code>scipy.cluster.hierarchy.dendrogram</code>.</p>
+
+</div>
+</div>
+</div>
+
+<div class="{} cell border-box-sizing code_cell rendered">
+<div class="input">
+<div class="prompt input_prompt">In&nbsp;[12]:</div>
+<div class="inner_cell">
+	<div class="input_area">
+<div class=" highlight hl-ipython3"><pre><span></span><span class="kn">from</span> <span class="nn">scipy.cluster.hierarchy</span> <span class="kn">import</span> <span class="n">ward</span><span class="p">,</span> <span class="n">dendrogram</span>
+
+<span class="n">linkage_matrix</span> <span class="o">=</span> <span class="n">ward</span><span class="p">(</span><span class="n">dist</span><span class="p">)</span>
+
+<span class="c1"># match dendrogram to that returned by R&#39;s hclust()</span>
+<span class="n">dendrogram</span><span class="p">(</span><span class="n">linkage_matrix</span><span class="p">,</span> <span class="n">orientation</span><span class="o">=</span><span class="s2">&quot;right&quot;</span><span class="p">,</span> <span class="n">labels</span><span class="o">=</span><span class="n">names</span><span class="p">)</span>
+
+<span class="n">plt</span><span class="o">.</span><span class="n">tight_layout</span><span class="p">()</span>  <span class="c1"># fixes margins</span>
+
+<span class="nd">@savefig</span> <span class="n">plot_getting_started_ward_dendrogram</span><span class="o">.</span><span class="n">png</span> <span class="n">width</span><span class="o">=</span><span class="mi">7</span><span class="ow">in</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">show</span><span class="p">()</span>
+</pre></div>
+
+	</div>
+</div>
+</div>
+
+<div class="output_wrapper">
+<div class="output">
+
+
+<div class="output_area">
+
+	<div class="prompt"></div>
+
+
+<div class="output_subarea output_text output_error">
+<pre>
+<span class="ansi-cyan-fg">  File </span><span class="ansi-green-fg">&#34;&lt;ipython-input-12-392926b25e27&gt;&#34;</span><span class="ansi-cyan-fg">, line </span><span class="ansi-green-fg">10</span>
+<span class="ansi-red-fg">    @savefig plot_getting_started_ward_dendrogram.png width=7in</span>
+                                                ^
+<span class="ansi-red-fg">SyntaxError</span><span class="ansi-red-fg">:</span> invalid syntax
+</pre>
+</div>
+</div>
+
+</div>
+</div>
+
+</div>
+
+<div class="{} cell border-box-sizing text_cell rendered"><div class="prompt input_prompt">
+</div><div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html">
+<p>For those familiar with R, the procedure is performed as follows:</p>
+
+</div>
+</div>
+</div>
+
+<div class="{} cell border-box-sizing text_cell rendered"><div class="prompt input_prompt">
+</div><div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html">
+<div class="highlight"><pre><span></span><span class="n">labels</span> <span class="o">=</span> <span class="nf">c</span><span class="p">(</span><span class="s">&#39;Austen_Emma&#39;</span><span class="p">,</span> <span class="s">&#39;Austen_Pride&#39;</span><span class="p">,</span> <span class="s">&#39;Austen_Sense&#39;</span><span class="p">,</span> <span class="s">&#39;CBronte_Jane&#39;</span><span class="p">,</span>
+           <span class="s">&#39;CBronte_Professor&#39;</span><span class="p">,</span> <span class="s">&#39;CBronte_Villette&#39;</span><span class="p">)</span>
+<span class="n">dtm_normed</span> <span class="o">=</span> <span class="n">dtm</span> <span class="o">/</span> <span class="nf">rowSums</span><span class="p">(</span><span class="n">dtm</span><span class="p">)</span>
+<span class="n">dist_matrix</span> <span class="o">=</span> <span class="nf">dist</span><span class="p">(</span><span class="n">dtm_normed</span><span class="p">)</span>
+<span class="n">tree</span> <span class="o">=</span> <span class="nf">hclust</span><span class="p">(</span><span class="n">dist_matrix</span><span class="p">,</span> <span class="n">method</span><span class="o">=</span><span class="s">&quot;ward&quot;</span><span class="p">)</span>
+<span class="nf">plot</span><span class="p">(</span><span class="n">tree</span><span class="p">,</span> <span class="n">labels</span><span class="o">=</span><span class="n">labels</span><span class="p">)</span>
+</pre></div>
+
+</div>
+</div>
+</div>
+
+<div class="{} cell border-box-sizing text_cell rendered"><div class="prompt input_prompt">
+</div><div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html">
+<h2 id="Exercises">Exercises<a class="anchor-link" href="#Exercises">&#182;</a></h2><ol>
+<li>Find two different ways of determining the number of times the word
+‘situation’ appears in <em>Emma</em>. (Make sure the methods produce the same result.)  </li>
+<li>Working with the strings below as documents and using <code>CountVectorizer</code>
+with the <code>input='content'</code> parameter, create a document-term matrix.
+Apart from the <code>input</code> parameter, use the default settings.  </li>
+</ol>
+
+</div>
+</div>
+</div>
+
+<div class="{} cell border-box-sizing code_cell rendered">
+<div class="input">
+<div class="prompt input_prompt">In&nbsp;[13]:</div>
+<div class="inner_cell">
+	<div class="input_area">
+<div class=" highlight hl-ipython3"><pre><span></span><span class="n">text1</span> <span class="o">=</span> <span class="s2">&quot;Indeed, she had a rather kindly disposition.&quot;</span>
+<span class="n">text2</span> <span class="o">=</span> <span class="s2">&quot;The real evils, indeed, of Emma&#39;s situation were the power of having rather too much her own way, and a disposition to think a little too well of herself;&quot;</span>
+<span class="n">text3</span> <span class="o">=</span> <span class="s2">&quot;The Jaccard distance is a way of measuring the distance from one set to another set.&quot;</span>
+</pre></div>
+
+	</div>
+</div>
+</div>
+
+</div>
+
+<div class="{} cell border-box-sizing text_cell rendered"><div class="prompt input_prompt">
+</div><div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html">
+<ol>
+<li>Using the document-term matrix just created, calculate the Euclidean
+distance, <a href="http://en.wikipedia.org/wiki/Jaccard_index">Jaccard distance</a>,
+and cosine distance between each pair of documents. Make sure to calculate
+distance (rather than similarity). Are our intuitions about which texts are
+most similar reflected in the measurements of distance?  </li>
+</ol>
+<p><em>For solutions, view the source for this document.</em></p>
+
+</div>
+</div>
+</div>
+ 
+
+
+
+
+					</div>
+
+				</div>
+
+			</div>
+
+			<footer class="footer">
+
+				<p>&copy; Copyright <YEAR>, Built using the minimal jupinx template.</p>
+
+			</footer>
+
+		</div>
+
+		<script src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.1/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+		<script src="/_static/js/base.js"></script>
+
+	</body>
+</html>

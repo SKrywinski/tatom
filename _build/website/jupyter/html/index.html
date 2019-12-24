@@ -1,0 +1,176 @@
+<!doctype html>
+<html lang="en">
+	<head>
+		<meta charset="utf-8">
+
+		<title>Documentation</title>
+
+		<meta name="viewport" content="width=device-width, initial-scale=1">
+		<meta name="author" content="">
+		<meta name="keywords" content="">
+		<meta name="description" content="">
+
+		<link rel="stylesheet" href="/_static/css/base.css">
+
+	</head>
+
+	<body>
+
+		<div class="wrapper">
+
+			<header class="header">
+
+				<div class="branding">
+
+					<p class="site-title"><a href="/">Documentation</a></p>
+
+					<p class="sr-only"><a href="#skip">Skip to content</a></p>
+
+				</div>
+
+				<div class="header-tools">
+
+
+					<div class="header-badge" id="coverage_badge"></div>
+
+
+				</div>
+
+			</header>
+
+			<div class="main">
+
+				<div class="content">
+
+					<div id="skip"></div>
+
+					<div class="document">
+
+<div class="{} cell border-box-sizing text_cell rendered"><div class="prompt input_prompt">
+</div><div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html">
+<h1 id="Text-Analysis-with-Topic-Models-for-the-Humanities-and-Social-Sciences">Text Analysis with Topic Models for the Humanities and Social Sciences<a class="anchor-link" href="#Text-Analysis-with-Topic-Models-for-the-Humanities-and-Social-Sciences">&#182;</a></h1><p><em>Text Analysis with Topic Models for the Humanities and Social Sciences</em> (TAToM)
+consists of a series of tutorials covering basic procedures in quantitative text
+analysis. The tutorials cover the preparation of a text corpus for analysis and
+the exploration of a collection of texts using topic models and machine
+learning.</p>
+<p>These tutorials cover basic as well as somewhat advanced procedures and make
+extensive use of the Python programming language to organize, analyze, and
+visualize data.</p>
+<p>These tutorials are written by <a href="http://ariddell.org">Allen Riddell</a>.  Comments
+are welcome, as are reports of bugs and typos. Please use the <a href="https://github.com/ariddell/tatom/issues">project’s issue
+tracker</a>.</p>
+
+</div>
+</div>
+</div>
+
+<div class="{} cell border-box-sizing text_cell rendered"><div class="prompt input_prompt">
+</div><div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html">
+<h2 id="Contents">Contents<a class="anchor-link" href="#Contents">&#182;</a></h2><ul>
+<li><a href="preliminaries.html">Preliminaries</a><ul>
+<li><a href="preliminaries.html#required-python-packages">Required Python packages</a></li>
+<li><a href="preliminaries.html#installing-python">Installing Python</a></li>
+<li><a href="preliminaries.html#installing-python-packages">Installing Python packages</a></li>
+</ul>
+</li>
+<li><a href="getting_started.html">Getting started</a><ul>
+<li><a href="getting_started.html#for-those-new-to-python">For those new to Python</a></li>
+<li><a href="getting_started.html#for-those-new-to-numpy">For those new to NumPy</a></li>
+<li><a href="getting_started.html#for-those-new-to-matplotlib">For those new to Matplotlib</a></li>
+</ul>
+</li>
+<li><a href="working_with_text.html">Working with text</a><ul>
+<li><a href="working_with_text.html#creating-a-document-term-matrix">Creating a document-term matrix</a></li>
+<li><a href="working_with_text.html#comparing-texts">Comparing texts</a></li>
+<li><a href="working_with_text.html#visualizing-distances">Visualizing distances</a></li>
+<li><a href="working_with_text.html#clustering-texts-based-on-distance">Clustering texts based on distance</a></li>
+<li><a href="working_with_text.html#exercises">Exercises</a></li>
+</ul>
+</li>
+<li><a href="preprocessing.html">Preprocessing</a><ul>
+<li><a href="preprocessing.html#tokenizing">Tokenizing</a></li>
+<li><a href="preprocessing.html#chunking">Chunking</a></li>
+<li><a href="preprocessing.html#grouping">Grouping</a></li>
+<li><a href="preprocessing.html#exercises">Exercises</a></li>
+</ul>
+</li>
+<li><a href="feature_selection.html">Feature selection: finding distinctive words</a><ul>
+<li><a href="feature_selection.html#measuring-distinctiveness">Measuring “distinctiveness”</a></li>
+<li><a href="feature_selection.html#bayesian-group-comparison">Bayesian group comparison</a></li>
+<li><a href="feature_selection.html#log-likelihood-ratio-and-chi-2-feature-selection">Log likelihood ratio and $ \chi^2 $ feature selection</a></li>
+<li><a href="feature_selection.html#mutual-information-feature-selection">Mutual information feature selection</a></li>
+<li><a href="feature_selection.html#feature-selection-as-exploratory-data-analysis">Feature selection as exploratory data analysis</a></li>
+<li><a href="feature_selection.html#exercises">Exercises</a></li>
+</ul>
+</li>
+<li><a href="topic_model_mallet.html">Topic modeling with MALLET</a><ul>
+<li><a href="topic_model_mallet.html#running-mallet">Running MALLET</a></li>
+<li><a href="topic_model_mallet.html#processing-mallet-output">Processing MALLET output</a></li>
+<li><a href="topic_model_mallet.html#inspecting-the-topic-model">Inspecting the topic model</a></li>
+</ul>
+</li>
+<li><a href="topic_model_python.html">Topic modeling in Python</a><ul>
+<li><a href="topic_model_python.html#using-non-negative-matrix-factorization">Using Non-negative matrix factorization</a></li>
+<li><a href="topic_model_python.html#inspecting-the-nmf-fit">Inspecting the NMF fit</a></li>
+</ul>
+</li>
+<li><a href="topic_model_visualization.html">Visualizing topic models</a><ul>
+<li><a href="topic_model_visualization.html#visualizing-topic-shares">Visualizing topic shares</a></li>
+<li><a href="topic_model_visualization.html#visualizing-topic-word-associations">Visualizing topic-word associations</a></li>
+</ul>
+</li>
+<li><a href="visualizing_trends.html">Visualizing trends</a><ul>
+<li><a href="visualizing_trends.html#plotting-trends">Plotting trends</a></li>
+</ul>
+</li>
+<li><a href="classification_logistic_regression.html">Classification, Machine Learning, and Logistic Regression</a><ul>
+<li><a href="classification_logistic_regression.html#predicting-genre-classifications">Predicting genre classifications</a></li>
+<li><a href="classification_logistic_regression.html#logistic-regression">Logistic regression</a></li>
+</ul>
+</li>
+<li><a href="case_study_racine.html">Case study: Racine’s early and late tragedies </a><ul>
+<li><a href="case_study_racine.html#corpus-sixty-tragedies">Corpus: sixty tragedies</a></li>
+<li><a href="case_study_racine.html#racine-s-atypical-plays">Racine’s atypical plays</a></li>
+</ul>
+</li>
+<li><a href="datasets.html">Datasets</a><ul>
+<li><a href="datasets.html#british-novels">British novels</a></li>
+<li><a href="datasets.html#french-plays">French plays</a></li>
+<li><a href="datasets.html#les-miserables">Les Misérables</a></li>
+<li><a href="datasets.html#stopword-lists">Stopword lists</a></li>
+</ul>
+</li>
+<li><a href="references.html">References</a></li>
+</ul>
+<p><img src="_static/plot_doctopic_heatmap.png" alt="Heatmap of topic shares in the ``austen-brontë`` corpus. See :ref:`topic_model_visualization`." style="width:60%;height:60%"></p>
+<p><img src="_static/plot_word_topic.png" alt="Word associated with topics ``austen-brontë`` corpus. See :ref:`topic_model_visualization`." style="width:60%;height:60%"></p>
+
+</div>
+</div>
+</div>
+ 
+
+
+
+
+					</div>
+
+				</div>
+
+			</div>
+
+			<footer class="footer">
+
+				<p>&copy; Copyright <YEAR>, Built using the minimal jupinx template.</p>
+
+			</footer>
+
+		</div>
+
+		<script src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.1/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+		<script src="/_static/js/base.js"></script>
+
+	</body>
+</html>

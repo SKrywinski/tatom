@@ -1,0 +1,706 @@
+<!doctype html>
+<html lang="en">
+	<head>
+		<meta charset="utf-8">
+
+		<title>Preliminaries &ndash; Documentation</title>
+
+		<meta name="viewport" content="width=device-width, initial-scale=1">
+		<meta name="author" content="">
+		<meta name="keywords" content="">
+		<meta name="description" content="">
+
+		<link rel="stylesheet" href="/_static/css/base.css">
+
+	</head>
+
+	<body>
+
+		<div class="wrapper">
+
+			<header class="header">
+
+				<div class="branding">
+
+					<p class="site-title"><a href="/">Documentation</a></p>
+
+					<p class="sr-only"><a href="#skip">Skip to content</a></p>
+
+				</div>
+
+				<div class="header-tools">
+
+
+					<div class="header-badge" id="executability_status_badge"></div>
+
+
+				</div>
+
+			</header>
+
+			<div class="main">
+
+				<div class="content">
+
+					<div id="skip"></div>
+
+					<div class="document">
+
+<div class="{} cell border-box-sizing text_cell rendered"><div class="prompt input_prompt">
+</div><div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html">
+<p><a id='index-0'></a></p>
+<p><a id='preliminaries'></a></p>
+
+</div>
+</div>
+</div>
+
+<div class="{} cell border-box-sizing text_cell rendered"><div class="prompt input_prompt">
+</div><div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html">
+<h1 id="Preliminaries">Preliminaries<a class="anchor-link" href="#Preliminaries">&#182;</a></h1><p>These tutorials make use of a number of Python packages. This section describes
+how to install these packages. (If you do not already have Python 3 installed on
+your system you may wish to skip to the section <a href="#installing-python">Installing Python</a>.)</p>
+
+</div>
+</div>
+</div>
+
+<div class="{} cell border-box-sizing text_cell rendered"><div class="prompt input_prompt">
+</div><div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html">
+<h2 id="Required-Python-packages">Required Python packages<a class="anchor-link" href="#Required-Python-packages">&#182;</a></h2><p>The tutorials collected here assume that Python version 3.3 or higher is
+installed along with the following packages:</p>
+<ul>
+<li><a href="http://numpy.org">NumPy</a> version 1.7 or higher  </li>
+<li><a href="http://scipy.org">SciPy</a> version 0.12 or higher  </li>
+<li><a href="http://matplotlib.org">matplotlib</a> version 1.3.1 or higher  </li>
+<li><a href="http://pandas.pydata.org/">Pandas</a> version 0.14.1 or higher.  </li>
+<li><a href="http://nltk.org">NLTK</a> version 3.0 or higher  </li>
+<li><a href="http://scikit-learn.org">scikit-learn</a> version 0.15.0 or higher  </li>
+</ul>
+<blockquote><p><strong>Note</strong></p>
+<p>As of this writing, <a href="http://nltk.org/nltk3-alpha">NLTK 3.0 “alpha”</a> is the
+only version released that works with Python 3. It must be <a href="#installing-from-source">installed
+from source</a>. If you have <code>pip</code> available just
+use: <code>pip install http://nltk.org/nltk3-alpha/nltk-3.0a4.tar.gz</code></p>
+</blockquote>
+<p>If these packages are installed, the following lines of code should run in
+a Python interpreter without error.</p>
+
+</div>
+</div>
+</div>
+
+<div class="{} cell border-box-sizing code_cell rendered">
+<div class="input">
+<div class="prompt input_prompt">In&nbsp;[1]:</div>
+<div class="inner_cell">
+	<div class="input_area">
+<div class=" highlight hl-ipython3"><pre><span></span><span class="kn">import</span> <span class="nn">numpy</span>
+<span class="n">numpy</span><span class="o">.</span><span class="n">__version__</span>
+<span class="kn">import</span> <span class="nn">scipy</span>
+<span class="n">scipy</span><span class="o">.</span><span class="n">__version__</span>
+<span class="kn">import</span> <span class="nn">matplotlib</span>
+<span class="n">matplotlib</span><span class="o">.</span><span class="n">__version__</span>
+<span class="kn">import</span> <span class="nn">pandas</span>
+<span class="n">pandas</span><span class="o">.</span><span class="n">__version__</span>
+<span class="kn">import</span> <span class="nn">nltk</span>
+<span class="n">nltk</span><span class="o">.</span><span class="n">__version__</span>
+<span class="kn">import</span> <span class="nn">sklearn</span>
+<span class="n">sklearn</span><span class="o">.</span><span class="n">__version__</span>
+</pre></div>
+
+	</div>
+</div>
+</div>
+
+<div class="output_wrapper">
+<div class="output">
+
+
+<div class="output_area">
+
+	<div class="prompt output_prompt">Out[1]:</div>
+
+
+
+
+<div class="output_text output_subarea output_execute_result">
+<pre>&#39;0.22&#39;</pre>
+</div>
+
+</div>
+
+</div>
+</div>
+
+</div>
+
+<div class="{} cell border-box-sizing text_cell rendered"><div class="prompt input_prompt">
+</div><div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html">
+<p>The following packages are also worth checking out:</p>
+<ul>
+<li><a href="http://www.ipython.org">IPython</a>  </li>
+<li><a href="http://statsmodels.sourceforge.net/">statsmodels</a>  </li>
+</ul>
+
+</div>
+</div>
+</div>
+
+<div class="{} cell border-box-sizing code_cell rendered">
+<div class="input">
+<div class="prompt input_prompt">In&nbsp;[2]:</div>
+<div class="inner_cell">
+	<div class="input_area">
+<div class=" highlight hl-ipython3"><pre><span></span><span class="kn">import</span> <span class="nn">IPython</span>
+<span class="n">IPython</span><span class="o">.</span><span class="n">__version__</span>
+<span class="kn">import</span> <span class="nn">statsmodels</span>
+<span class="n">statsmodels</span><span class="o">.</span><span class="n">__version__</span>
+</pre></div>
+
+	</div>
+</div>
+</div>
+
+<div class="output_wrapper">
+<div class="output">
+
+
+<div class="output_area">
+
+	<div class="prompt output_prompt">Out[2]:</div>
+
+
+
+
+<div class="output_text output_subarea output_execute_result">
+<pre>&#39;0.10.2&#39;</pre>
+</div>
+
+</div>
+
+</div>
+</div>
+
+</div>
+
+<div class="{} cell border-box-sizing text_cell rendered"><div class="prompt input_prompt">
+</div><div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html">
+<blockquote><p><strong>Note</strong></p>
+<p>Why Python 3? Python 3 <a href="https://docs.python.org/3.3/library/stdtypes.html#textseq">stores strings as Unicode</a>.
+This makes working with languages other than English immeasurably easier. In
+Python 3, “文” and “ø” are characters like “a” and “o” and require no special
+handling.</p>
+</blockquote>
+<p><a id='installing-python'></a></p>
+
+</div>
+</div>
+</div>
+
+<div class="{} cell border-box-sizing text_cell rendered"><div class="prompt input_prompt">
+</div><div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html">
+<h2 id="Installing-Python">Installing Python<a class="anchor-link" href="#Installing-Python">&#182;</a></h2>
+</div>
+</div>
+</div>
+
+<div class="{} cell border-box-sizing text_cell rendered"><div class="prompt input_prompt">
+</div><div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html">
+<h3 id="Installing-Python-on-Linux">Installing Python on Linux<a class="anchor-link" href="#Installing-Python-on-Linux">&#182;</a></h3><p>On Debian-based systems such as Ubuntu, Python 3 may be installed with:</p>
+
+</div>
+</div>
+</div>
+
+<div class="{} cell border-box-sizing code_cell rendered">
+<div class="input">
+<div class="prompt input_prompt">In&nbsp;[3]:</div>
+<div class="inner_cell">
+	<div class="input_area">
+<div class=" highlight hl-ipython3"><pre><span></span><span class="n">apt</span><span class="o">-</span><span class="n">get</span> <span class="n">install</span> <span class="n">python3</span>
+</pre></div>
+
+	</div>
+</div>
+</div>
+
+<div class="output_wrapper">
+<div class="output">
+
+
+<div class="output_area">
+
+	<div class="prompt"></div>
+
+
+<div class="output_subarea output_text output_error">
+<pre>
+<span class="ansi-cyan-fg">  File </span><span class="ansi-green-fg">&#34;&lt;ipython-input-3-de06b22f695c&gt;&#34;</span><span class="ansi-cyan-fg">, line </span><span class="ansi-green-fg">1</span>
+<span class="ansi-red-fg">    apt-get install python3</span>
+                  ^
+<span class="ansi-red-fg">SyntaxError</span><span class="ansi-red-fg">:</span> invalid syntax
+</pre>
+</div>
+</div>
+
+</div>
+</div>
+
+</div>
+
+<div class="{} cell border-box-sizing text_cell rendered"><div class="prompt input_prompt">
+</div><div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html">
+<p>On Fedora the command is:</p>
+
+</div>
+</div>
+</div>
+
+<div class="{} cell border-box-sizing code_cell rendered">
+<div class="input">
+<div class="prompt input_prompt">In&nbsp;[4]:</div>
+<div class="inner_cell">
+	<div class="input_area">
+<div class=" highlight hl-ipython3"><pre><span></span><span class="n">yum</span> <span class="n">install</span> <span class="n">python3</span>
+</pre></div>
+
+	</div>
+</div>
+</div>
+
+<div class="output_wrapper">
+<div class="output">
+
+
+<div class="output_area">
+
+	<div class="prompt"></div>
+
+
+<div class="output_subarea output_text output_error">
+<pre>
+<span class="ansi-cyan-fg">  File </span><span class="ansi-green-fg">&#34;&lt;ipython-input-4-51b674c48e80&gt;&#34;</span><span class="ansi-cyan-fg">, line </span><span class="ansi-green-fg">1</span>
+<span class="ansi-red-fg">    yum install python3</span>
+              ^
+<span class="ansi-red-fg">SyntaxError</span><span class="ansi-red-fg">:</span> invalid syntax
+</pre>
+</div>
+</div>
+
+</div>
+</div>
+
+</div>
+
+<div class="{} cell border-box-sizing text_cell rendered"><div class="prompt input_prompt">
+</div><div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html">
+<p>Depending on how current the operating system is, these commands may or may not
+install Python version 3.3 or higher. Find the version of python available by
+running <code>python3 --version</code> in a terminal.</p>
+
+</div>
+</div>
+</div>
+
+<div class="{} cell border-box-sizing text_cell rendered"><div class="prompt input_prompt">
+</div><div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html">
+<h3 id="Installing-packages-on-Mac-OS-X">Installing packages on Mac OS X<a class="anchor-link" href="#Installing-packages-on-Mac-OS-X">&#182;</a></h3><p>Installing Python 3 via <a href="http://brew.sh/">homebrew</a> is the preferred method
+for those comfortable with the OS X command line interface.</p>
+<p><a href="http://www.python.org/download/">Mac OS X installers</a> for Python may be found
+on the official <a href="http://python.org">Python website</a>.</p>
+<p>Finally, Python 3.3 may also be installed via MacPorts &lt;<a href="http://macports.org">http://macports.org</a>.</p>
+
+</div>
+</div>
+</div>
+
+<div class="{} cell border-box-sizing text_cell rendered"><div class="prompt input_prompt">
+</div><div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html">
+<h3 id="Installing-Python-on-Windows">Installing Python on Windows<a class="anchor-link" href="#Installing-Python-on-Windows">&#182;</a></h3><p>There are also a number of distributions of Python for Windows that come bundled
+with Python packages relevant to scientific computing including as NumPy, SciPy,
+and scikit-learn.  One such distribution with excellent support for Python
+3 is <a href="https://store.continuum.io/cshop/anaconda">Anaconda Python</a>.</p>
+<p><a id='installing-packages'></a></p>
+
+</div>
+</div>
+</div>
+
+<div class="{} cell border-box-sizing text_cell rendered"><div class="prompt input_prompt">
+</div><div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html">
+<h2 id="Installing-Python-packages">Installing Python packages<a class="anchor-link" href="#Installing-Python-packages">&#182;</a></h2>
+</div>
+</div>
+</div>
+
+<div class="{} cell border-box-sizing text_cell rendered"><div class="prompt input_prompt">
+</div><div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html">
+<h3 id="Installing-packages-on-Linux">Installing packages on Linux<a class="anchor-link" href="#Installing-packages-on-Linux">&#182;</a></h3><blockquote><p><strong>Note</strong></p>
+<p>Advanced users may want to consider isolating these packages in
+a <a href="http://docs.python.org/3/library/venv.html">virtual environment</a>.</p>
+</blockquote>
+
+</div>
+</div>
+</div>
+
+<div class="{} cell border-box-sizing text_cell rendered"><div class="prompt input_prompt">
+</div><div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html">
+<h4 id="Using-the-package-manager">Using the package manager<a class="anchor-link" href="#Using-the-package-manager">&#182;</a></h4><p>On recent versions of Debian and Ubuntu as well as Fedora Linux there are
+recompiled packages available that cover almost all of the requirements. With
+<code>apt-get</code> most of the requirements are installed with the following command:</p>
+
+</div>
+</div>
+</div>
+
+<div class="{} cell border-box-sizing code_cell rendered">
+<div class="input">
+<div class="prompt input_prompt">In&nbsp;[5]:</div>
+<div class="inner_cell">
+	<div class="input_area">
+<div class=" highlight hl-ipython3"><pre><span></span><span class="n">sudo</span> <span class="n">apt</span><span class="o">-</span><span class="n">get</span> <span class="n">install</span> <span class="n">python3</span><span class="o">-</span><span class="n">numpy</span> <span class="n">python3</span><span class="o">-</span><span class="n">scipy</span> <span class="n">python3</span><span class="o">-</span><span class="n">pandas</span> <span class="n">python3</span><span class="o">-</span><span class="n">matplotlib</span> <span class="n">ipython3</span>
+</pre></div>
+
+	</div>
+</div>
+</div>
+
+<div class="output_wrapper">
+<div class="output">
+
+
+<div class="output_area">
+
+	<div class="prompt"></div>
+
+
+<div class="output_subarea output_text output_error">
+<pre>
+<span class="ansi-cyan-fg">  File </span><span class="ansi-green-fg">&#34;&lt;ipython-input-5-7b20a21bfe93&gt;&#34;</span><span class="ansi-cyan-fg">, line </span><span class="ansi-green-fg">1</span>
+<span class="ansi-red-fg">    sudo apt-get install python3-numpy python3-scipy python3-pandas python3-matplotlib ipython3</span>
+           ^
+<span class="ansi-red-fg">SyntaxError</span><span class="ansi-red-fg">:</span> invalid syntax
+</pre>
+</div>
+</div>
+
+</div>
+</div>
+
+</div>
+
+<div class="{} cell border-box-sizing text_cell rendered"><div class="prompt input_prompt">
+</div><div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html">
+<h4 id="Using-pip">Using pip<a class="anchor-link" href="#Using-pip">&#182;</a></h4><p>Installing the required packages is straightforward if the <a href="http://www.pip-installer.org/">pip</a> installer is available. For example,
+NLTK may be installed with the following command:</p>
+
+</div>
+</div>
+</div>
+
+<div class="{} cell border-box-sizing code_cell rendered">
+<div class="input">
+<div class="prompt input_prompt">In&nbsp;[6]:</div>
+<div class="inner_cell">
+	<div class="input_area">
+<div class=" highlight hl-ipython3"><pre><span></span><span class="n">pip</span> <span class="n">install</span> <span class="n">http</span><span class="p">:</span><span class="o">//</span><span class="n">nltk</span><span class="o">.</span><span class="n">org</span><span class="o">/</span><span class="n">nltk3</span><span class="o">-</span><span class="n">alpha</span><span class="o">/</span><span class="n">nltk</span><span class="o">-</span><span class="mf">3.0</span><span class="n">a4</span><span class="o">.</span><span class="n">tar</span><span class="o">.</span><span class="n">gz</span>
+</pre></div>
+
+	</div>
+</div>
+</div>
+
+<div class="output_wrapper">
+<div class="output">
+
+
+<div class="output_area">
+
+	<div class="prompt"></div>
+
+
+<div class="output_subarea output_stream output_stdout output_text">
+<pre>Collecting http://nltk.org/nltk3-alpha/nltk-3.0a4.tar.gz
+<span class="ansi-red-fg">  ERROR: HTTP error 404 while getting http://nltk.org/nltk3-alpha/nltk-3.0a4.tar.gz</span>
+<span class="ansi-red-fg">  ERROR: Could not install requirement http://nltk.org/nltk3-alpha/nltk-3.0a4.tar.gz because of error 404 Client Error: Not Found for url: http://www.nltk.org/nltk3-alpha/nltk-3.0a4.tar.gz</span>
+<span class="ansi-red-fg">ERROR: Could not install requirement http://nltk.org/nltk3-alpha/nltk-3.0a4.tar.gz because of HTTP error 404 Client Error: Not Found for url: http://www.nltk.org/nltk3-alpha/nltk-3.0a4.tar.gz for URL http://nltk.org/nltk3-alpha/nltk-3.0a4.tar.gz</span>
+Note: you may need to restart the kernel to use updated packages.
+</pre>
+</div>
+</div>
+
+</div>
+</div>
+
+</div>
+
+<div class="{} cell border-box-sizing text_cell rendered"><div class="prompt input_prompt">
+</div><div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html">
+<p><code>scikit-learn</code> may also be installed with <code>pip</code>:</p>
+
+</div>
+</div>
+</div>
+
+<div class="{} cell border-box-sizing code_cell rendered">
+<div class="input">
+<div class="prompt input_prompt">In&nbsp;[7]:</div>
+<div class="inner_cell">
+	<div class="input_area">
+<div class=" highlight hl-ipython3"><pre><span></span><span class="n">pip</span> <span class="n">install</span> <span class="n">scikit</span><span class="o">-</span><span class="n">learn</span>
+</pre></div>
+
+	</div>
+</div>
+</div>
+
+<div class="output_wrapper">
+<div class="output">
+
+
+<div class="output_area">
+
+	<div class="prompt"></div>
+
+
+<div class="output_subarea output_stream output_stdout output_text">
+<pre>Requirement already satisfied: scikit-learn in /home/hautakivi/.local/share/virtualenvs/tatom-zRpuh5iC/lib/python3.6/site-packages (0.22)
+Requirement already satisfied: numpy&gt;=1.11.0 in /home/hautakivi/.local/share/virtualenvs/tatom-zRpuh5iC/lib/python3.6/site-packages (from scikit-learn) (1.17.4)
+Requirement already satisfied: joblib&gt;=0.11 in /home/hautakivi/.local/share/virtualenvs/tatom-zRpuh5iC/lib/python3.6/site-packages (from scikit-learn) (0.14.1)
+Requirement already satisfied: scipy&gt;=0.17.0 in /home/hautakivi/.local/share/virtualenvs/tatom-zRpuh5iC/lib/python3.6/site-packages (from scikit-learn) (1.4.1)
+Note: you may need to restart the kernel to use updated packages.
+</pre>
+</div>
+</div>
+
+</div>
+</div>
+
+</div>
+
+<div class="{} cell border-box-sizing text_cell rendered"><div class="prompt input_prompt">
+</div><div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html">
+<p><a id='installing-from-source'></a></p>
+
+</div>
+</div>
+</div>
+
+<div class="{} cell border-box-sizing text_cell rendered"><div class="prompt input_prompt">
+</div><div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html">
+<h4 id="Installing-from-source">Installing from source<a class="anchor-link" href="#Installing-from-source">&#182;</a></h4><p><code>pip</code> should be available on any system with Python 3.4 or higher installed. If <code>pip</code>
+is not available, the packages may be installed from source. Source “tarballs”
+for NumPy and matplotlib can be obtained and installed with the following
+sequence of commands. To install NumPy from source use the following commands:</p>
+
+</div>
+</div>
+</div>
+
+<div class="{} cell border-box-sizing code_cell rendered">
+<div class="input">
+<div class="prompt input_prompt">In&nbsp;[8]:</div>
+<div class="inner_cell">
+	<div class="input_area">
+<div class=" highlight hl-ipython3"><pre><span></span><span class="n">curl</span> <span class="o">-</span><span class="n">O</span> <span class="n">https</span><span class="p">:</span><span class="o">//</span><span class="n">pypi</span><span class="o">.</span><span class="n">python</span><span class="o">.</span><span class="n">org</span><span class="o">/</span><span class="n">packages</span><span class="o">/</span><span class="n">source</span><span class="o">/</span><span class="n">n</span><span class="o">/</span><span class="n">numpy</span><span class="o">/</span><span class="n">numpy</span><span class="o">-</span><span class="mf">1.8</span><span class="o">.</span><span class="mf">1.</span><span class="n">tar</span><span class="o">.</span><span class="n">gz</span>
+<span class="n">tar</span> <span class="n">zxvf</span> <span class="n">numpy</span><span class="o">-</span><span class="mf">1.7</span><span class="o">.</span><span class="mf">1.</span><span class="n">tar</span><span class="o">.</span><span class="n">gz</span>
+<span class="n">cd</span> <span class="n">numpy</span><span class="o">-</span><span class="mf">1.7</span><span class="o">.</span><span class="mi">1</span>
+<span class="n">python</span> <span class="n">setup</span><span class="o">.</span><span class="n">py</span> <span class="n">install</span>
+</pre></div>
+
+	</div>
+</div>
+</div>
+
+<div class="output_wrapper">
+<div class="output">
+
+
+<div class="output_area">
+
+	<div class="prompt"></div>
+
+
+<div class="output_subarea output_text output_error">
+<pre>
+<span class="ansi-cyan-fg">  File </span><span class="ansi-green-fg">&#34;&lt;ipython-input-8-8507dc84f69a&gt;&#34;</span><span class="ansi-cyan-fg">, line </span><span class="ansi-green-fg">1</span>
+<span class="ansi-red-fg">    curl -O https://pypi.python.org/packages/source/n/numpy/numpy-1.8.1.tar.gz</span>
+                ^
+<span class="ansi-red-fg">SyntaxError</span><span class="ansi-red-fg">:</span> invalid syntax
+</pre>
+</div>
+</div>
+
+</div>
+</div>
+
+</div>
+
+<div class="{} cell border-box-sizing text_cell rendered"><div class="prompt input_prompt">
+</div><div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html">
+<p>To install matplotlib from source, enter the following commands:</p>
+
+</div>
+</div>
+</div>
+
+<div class="{} cell border-box-sizing code_cell rendered">
+<div class="input">
+<div class="prompt input_prompt">In&nbsp;[9]:</div>
+<div class="inner_cell">
+	<div class="input_area">
+<div class=" highlight hl-ipython3"><pre><span></span><span class="n">curl</span> <span class="o">-</span><span class="n">O</span> <span class="o">-</span><span class="n">L</span> <span class="n">https</span><span class="p">:</span><span class="o">//</span><span class="n">downloads</span><span class="o">.</span><span class="n">sourceforge</span><span class="o">.</span><span class="n">net</span><span class="o">/</span><span class="n">project</span><span class="o">/</span><span class="n">matplotlib</span><span class="o">/</span><span class="n">matplotlib</span><span class="o">/</span><span class="n">matplotlib</span><span class="o">-</span><span class="mf">1.3</span><span class="o">.</span><span class="mi">1</span><span class="o">/</span><span class="n">matplotlib</span><span class="o">-</span><span class="mf">1.3</span><span class="o">.</span><span class="mf">1.</span><span class="n">tar</span><span class="o">.</span><span class="n">gz</span>
+<span class="n">tar</span> <span class="n">zxvf</span> <span class="n">matplotlib</span><span class="o">-</span><span class="mf">1.3</span><span class="o">.</span><span class="mf">1.</span><span class="n">tar</span><span class="o">.</span><span class="n">gz</span>
+<span class="n">cd</span> <span class="n">matplotlib</span><span class="o">-</span><span class="mf">1.3</span><span class="o">.</span><span class="mi">1</span>
+<span class="n">python</span> <span class="n">setup</span><span class="o">.</span><span class="n">py</span> <span class="n">install</span>
+</pre></div>
+
+	</div>
+</div>
+</div>
+
+<div class="output_wrapper">
+<div class="output">
+
+
+<div class="output_area">
+
+	<div class="prompt"></div>
+
+
+<div class="output_subarea output_text output_error">
+<pre>
+<span class="ansi-cyan-fg">  File </span><span class="ansi-green-fg">&#34;&lt;ipython-input-9-df14c509b4fb&gt;&#34;</span><span class="ansi-cyan-fg">, line </span><span class="ansi-green-fg">1</span>
+<span class="ansi-red-fg">    curl -O -L https://downloads.sourceforge.net/project/matplotlib/matplotlib/matplotlib-1.3.1/matplotlib-1.3.1.tar.gz</span>
+                   ^
+<span class="ansi-red-fg">SyntaxError</span><span class="ansi-red-fg">:</span> invalid syntax
+</pre>
+</div>
+</div>
+
+</div>
+</div>
+
+</div>
+
+<div class="{} cell border-box-sizing text_cell rendered"><div class="prompt input_prompt">
+</div><div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html">
+<p>To install NTLK:</p>
+
+</div>
+</div>
+</div>
+
+<div class="{} cell border-box-sizing code_cell rendered">
+<div class="input">
+<div class="prompt input_prompt">In&nbsp;[10]:</div>
+<div class="inner_cell">
+	<div class="input_area">
+<div class=" highlight hl-ipython3"><pre><span></span><span class="n">curl</span> <span class="o">-</span><span class="n">O</span> <span class="n">http</span><span class="p">:</span><span class="o">//</span><span class="n">nltk</span><span class="o">.</span><span class="n">org</span><span class="o">/</span><span class="n">nltk3</span><span class="o">-</span><span class="n">alpha</span><span class="o">/</span><span class="n">nltk</span><span class="o">-</span><span class="mf">3.0</span><span class="n">a4</span><span class="o">.</span><span class="n">tar</span><span class="o">.</span><span class="n">gz</span>
+<span class="n">tar</span> <span class="n">zxvf</span> <span class="n">nltk</span><span class="o">-</span><span class="mf">3.0</span><span class="n">a4</span><span class="o">.</span><span class="n">tar</span><span class="o">.</span><span class="n">gz</span>
+<span class="n">cd</span> <span class="n">nltk</span><span class="o">-</span><span class="mf">3.0</span><span class="n">a4</span>
+<span class="n">python</span> <span class="n">setup</span><span class="o">.</span><span class="n">py</span> <span class="n">install</span>
+</pre></div>
+
+	</div>
+</div>
+</div>
+
+<div class="output_wrapper">
+<div class="output">
+
+
+<div class="output_area">
+
+	<div class="prompt"></div>
+
+
+<div class="output_subarea output_text output_error">
+<pre>
+<span class="ansi-cyan-fg">  File </span><span class="ansi-green-fg">&#34;&lt;ipython-input-10-22cda93320f9&gt;&#34;</span><span class="ansi-cyan-fg">, line </span><span class="ansi-green-fg">1</span>
+<span class="ansi-red-fg">    curl -O http://nltk.org/nltk3-alpha/nltk-3.0a4.tar.gz</span>
+               ^
+<span class="ansi-red-fg">SyntaxError</span><span class="ansi-red-fg">:</span> invalid syntax
+</pre>
+</div>
+</div>
+
+</div>
+</div>
+
+</div>
+
+<div class="{} cell border-box-sizing text_cell rendered"><div class="prompt input_prompt">
+</div><div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html">
+<h3 id="Installing-packages-on-Mac-OS-X">Installing packages on Mac OS X<a class="anchor-link" href="#Installing-packages-on-Mac-OS-X">&#182;</a></h3><p>Installation of Python 3 and the required packages may be accomplished using
+<a href="http://macports.org">MacPorts</a> or <a href="http://brew.sh/">homebrew</a>. For example,
+the following command installs <code>matplotlib</code> for Python version 3.3 under
+MacPorts:</p>
+<blockquote><p>sudo port install py33-matplotlib</p>
+</blockquote>
+<p>Homebrew has a wiki page <a href="https://github.com/mxcl/homebrew/wiki/Homebrew-and-Python">Homebrew and Python</a> that describes how
+Python is handled in homebrew.</p>
+
+</div>
+</div>
+</div>
+
+<div class="{} cell border-box-sizing text_cell rendered"><div class="prompt input_prompt">
+</div><div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html">
+<h3 id="Installing-packages-on-Windows">Installing packages on Windows<a class="anchor-link" href="#Installing-packages-on-Windows">&#182;</a></h3><p>There are a number of distributions of Python for Windows that come pre-packaged
+with packages relevant to scientific computing such as NumPy and SciPy. They
+include, for example, <a href="https://store.continuum.io/cshop/anaconda">Anaconda Python</a>. Anaconda includes almost all the
+packages used here. Also available are instructions on how to use Python 3 with
+Anaconda <a href="http://continuum.io/blog/anaconda-python-3">http://continuum.io/blog/anaconda-python-3</a>.</p>
+
+</div>
+</div>
+</div>
+ 
+
+
+
+
+					</div>
+
+				</div>
+
+			</div>
+
+			<footer class="footer">
+
+				<p>&copy; Copyright <YEAR>, Built using the minimal jupinx template.</p>
+
+			</footer>
+
+		</div>
+
+		<script src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.1/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+		<script src="/_static/js/base.js"></script>
+
+	</body>
+</html>

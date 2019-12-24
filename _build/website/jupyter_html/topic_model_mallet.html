@@ -1,0 +1,883 @@
+<!doctype html>
+<html lang="en">
+	<head>
+		<meta charset="utf-8">
+
+		<title>Topic modeling with MALLET &ndash; Documentation</title>
+
+		<meta name="viewport" content="width=device-width, initial-scale=1">
+		<meta name="author" content="">
+		<meta name="keywords" content="">
+		<meta name="description" content="">
+
+		<link rel="stylesheet" href="/_static/css/base.css">
+
+	</head>
+
+	<body>
+
+		<div class="wrapper">
+
+			<header class="header">
+
+				<div class="branding">
+
+					<p class="site-title"><a href="/">Documentation</a></p>
+
+					<p class="sr-only"><a href="#skip">Skip to content</a></p>
+
+				</div>
+
+				<div class="header-tools">
+
+
+					<div class="header-badge" id="executability_status_badge"></div>
+
+
+				</div>
+
+			</header>
+
+			<div class="main">
+
+				<div class="content">
+
+					<div id="skip"></div>
+
+					<div class="document">
+
+<div class="{} cell border-box-sizing text_cell rendered"><div class="prompt input_prompt">
+</div><div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html">
+<p><a id='index-0'></a></p>
+<p><a id='topic-model-mallet'></a></p>
+
+</div>
+</div>
+</div>
+
+<div class="{} cell border-box-sizing text_cell rendered"><div class="prompt input_prompt">
+</div><div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html">
+<h1 id="Topic-modeling-with-MALLET">Topic modeling with MALLET<a class="anchor-link" href="#Topic-modeling-with-MALLET">&#182;</a></h1><p>This section illustrates how to use <a href="http://mallet.cs.umass.edu/">MALLET</a> to
+model a corpus of texts using a topic model and how to analyze the results using
+Python.</p>
+<p>A topic model is a probabilistic model of the words appearing in a corpus of
+documents.  (There are a number of general introductions to topic models
+available, such as <a href="references.html#blei-introduction-2012">[Ble12]</a>.) The particular topic model
+used in this section is Latent Dirichlet Allocation (LDA), a model introduced in
+the context of text analysis in 2003 <a href="references.html#blei-latent-2003">[BNJ03]</a>. LDA is an
+instance of a more general class of models called mixed-membership models. While
+LDA involves a greater number of distributions and parameters than the Bayesian
+model introduced in the section on <a href="feature_selection.html#bayesian-group-comparison">group comparison</a>, both are instances of a Bayesian probabilistic
+model. In fact, posterior inference for both models is typically performed in
+precisely the same manner, using Gibbs sampling with conjugate priors.</p>
+<p>This section assumes prior exposure to topic modeling and proceeds as follows:</p>
+<ol>
+<li>MALLET is downloaded and used to fit a topic model of six novels, three by
+Brontë and three by Austen. Because these are lengthy texts, the novels are split
+up into smaller sections—a preprocessing step which improves results considerably.  </li>
+<li>The output of MALLET is loaded into Python as a document-topic matrix (a
+2-dimensional array) of topic shares.  </li>
+<li>Topics, discrete distributions over the vocabulary, are analyzed.  </li>
+</ol>
+<p>Note that <a href="topic_model_visualization.html#topic-model-visualization">an entire section</a> is devoted to
+visualizing topic models. This section focuses on using MALLET and processing
+the results.</p>
+<p>This section uses six novels by Brontë and Austen. These novels are divided into
+parts as follows:</p>
+
+</div>
+</div>
+</div>
+
+<div class="{} cell border-box-sizing code_cell rendered">
+<div class="input">
+<div class="prompt input_prompt">In&nbsp;[1]:</div>
+<div class="inner_cell">
+	<div class="input_area">
+<div class=" highlight hl-ipython3"><pre><span></span><span class="kn">import</span> <span class="nn">os</span>
+<span class="n">CORPUS_PATH</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="s1">&#39;data&#39;</span><span class="p">,</span> <span class="s1">&#39;austen-brontë-split&#39;</span><span class="p">)</span>
+<span class="n">filenames</span> <span class="o">=</span> <span class="nb">sorted</span><span class="p">([</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">CORPUS_PATH</span><span class="p">,</span> <span class="n">fn</span><span class="p">)</span> <span class="k">for</span> <span class="n">fn</span> <span class="ow">in</span> <span class="n">os</span><span class="o">.</span><span class="n">listdir</span><span class="p">(</span><span class="n">CORPUS_PATH</span><span class="p">)])</span>
+</pre></div>
+
+	</div>
+</div>
+</div>
+
+<div class="output_wrapper">
+<div class="output">
+
+
+<div class="output_area">
+
+	<div class="prompt"></div>
+
+
+<div class="output_subarea output_text output_error">
+<pre>
+<span class="ansi-red-fg">---------------------------------------------------------------------------</span>
+<span class="ansi-red-fg">FileNotFoundError</span>                         Traceback (most recent call last)
+<span class="ansi-green-fg">&lt;ipython-input-1-54a81d82a83a&gt;</span> in <span class="ansi-cyan-fg">&lt;module&gt;</span>
+<span class="ansi-green-intense-fg ansi-bold">      1</span> <span class="ansi-green-fg">import</span> os
+<span class="ansi-green-intense-fg ansi-bold">      2</span> CORPUS_PATH <span class="ansi-blue-fg">=</span> os<span class="ansi-blue-fg">.</span>path<span class="ansi-blue-fg">.</span>join<span class="ansi-blue-fg">(</span><span class="ansi-blue-fg">&#39;data&#39;</span><span class="ansi-blue-fg">,</span> <span class="ansi-blue-fg">&#39;austen-brontë-split&#39;</span><span class="ansi-blue-fg">)</span>
+<span class="ansi-green-fg">----&gt; 3</span><span class="ansi-red-fg"> </span>filenames <span class="ansi-blue-fg">=</span> sorted<span class="ansi-blue-fg">(</span><span class="ansi-blue-fg">[</span>os<span class="ansi-blue-fg">.</span>path<span class="ansi-blue-fg">.</span>join<span class="ansi-blue-fg">(</span>CORPUS_PATH<span class="ansi-blue-fg">,</span> fn<span class="ansi-blue-fg">)</span> <span class="ansi-green-fg">for</span> fn <span class="ansi-green-fg">in</span> os<span class="ansi-blue-fg">.</span>listdir<span class="ansi-blue-fg">(</span>CORPUS_PATH<span class="ansi-blue-fg">)</span><span class="ansi-blue-fg">]</span><span class="ansi-blue-fg">)</span>
+
+<span class="ansi-red-fg">FileNotFoundError</span>: [Errno 2] No such file or directory: &#39;data/austen-brontë-split&#39;</pre>
+</div>
+</div>
+
+</div>
+</div>
+
+</div>
+
+<div class="{} cell border-box-sizing code_cell rendered">
+<div class="input">
+<div class="prompt input_prompt">In&nbsp;[2]:</div>
+<div class="inner_cell">
+	<div class="input_area">
+<div class=" highlight hl-ipython3"><pre><span></span><span class="c1"># files are located in data/austen-brontë-split</span>
+<span class="nb">len</span><span class="p">(</span><span class="n">filenames</span><span class="p">)</span>
+<span class="n">filenames</span><span class="p">[:</span><span class="mi">5</span><span class="p">]</span>
+</pre></div>
+
+	</div>
+</div>
+</div>
+
+<div class="output_wrapper">
+<div class="output">
+
+
+<div class="output_area">
+
+	<div class="prompt"></div>
+
+
+<div class="output_subarea output_text output_error">
+<pre>
+<span class="ansi-red-fg">---------------------------------------------------------------------------</span>
+<span class="ansi-red-fg">NameError</span>                                 Traceback (most recent call last)
+<span class="ansi-green-fg">&lt;ipython-input-2-4ff59eae8c96&gt;</span> in <span class="ansi-cyan-fg">&lt;module&gt;</span>
+<span class="ansi-green-intense-fg ansi-bold">      1</span> <span class="ansi-red-fg"># files are located in data/austen-brontë-split</span>
+<span class="ansi-green-fg">----&gt; 2</span><span class="ansi-red-fg"> </span>len<span class="ansi-blue-fg">(</span>filenames<span class="ansi-blue-fg">)</span>
+<span class="ansi-green-intense-fg ansi-bold">      3</span> filenames<span class="ansi-blue-fg">[</span><span class="ansi-blue-fg">:</span><span class="ansi-cyan-fg">5</span><span class="ansi-blue-fg">]</span>
+
+<span class="ansi-red-fg">NameError</span>: name &#39;filenames&#39; is not defined</pre>
+</div>
+</div>
+
+</div>
+</div>
+
+</div>
+
+<div class="{} cell border-box-sizing text_cell rendered"><div class="prompt input_prompt">
+</div><div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html">
+<h2 id="Running-MALLET">Running MALLET<a class="anchor-link" href="#Running-MALLET">&#182;</a></h2><blockquote><p><strong>Note</strong></p>
+<p>The <code>nltk</code> package provides a thin wrapper for MALLET which may be
+worth investigating. See <code>nltk.classify.mallet</code>.</p>
+</blockquote>
+<p>On Linux and BSD-based systems (such as OS X), the following commands should
+download and extract MALLET:</p>
+
+</div>
+</div>
+</div>
+
+<div class="{} cell border-box-sizing text_cell rendered"><div class="prompt input_prompt">
+</div><div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html">
+<div class="highlight"><pre><span></span><span class="c1"># alternatively: wget http://mallet.cs.umass.edu/dist/mallet-2.0.7.tar.gz</span>
+curl --remote-name http://mallet.cs.umass.edu/dist/mallet-2.0.7.tar.gz
+tar zxf mallet-2.0.7.tar.gz
+</pre></div>
+
+</div>
+</div>
+</div>
+
+<div class="{} cell border-box-sizing text_cell rendered"><div class="prompt input_prompt">
+</div><div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html">
+<p>We will run MALLET using the default parameters. Using the option
+<code>--random-seed 1</code> should guarantee that the results produced match those
+appearing below.</p>
+
+</div>
+</div>
+</div>
+
+<div class="{} cell border-box-sizing text_cell rendered"><div class="prompt input_prompt">
+</div><div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html">
+<div class="highlight"><pre><span></span>mallet-2.0.7/bin/mallet import-dir --input data/austen-brontë-split/ --output /tmp/topic-input-austen-brontë.mallet --keep-sequence --remove-stopwords
+mallet-2.0.7/bin/mallet train-topics --input /tmp/topic-input-austen-brontë.mallet --num-topics <span class="m">20</span> --output-doc-topics /tmp/doc-topics-austen-brontë.txt --output-topic-keys /tmp/topic-keys-austen-brontë.txt --random-seed <span class="m">1</span>
+</pre></div>
+
+</div>
+</div>
+</div>
+
+<div class="{} cell border-box-sizing text_cell rendered"><div class="prompt input_prompt">
+</div><div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html">
+<p>Under Windows the commands are similar. For detailed instructions see the
+article <a href="http://programminghistorian.org/lessons/topic-modeling-and-mallet">“Getting Started with Topic Modeling and MALLET”</a>.  The
+MALLET homepage also has <a href="http://mallet.cs.umass.edu/download.php">instructions on how to install and run the software
+under Windows</a>.</p>
+
+</div>
+</div>
+</div>
+
+<div class="{} cell border-box-sizing text_cell rendered"><div class="prompt input_prompt">
+</div><div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html">
+<h2 id="Processing-MALLET-output">Processing MALLET output<a class="anchor-link" href="#Processing-MALLET-output">&#182;</a></h2><p>We have already seen that <a href="working_with_text.html#working-with-text">a document-term matrix is a convenient way to
+represent the word frequencies</a> associated with each
+document. Similarly, as each document is associated with a set of topic shares,
+it will be useful to gather these features into a document-topic
+matrix.</p>
+<blockquote><p><strong>Note</strong></p>
+<p>Topic shares are also referred to as topic <em>weights</em>,
+<em>mixture weights</em>, or <em>component weights</em>. Different communities favor
+different terms.</p>
+</blockquote>
+<p>Manipulating the output of MALLET into a document-topic matrix is not
+entirely intuitive. Fortunately the tools required for the job are available in
+Python and the procedure is similar to that reviewed in the previous section on
+<a href="preprocessing.html#grouping-texts">grouping texts</a>.</p>
+<p>MALLET delivers the topic shares for each document into a file specified by the
+<code>--output-doc-topics</code> option. In this case we have provided the output
+filename <code>/tmp/doc-topics-austen-brontë.txt</code>. The first lines of this file
+should look something like this:</p>
+
+</div>
+</div>
+</div>
+
+<div class="{} cell border-box-sizing code_cell rendered">
+<div class="input">
+<div class="prompt input_prompt">In&nbsp;[3]:</div>
+<div class="inner_cell">
+	<div class="input_area">
+<div class=" highlight hl-ipython3"><pre><span></span><span class="c1">#doc name topic proportion ...</span>
+<span class="mi">0</span>    <span class="n">file</span><span class="p">:</span><span class="o">/.../</span><span class="n">austen</span><span class="o">-</span><span class="n">brontë</span><span class="o">-</span><span class="n">split</span><span class="o">/</span><span class="n">Austen_Pride0103</span><span class="o">.</span><span class="n">txt</span>      <span class="mi">3</span>       <span class="mf">0.2110215053763441</span>      <span class="mi">14</span>      <span class="mf">0.13306451612903225</span>
+<span class="mi">1</span>    <span class="n">file</span><span class="p">:</span><span class="o">/.../</span><span class="n">austen</span><span class="o">-</span><span class="n">brontë</span><span class="o">-</span><span class="n">split</span><span class="o">/</span><span class="n">Austen_Pride0068</span><span class="o">.</span><span class="n">txt</span>      <span class="mi">17</span>      <span class="mf">0.19915254237288135</span>     <span class="mi">3</span>       <span class="mf">0.14548022598870056</span>
+<span class="o">...</span>
+</pre></div>
+
+	</div>
+</div>
+</div>
+
+<div class="output_wrapper">
+<div class="output">
+
+
+<div class="output_area">
+
+	<div class="prompt"></div>
+
+
+<div class="output_subarea output_text output_error">
+<pre>
+<span class="ansi-cyan-fg">  File </span><span class="ansi-green-fg">&#34;&lt;ipython-input-3-8c2199f2dc3f&gt;&#34;</span><span class="ansi-cyan-fg">, line </span><span class="ansi-green-fg">2</span>
+<span class="ansi-red-fg">    0    file:/.../austen-brontë-split/Austen_Pride0103.txt      3       0.2110215053763441      14      0.13306451612903225</span>
+            ^
+<span class="ansi-red-fg">SyntaxError</span><span class="ansi-red-fg">:</span> invalid syntax
+</pre>
+</div>
+</div>
+
+</div>
+</div>
+
+</div>
+
+<div class="{} cell border-box-sizing text_cell rendered"><div class="prompt input_prompt">
+</div><div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html">
+<p>The first two columns of <code>doc-topics.txt</code> record the document number
+(0-based indexing) and the full path to the filename. The rest of the columns are best
+considered as (topic-number, topic-share) pairs. There are as many of these
+pairs as there are topics. All columns are separated by tabs (there’s even
+a trailing tab at the end of the line). With the exception of the header (the
+first line), this file records data using <a href="https://en.wikipedia.org/wiki/Tab-separated_values">tab-separated values</a>. There are two challenges
+in parsing this file into a document-topic matrix. The first is sorting.
+The texts do not appear in a consistent order in <code>doc-topics.txt</code> and the
+topic number and share pairs appear in different columns depending on the
+document. We will need to reorder these pairs before assembling them into
+a matrix.[#fnmapreduce]_ The second challenge is that the number of columns will
+vary with the number of topics specified (<code>--num-topics</code>). Fortunately, the
+documentation in the Python library <a href="http://docs.python.org/dev/library/itertools.html">itertools</a> describes a function
+called <code>grouper</code> using <code>itertools.izip_longest</code> that solves our problem.</p>
+
+</div>
+</div>
+</div>
+
+<div class="{} cell border-box-sizing code_cell rendered">
+<div class="input">
+<div class="prompt input_prompt">In&nbsp;[4]:</div>
+<div class="inner_cell">
+	<div class="input_area">
+<div class=" highlight hl-ipython3"><pre><span></span><span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
+<span class="kn">import</span> <span class="nn">itertools</span>
+<span class="kn">import</span> <span class="nn">operator</span>
+<span class="kn">import</span> <span class="nn">os</span>
+
+<span class="k">def</span> <span class="nf">grouper</span><span class="p">(</span><span class="n">n</span><span class="p">,</span> <span class="n">iterable</span><span class="p">,</span> <span class="n">fillvalue</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+    <span class="s2">&quot;Collect data into fixed-length chunks or blocks&quot;</span>
+    <span class="c1"># grouper(3, &#39;ABCDEFG&#39;, &#39;x&#39;) --&gt; ABC DEF Gxx&quot;</span>
+    <span class="n">args</span> <span class="o">=</span> <span class="p">[</span><span class="nb">iter</span><span class="p">(</span><span class="n">iterable</span><span class="p">)]</span> <span class="o">*</span> <span class="n">n</span>
+    <span class="k">return</span> <span class="n">itertools</span><span class="o">.</span><span class="n">zip_longest</span><span class="p">(</span><span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="n">fillvalue</span><span class="o">=</span><span class="n">fillvalue</span><span class="p">)</span>
+
+<span class="n">doctopic_triples</span> <span class="o">=</span> <span class="p">[]</span>
+<span class="n">mallet_docnames</span> <span class="o">=</span> <span class="p">[]</span>
+
+<span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="s2">&quot;/tmp/doc-topics-austen-brontë.txt&quot;</span><span class="p">)</span> <span class="k">as</span> <span class="n">f</span><span class="p">:</span>
+    <span class="n">f</span><span class="o">.</span><span class="n">readline</span><span class="p">()</span>  <span class="c1"># read one line in order to skip the header</span>
+    <span class="k">for</span> <span class="n">line</span> <span class="ow">in</span> <span class="n">f</span><span class="p">:</span>
+        <span class="c1"># ``docnum, docname, *values`` performs &quot;tuple unpacking&quot;, useful Python feature</span>
+        <span class="c1"># ``.rstrip()`` removes the superfluous trailing tab</span>
+        <span class="n">docnum</span><span class="p">,</span> <span class="n">docname</span><span class="p">,</span> <span class="o">*</span><span class="n">values</span> <span class="o">=</span> <span class="n">line</span><span class="o">.</span><span class="n">rstrip</span><span class="p">()</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s1">&#39;</span><span class="se">\t</span><span class="s1">&#39;</span><span class="p">)</span>
+        <span class="n">mallet_docnames</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">docname</span><span class="p">)</span>
+        <span class="k">for</span> <span class="n">topic</span><span class="p">,</span> <span class="n">share</span> <span class="ow">in</span> <span class="n">grouper</span><span class="p">(</span><span class="mi">2</span><span class="p">,</span> <span class="n">values</span><span class="p">):</span>
+            <span class="n">triple</span> <span class="o">=</span> <span class="p">(</span><span class="n">docname</span><span class="p">,</span> <span class="nb">int</span><span class="p">(</span><span class="n">topic</span><span class="p">),</span> <span class="nb">float</span><span class="p">(</span><span class="n">share</span><span class="p">))</span>
+            <span class="n">doctopic_triples</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">triple</span><span class="p">)</span>
+
+<span class="c1"># sort the triples</span>
+<span class="c1"># triple is (docname, topicnum, share) so sort(key=operator.itemgetter(0,1))</span>
+<span class="c1"># sorts on (docname, topicnum) which is what we want</span>
+<span class="n">doctopic_triples</span> <span class="o">=</span> <span class="nb">sorted</span><span class="p">(</span><span class="n">doctopic_triples</span><span class="p">,</span> <span class="n">key</span><span class="o">=</span><span class="n">operator</span><span class="o">.</span><span class="n">itemgetter</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span><span class="mi">1</span><span class="p">))</span>
+
+<span class="c1"># sort the document names rather than relying on MALLET&#39;s ordering</span>
+<span class="n">mallet_docnames</span> <span class="o">=</span> <span class="nb">sorted</span><span class="p">(</span><span class="n">mallet_docnames</span><span class="p">)</span>
+
+<span class="c1"># collect into a document-term matrix</span>
+<span class="n">num_docs</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">mallet_docnames</span><span class="p">)</span>
+<span class="n">num_topics</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">doctopic_triples</span><span class="p">)</span> <span class="o">//</span> <span class="nb">len</span><span class="p">(</span><span class="n">mallet_docnames</span><span class="p">)</span>
+
+<span class="c1"># the following works because we know that the triples are in sequential order</span>
+<span class="n">doctopic</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">((</span><span class="n">num_docs</span><span class="p">,</span> <span class="n">num_topics</span><span class="p">))</span>
+<span class="k">for</span> <span class="n">triple</span> <span class="ow">in</span> <span class="n">doctopic_triples</span><span class="p">:</span>
+    <span class="n">docname</span><span class="p">,</span> <span class="n">topic</span><span class="p">,</span> <span class="n">share</span> <span class="o">=</span> <span class="n">triple</span>
+    <span class="n">row_num</span> <span class="o">=</span> <span class="n">mallet_docnames</span><span class="o">.</span><span class="n">index</span><span class="p">(</span><span class="n">docname</span><span class="p">)</span>
+    <span class="n">doctopic</span><span class="p">[</span><span class="n">row_num</span><span class="p">,</span> <span class="n">topic</span><span class="p">]</span> <span class="o">=</span> <span class="n">share</span>
+
+<span class="nd">@suppress</span>
+<span class="n">doctopic_orig</span> <span class="o">=</span> <span class="n">doctopic</span><span class="o">.</span><span class="n">copy</span><span class="p">()</span>
+</pre></div>
+
+	</div>
+</div>
+</div>
+
+<div class="output_wrapper">
+<div class="output">
+
+
+<div class="output_area">
+
+	<div class="prompt"></div>
+
+
+<div class="output_subarea output_text output_error">
+<pre>
+<span class="ansi-cyan-fg">  File </span><span class="ansi-green-fg">&#34;&lt;ipython-input-4-5f5e01107f7a&gt;&#34;</span><span class="ansi-cyan-fg">, line </span><span class="ansi-green-fg">46</span>
+<span class="ansi-red-fg">    doctopic_orig = doctopic.copy()</span>
+                ^
+<span class="ansi-red-fg">SyntaxError</span><span class="ansi-red-fg">:</span> invalid syntax
+</pre>
+</div>
+</div>
+
+</div>
+</div>
+
+</div>
+
+<div class="{} cell border-box-sizing code_cell rendered">
+<div class="input">
+<div class="prompt input_prompt">In&nbsp;[5]:</div>
+<div class="inner_cell">
+	<div class="input_area">
+<div class=" highlight hl-ipython3"><pre><span></span><span class="c1"># The following method is considerably faster. It uses the itertools library which is part of the Python standard library.</span>
+<span class="kn">import</span> <span class="nn">itertools</span>
+<span class="kn">import</span> <span class="nn">operator</span>
+<span class="n">doctopic</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">((</span><span class="n">num_docs</span><span class="p">,</span> <span class="n">num_topics</span><span class="p">))</span>
+<span class="k">for</span> <span class="n">i</span><span class="p">,</span> <span class="p">(</span><span class="n">doc_name</span><span class="p">,</span> <span class="n">triples</span><span class="p">)</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">itertools</span><span class="o">.</span><span class="n">groupby</span><span class="p">(</span><span class="n">doctopic_triples</span><span class="p">,</span> <span class="n">key</span><span class="o">=</span><span class="n">operator</span><span class="o">.</span><span class="n">itemgetter</span><span class="p">(</span><span class="mi">0</span><span class="p">))):</span>
+    <span class="n">doctopic</span><span class="p">[</span><span class="n">i</span><span class="p">,</span> <span class="p">:]</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="n">share</span> <span class="k">for</span> <span class="n">_</span><span class="p">,</span> <span class="n">_</span><span class="p">,</span> <span class="n">share</span> <span class="ow">in</span> <span class="n">triples</span><span class="p">])</span>
+</pre></div>
+
+	</div>
+</div>
+</div>
+
+<div class="output_wrapper">
+<div class="output">
+
+
+<div class="output_area">
+
+	<div class="prompt"></div>
+
+
+<div class="output_subarea output_text output_error">
+<pre>
+<span class="ansi-red-fg">---------------------------------------------------------------------------</span>
+<span class="ansi-red-fg">NameError</span>                                 Traceback (most recent call last)
+<span class="ansi-green-fg">&lt;ipython-input-5-9f3aad46dff9&gt;</span> in <span class="ansi-cyan-fg">&lt;module&gt;</span>
+<span class="ansi-green-intense-fg ansi-bold">      2</span> <span class="ansi-green-fg">import</span> itertools
+<span class="ansi-green-intense-fg ansi-bold">      3</span> <span class="ansi-green-fg">import</span> operator
+<span class="ansi-green-fg">----&gt; 4</span><span class="ansi-red-fg"> </span>doctopic <span class="ansi-blue-fg">=</span> np<span class="ansi-blue-fg">.</span>zeros<span class="ansi-blue-fg">(</span><span class="ansi-blue-fg">(</span>num_docs<span class="ansi-blue-fg">,</span> num_topics<span class="ansi-blue-fg">)</span><span class="ansi-blue-fg">)</span>
+<span class="ansi-green-intense-fg ansi-bold">      5</span> <span class="ansi-green-fg">for</span> i<span class="ansi-blue-fg">,</span> <span class="ansi-blue-fg">(</span>doc_name<span class="ansi-blue-fg">,</span> triples<span class="ansi-blue-fg">)</span> <span class="ansi-green-fg">in</span> enumerate<span class="ansi-blue-fg">(</span>itertools<span class="ansi-blue-fg">.</span>groupby<span class="ansi-blue-fg">(</span>doctopic_triples<span class="ansi-blue-fg">,</span> key<span class="ansi-blue-fg">=</span>operator<span class="ansi-blue-fg">.</span>itemgetter<span class="ansi-blue-fg">(</span><span class="ansi-cyan-fg">0</span><span class="ansi-blue-fg">)</span><span class="ansi-blue-fg">)</span><span class="ansi-blue-fg">)</span><span class="ansi-blue-fg">:</span>
+<span class="ansi-green-intense-fg ansi-bold">      6</span>     doctopic<span class="ansi-blue-fg">[</span>i<span class="ansi-blue-fg">,</span> <span class="ansi-blue-fg">:</span><span class="ansi-blue-fg">]</span> <span class="ansi-blue-fg">=</span> np<span class="ansi-blue-fg">.</span>array<span class="ansi-blue-fg">(</span><span class="ansi-blue-fg">[</span>share <span class="ansi-green-fg">for</span> _<span class="ansi-blue-fg">,</span> _<span class="ansi-blue-fg">,</span> share <span class="ansi-green-fg">in</span> triples<span class="ansi-blue-fg">]</span><span class="ansi-blue-fg">)</span>
+
+<span class="ansi-red-fg">NameError</span>: name &#39;np&#39; is not defined</pre>
+</div>
+</div>
+
+</div>
+</div>
+
+</div>
+
+<div class="{} cell border-box-sizing text_cell rendered"><div class="prompt input_prompt">
+</div><div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html">
+<p>Now we will calculate the average of the topic shares associated with each
+novel. Recall that we have been working with small sections of novels. The
+following step combines the topic shares for sections associated with the same
+novel.</p>
+
+</div>
+</div>
+</div>
+
+<div class="{} cell border-box-sizing code_cell rendered">
+<div class="input">
+<div class="prompt input_prompt">In&nbsp;[6]:</div>
+<div class="inner_cell">
+	<div class="input_area">
+<div class=" highlight hl-ipython3"><pre><span></span><span class="n">novel_names</span> <span class="o">=</span> <span class="p">[]</span>
+<span class="k">for</span> <span class="n">fn</span> <span class="ow">in</span> <span class="n">filenames</span><span class="p">:</span>
+    <span class="n">basename</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">basename</span><span class="p">(</span><span class="n">fn</span><span class="p">)</span>
+    <span class="c1"># splitext splits the extension off, &#39;novel.txt&#39; -&gt; (&#39;novel&#39;, &#39;.txt&#39;)</span>
+    <span class="n">name</span><span class="p">,</span> <span class="n">ext</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">splitext</span><span class="p">(</span><span class="n">basename</span><span class="p">)</span>
+    <span class="c1"># remove trailing numbers identifying chunk</span>
+    <span class="n">name</span> <span class="o">=</span> <span class="n">name</span><span class="o">.</span><span class="n">rstrip</span><span class="p">(</span><span class="s1">&#39;0123456789&#39;</span><span class="p">)</span>
+    <span class="n">novel_names</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">name</span><span class="p">)</span>
+<span class="c1"># turn this into an array so we can use NumPy functions</span>
+<span class="n">novel_names</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">asarray</span><span class="p">(</span><span class="n">novel_names</span><span class="p">)</span>
+
+<span class="nd">@suppress</span>
+<span class="k">assert</span> <span class="nb">len</span><span class="p">(</span><span class="nb">set</span><span class="p">(</span><span class="n">novel_names</span><span class="p">))</span> <span class="o">==</span> <span class="mi">6</span>
+<span class="nd">@supress</span>
+<span class="n">doctopic_orig</span> <span class="o">=</span> <span class="n">doctopic</span><span class="o">.</span><span class="n">copy</span><span class="p">()</span>
+
+<span class="c1"># use method described in preprocessing section</span>
+<span class="n">num_groups</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="nb">set</span><span class="p">(</span><span class="n">novel_names</span><span class="p">))</span>
+<span class="n">doctopic_grouped</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">((</span><span class="n">num_groups</span><span class="p">,</span> <span class="n">num_topics</span><span class="p">))</span>
+<span class="k">for</span> <span class="n">i</span><span class="p">,</span> <span class="n">name</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="nb">sorted</span><span class="p">(</span><span class="nb">set</span><span class="p">(</span><span class="n">novel_names</span><span class="p">))):</span>
+    <span class="n">doctopic_grouped</span><span class="p">[</span><span class="n">i</span><span class="p">,</span> <span class="p">:]</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">mean</span><span class="p">(</span><span class="n">doctopic</span><span class="p">[</span><span class="n">novel_names</span> <span class="o">==</span> <span class="n">name</span><span class="p">,</span> <span class="p">:],</span> <span class="n">axis</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
+
+<span class="n">doctopic</span> <span class="o">=</span> <span class="n">doctopic_grouped</span>
+
+<span class="nd">@suppress</span>
+<span class="n">docnames</span> <span class="o">=</span> <span class="nb">sorted</span><span class="p">(</span><span class="nb">set</span><span class="p">(</span><span class="n">novel_names</span><span class="p">))</span>
+</pre></div>
+
+	</div>
+</div>
+</div>
+
+<div class="output_wrapper">
+<div class="output">
+
+
+<div class="output_area">
+
+	<div class="prompt"></div>
+
+
+<div class="output_subarea output_text output_error">
+<pre>
+<span class="ansi-cyan-fg">  File </span><span class="ansi-green-fg">&#34;&lt;ipython-input-6-657117322ce2&gt;&#34;</span><span class="ansi-cyan-fg">, line </span><span class="ansi-green-fg">13</span>
+<span class="ansi-red-fg">    assert len(set(novel_names)) == 6</span>
+         ^
+<span class="ansi-red-fg">SyntaxError</span><span class="ansi-red-fg">:</span> invalid syntax
+</pre>
+</div>
+</div>
+
+</div>
+</div>
+
+</div>
+
+<div class="{} cell border-box-sizing text_cell rendered"><div class="prompt input_prompt">
+</div><div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html">
+<p>In order to fit into the space available, the table above displays the first 15
+of 20 topics.</p>
+
+</div>
+</div>
+</div>
+
+<div class="{} cell border-box-sizing text_cell rendered"><div class="prompt input_prompt">
+</div><div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html">
+<h2 id="Inspecting-the-topic-model">Inspecting the topic model<a class="anchor-link" href="#Inspecting-the-topic-model">&#182;</a></h2><p>The first thing we should appreciate about our topic model is that the twenty
+shares do a remarkably good job of summarizing our corpus. For example, they
+preserve the distances between novels (see figures below). By this measure, LDA
+is good at dimensionality reduction: we have taken a matrix of dimensions 813 by
+14862 (occupying almost three megabytes of memory if stored in a spare matrix)
+and fashioned a representation that preserves important features in a matrix
+that is 813 by 20 (5% the size of the original).</p>
+<p>Even though a topic model “discards” the “fine-grained” information recorded in
+the matrix of word frequencies, it preserves salient details of the underlying
+matrix. That is, the topic shares associated with a document have an
+interpretation in terms of word frequencies. This is best illustrated by
+examining the present topic model.</p>
+<p>First let us identify the most significant topics for each text in the corpus.
+This procedure does not differ in essence from the procedure for identifying the
+most frequent words in each text.</p>
+
+</div>
+</div>
+</div>
+
+<div class="{} cell border-box-sizing code_cell rendered">
+<div class="input">
+<div class="prompt input_prompt">In&nbsp;[7]:</div>
+<div class="inner_cell">
+	<div class="input_area">
+<div class=" highlight hl-ipython3"><pre><span></span><span class="n">novels</span> <span class="o">=</span> <span class="nb">sorted</span><span class="p">(</span><span class="nb">set</span><span class="p">(</span><span class="n">novel_names</span><span class="p">))</span>
+<span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Top topics in...&quot;</span><span class="p">)</span>
+<span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">doctopic</span><span class="p">)):</span>
+    <span class="n">top_topics</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">argsort</span><span class="p">(</span><span class="n">doctopic</span><span class="p">[</span><span class="n">i</span><span class="p">,:])[::</span><span class="o">-</span><span class="mi">1</span><span class="p">][</span><span class="mi">0</span><span class="p">:</span><span class="mi">3</span><span class="p">]</span>
+    <span class="n">top_topics_str</span> <span class="o">=</span> <span class="s1">&#39; &#39;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="n">t</span><span class="p">)</span> <span class="k">for</span> <span class="n">t</span> <span class="ow">in</span> <span class="n">top_topics</span><span class="p">)</span>
+    <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;</span><span class="si">{}</span><span class="s2">: </span><span class="si">{}</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">novels</span><span class="p">[</span><span class="n">i</span><span class="p">],</span> <span class="n">top_topics_str</span><span class="p">))</span>
+</pre></div>
+
+	</div>
+</div>
+</div>
+
+<div class="output_wrapper">
+<div class="output">
+
+
+<div class="output_area">
+
+	<div class="prompt"></div>
+
+
+<div class="output_subarea output_text output_error">
+<pre>
+<span class="ansi-red-fg">---------------------------------------------------------------------------</span>
+<span class="ansi-red-fg">NameError</span>                                 Traceback (most recent call last)
+<span class="ansi-green-fg">&lt;ipython-input-7-f5abbc25840f&gt;</span> in <span class="ansi-cyan-fg">&lt;module&gt;</span>
+<span class="ansi-green-fg">----&gt; 1</span><span class="ansi-red-fg"> </span>novels <span class="ansi-blue-fg">=</span> sorted<span class="ansi-blue-fg">(</span>set<span class="ansi-blue-fg">(</span>novel_names<span class="ansi-blue-fg">)</span><span class="ansi-blue-fg">)</span>
+<span class="ansi-green-intense-fg ansi-bold">      2</span> print<span class="ansi-blue-fg">(</span><span class="ansi-blue-fg">&#34;Top topics in...&#34;</span><span class="ansi-blue-fg">)</span>
+<span class="ansi-green-intense-fg ansi-bold">      3</span> <span class="ansi-green-fg">for</span> i <span class="ansi-green-fg">in</span> range<span class="ansi-blue-fg">(</span>len<span class="ansi-blue-fg">(</span>doctopic<span class="ansi-blue-fg">)</span><span class="ansi-blue-fg">)</span><span class="ansi-blue-fg">:</span>
+<span class="ansi-green-intense-fg ansi-bold">      4</span>     top_topics <span class="ansi-blue-fg">=</span> np<span class="ansi-blue-fg">.</span>argsort<span class="ansi-blue-fg">(</span>doctopic<span class="ansi-blue-fg">[</span>i<span class="ansi-blue-fg">,</span><span class="ansi-blue-fg">:</span><span class="ansi-blue-fg">]</span><span class="ansi-blue-fg">)</span><span class="ansi-blue-fg">[</span><span class="ansi-blue-fg">:</span><span class="ansi-blue-fg">:</span><span class="ansi-blue-fg">-</span><span class="ansi-cyan-fg">1</span><span class="ansi-blue-fg">]</span><span class="ansi-blue-fg">[</span><span class="ansi-cyan-fg">0</span><span class="ansi-blue-fg">:</span><span class="ansi-cyan-fg">3</span><span class="ansi-blue-fg">]</span>
+<span class="ansi-green-intense-fg ansi-bold">      5</span>     top_topics_str <span class="ansi-blue-fg">=</span> <span class="ansi-blue-fg">&#39; &#39;</span><span class="ansi-blue-fg">.</span>join<span class="ansi-blue-fg">(</span>str<span class="ansi-blue-fg">(</span>t<span class="ansi-blue-fg">)</span> <span class="ansi-green-fg">for</span> t <span class="ansi-green-fg">in</span> top_topics<span class="ansi-blue-fg">)</span>
+
+<span class="ansi-red-fg">NameError</span>: name &#39;novel_names&#39; is not defined</pre>
+</div>
+</div>
+
+</div>
+</div>
+
+</div>
+
+<div class="{} cell border-box-sizing text_cell rendered"><div class="prompt input_prompt">
+</div><div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html">
+<blockquote><p><strong>Note</strong></p>
+<p>Recall that, like everything else in Python (and C, Java, and many
+other languages), the topics use 0-based indexing; the first topic is topic 0.</p>
+</blockquote>
+<p>Each topic in the topic model can be inspected. Each topic is a distribution
+which captures in probabilistic terms, the words associated with the topic and
+the strength of the association (the posterior probability of finding a word
+associated with a topic). Sometimes this distribution is called a topic-word
+distribution (in contrast to the document-topic distribution). Again, this is
+best illustrated by inspecting the topic-word distributions provided by MALLET
+for our Austen-Brontë corpus.  MALLET places (a subset of) the topic-word
+distribution for each topic in a file specified by the command-line option
+<code>--output-topic-keys</code>. For the run of <code>mallet</code> used in this section, this
+file is <code>/tmp/topic-keys-austen-brontë.txt</code>. The first line of this file
+should resemble the following:</p>
+
+</div>
+</div>
+</div>
+
+<div class="{} cell border-box-sizing code_cell rendered">
+<div class="input">
+<div class="prompt input_prompt">In&nbsp;[8]:</div>
+<div class="inner_cell">
+	<div class="input_area">
+<div class=" highlight hl-ipython3"><pre><span></span><span class="mi">0</span>    <span class="mf">2.5</span>     <span class="n">long</span> <span class="n">room</span> <span class="n">looked</span> <span class="n">day</span> <span class="n">eyes</span> <span class="n">make</span> <span class="n">voice</span> <span class="n">head</span> <span class="n">till</span> <span class="n">girl</span> <span class="n">morning</span> <span class="n">feel</span> <span class="n">called</span> <span class="n">table</span> <span class="n">turn</span> <span class="n">continued</span> <span class="n">times</span> <span class="n">appeared</span> <span class="n">breakfast</span>
+</pre></div>
+
+	</div>
+</div>
+</div>
+
+<div class="output_wrapper">
+<div class="output">
+
+
+<div class="output_area">
+
+	<div class="prompt"></div>
+
+
+<div class="output_subarea output_text output_error">
+<pre>
+<span class="ansi-cyan-fg">  File </span><span class="ansi-green-fg">&#34;&lt;ipython-input-8-63990ca30c62&gt;&#34;</span><span class="ansi-cyan-fg">, line </span><span class="ansi-green-fg">1</span>
+<span class="ansi-red-fg">    0    2.5     long room looked day eyes make voice head till girl morning feel called table turn continued times appeared breakfast</span>
+           ^
+<span class="ansi-red-fg">SyntaxError</span><span class="ansi-red-fg">:</span> invalid syntax
+</pre>
+</div>
+</div>
+
+</div>
+</div>
+
+</div>
+
+<div class="{} cell border-box-sizing text_cell rendered"><div class="prompt input_prompt">
+</div><div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html">
+<p>We need to parse this file into something we can work with. Fortunately this
+task is not difficult.</p>
+
+</div>
+</div>
+</div>
+
+<div class="{} cell border-box-sizing code_cell rendered">
+<div class="input">
+<div class="prompt input_prompt">In&nbsp;[9]:</div>
+<div class="inner_cell">
+	<div class="input_area">
+<div class=" highlight hl-ipython3"><pre><span></span><span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="s1">&#39;/tmp/topic-keys-austen-brontë.txt&#39;</span><span class="p">)</span> <span class="k">as</span> <span class="nb">input</span><span class="p">:</span>
+    <span class="n">topic_keys_lines</span> <span class="o">=</span> <span class="nb">input</span><span class="o">.</span><span class="n">readlines</span><span class="p">()</span>
+<span class="n">topic_words</span> <span class="o">=</span> <span class="p">[]</span>
+<span class="k">for</span> <span class="n">line</span> <span class="ow">in</span> <span class="n">topic_keys_lines</span><span class="p">:</span>
+    <span class="n">_</span><span class="p">,</span> <span class="n">_</span><span class="p">,</span> <span class="n">words</span> <span class="o">=</span> <span class="n">line</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s1">&#39;</span><span class="se">\t</span><span class="s1">&#39;</span><span class="p">)</span>  <span class="c1"># tab-separated</span>
+    <span class="n">words</span> <span class="o">=</span> <span class="n">words</span><span class="o">.</span><span class="n">rstrip</span><span class="p">()</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s1">&#39; &#39;</span><span class="p">)</span>  <span class="c1"># remove the trailing &#39;\n&#39;</span>
+    <span class="n">topic_words</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">words</span><span class="p">)</span>
+
+<span class="c1"># now we can get a list of the top words for topic 0 with topic_words[0]</span>
+<span class="n">topic_words</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+</pre></div>
+
+	</div>
+</div>
+</div>
+
+<div class="output_wrapper">
+<div class="output">
+
+
+<div class="output_area">
+
+	<div class="prompt"></div>
+
+
+<div class="output_subarea output_text output_error">
+<pre>
+<span class="ansi-red-fg">---------------------------------------------------------------------------</span>
+<span class="ansi-red-fg">FileNotFoundError</span>                         Traceback (most recent call last)
+<span class="ansi-green-fg">&lt;ipython-input-9-224a167046bd&gt;</span> in <span class="ansi-cyan-fg">&lt;module&gt;</span>
+<span class="ansi-green-fg">----&gt; 1</span><span class="ansi-red-fg"> </span><span class="ansi-green-fg">with</span> open<span class="ansi-blue-fg">(</span><span class="ansi-blue-fg">&#39;/tmp/topic-keys-austen-brontë.txt&#39;</span><span class="ansi-blue-fg">)</span> <span class="ansi-green-fg">as</span> input<span class="ansi-blue-fg">:</span>
+<span class="ansi-green-intense-fg ansi-bold">      2</span>     topic_keys_lines <span class="ansi-blue-fg">=</span> input<span class="ansi-blue-fg">.</span>readlines<span class="ansi-blue-fg">(</span><span class="ansi-blue-fg">)</span>
+<span class="ansi-green-intense-fg ansi-bold">      3</span> topic_words <span class="ansi-blue-fg">=</span> <span class="ansi-blue-fg">[</span><span class="ansi-blue-fg">]</span>
+<span class="ansi-green-intense-fg ansi-bold">      4</span> <span class="ansi-green-fg">for</span> line <span class="ansi-green-fg">in</span> topic_keys_lines<span class="ansi-blue-fg">:</span>
+<span class="ansi-green-intense-fg ansi-bold">      5</span>     _<span class="ansi-blue-fg">,</span> _<span class="ansi-blue-fg">,</span> words <span class="ansi-blue-fg">=</span> line<span class="ansi-blue-fg">.</span>split<span class="ansi-blue-fg">(</span><span class="ansi-blue-fg">&#39;\t&#39;</span><span class="ansi-blue-fg">)</span>  <span class="ansi-red-fg"># tab-separated</span>
+
+<span class="ansi-red-fg">FileNotFoundError</span>: [Errno 2] No such file or directory: &#39;/tmp/topic-keys-austen-brontë.txt&#39;</pre>
+</div>
+</div>
+
+</div>
+</div>
+
+</div>
+
+<div class="{} cell border-box-sizing text_cell rendered"><div class="prompt input_prompt">
+</div><div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html">
+<p>Now we have everything we need to list the words associated with each topic.</p>
+
+</div>
+</div>
+</div>
+
+<div class="{} cell border-box-sizing code_cell rendered">
+<div class="input">
+<div class="prompt input_prompt">In&nbsp;[10]:</div>
+<div class="inner_cell">
+	<div class="input_area">
+<div class=" highlight hl-ipython3"><pre><span></span><span class="n">N_WORDS_DISPLAY</span> <span class="o">=</span> <span class="mi">10</span>
+<span class="k">for</span> <span class="n">t</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">topic_words</span><span class="p">)):</span>
+    <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Topic </span><span class="si">{}</span><span class="s2">: </span><span class="si">{}</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">t</span><span class="p">,</span> <span class="s1">&#39; &#39;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">topic_words</span><span class="p">[</span><span class="n">t</span><span class="p">][:</span><span class="n">N_WORDS_DISPLAY</span><span class="p">])))</span>
+</pre></div>
+
+	</div>
+</div>
+</div>
+
+<div class="output_wrapper">
+<div class="output">
+
+
+<div class="output_area">
+
+	<div class="prompt"></div>
+
+
+<div class="output_subarea output_text output_error">
+<pre>
+<span class="ansi-red-fg">---------------------------------------------------------------------------</span>
+<span class="ansi-red-fg">NameError</span>                                 Traceback (most recent call last)
+<span class="ansi-green-fg">&lt;ipython-input-10-0389728c852c&gt;</span> in <span class="ansi-cyan-fg">&lt;module&gt;</span>
+<span class="ansi-green-intense-fg ansi-bold">      1</span> N_WORDS_DISPLAY <span class="ansi-blue-fg">=</span> <span class="ansi-cyan-fg">10</span>
+<span class="ansi-green-fg">----&gt; 2</span><span class="ansi-red-fg"> </span><span class="ansi-green-fg">for</span> t <span class="ansi-green-fg">in</span> range<span class="ansi-blue-fg">(</span>len<span class="ansi-blue-fg">(</span>topic_words<span class="ansi-blue-fg">)</span><span class="ansi-blue-fg">)</span><span class="ansi-blue-fg">:</span>
+<span class="ansi-green-intense-fg ansi-bold">      3</span>     print<span class="ansi-blue-fg">(</span><span class="ansi-blue-fg">&#34;Topic {}: {}&#34;</span><span class="ansi-blue-fg">.</span>format<span class="ansi-blue-fg">(</span>t<span class="ansi-blue-fg">,</span> <span class="ansi-blue-fg">&#39; &#39;</span><span class="ansi-blue-fg">.</span>join<span class="ansi-blue-fg">(</span>topic_words<span class="ansi-blue-fg">[</span>t<span class="ansi-blue-fg">]</span><span class="ansi-blue-fg">[</span><span class="ansi-blue-fg">:</span>N_WORDS_DISPLAY<span class="ansi-blue-fg">]</span><span class="ansi-blue-fg">)</span><span class="ansi-blue-fg">)</span><span class="ansi-blue-fg">)</span>
+
+<span class="ansi-red-fg">NameError</span>: name &#39;topic_words&#39; is not defined</pre>
+</div>
+</div>
+
+</div>
+</div>
+
+</div>
+
+<div class="{} cell border-box-sizing text_cell rendered"><div class="prompt input_prompt">
+</div><div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html">
+<p>There are many ways to inspect and to visualize topic models. Some of the more
+common methods are covered in <a href="topic_model_visualization.html#topic-model-visualization">next section</a>.</p>
+
+</div>
+</div>
+</div>
+
+<div class="{} cell border-box-sizing text_cell rendered"><div class="prompt input_prompt">
+</div><div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html">
+<h3 id="Distinctive-topics">Distinctive topics<a class="anchor-link" href="#Distinctive-topics">&#182;</a></h3><p>Finding distinctive topics is analogous to the task of <a href="feature_selection.html#feature-selection">finding distinctive
+words</a>. The topic model does an excellent job of focusing
+attention on recurrent patterns (of co-occurrence) in the word frequencies
+appearing in a corpus. To the extent that we are interested in these kinds of
+patterns (rather than the rare or isolated feature of texts), working with
+topics tends to be easier than working with word frequencies.</p>
+<p>Consider the task of finding the distinctive topics in Austen’s novels. Here the
+simple difference-in-averages provides an easy way of finding topics that tend
+to be associated more strongly with Austen’s novels than with Brontë’s.</p>
+
+</div>
+</div>
+</div>
+
+<div class="{} cell border-box-sizing code_cell rendered">
+<div class="input">
+<div class="prompt input_prompt">In&nbsp;[11]:</div>
+<div class="inner_cell">
+	<div class="input_area">
+<div class=" highlight hl-ipython3"><pre><span></span><span class="n">austen_indices</span><span class="p">,</span> <span class="n">cbronte_indices</span> <span class="o">=</span> <span class="p">[],</span> <span class="p">[]</span>
+<span class="k">for</span> <span class="n">index</span><span class="p">,</span> <span class="n">fn</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="nb">sorted</span><span class="p">(</span><span class="nb">set</span><span class="p">(</span><span class="n">novel_names</span><span class="p">))):</span>
+    <span class="k">if</span> <span class="s2">&quot;Austen&quot;</span> <span class="ow">in</span> <span class="n">fn</span><span class="p">:</span>
+        <span class="n">austen_indices</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">index</span><span class="p">)</span>
+    <span class="k">elif</span> <span class="s2">&quot;CBronte&quot;</span> <span class="ow">in</span> <span class="n">fn</span><span class="p">:</span>
+        <span class="n">cbronte_indices</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">index</span><span class="p">)</span>
+
+<span class="n">austen_avg</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">mean</span><span class="p">(</span><span class="n">doctopic</span><span class="p">[</span><span class="n">austen_indices</span><span class="p">,</span> <span class="p">:],</span> <span class="n">axis</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
+<span class="n">cbronte_avg</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">mean</span><span class="p">(</span><span class="n">doctopic</span><span class="p">[</span><span class="n">cbronte_indices</span><span class="p">,</span> <span class="p">:],</span> <span class="n">axis</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
+<span class="n">keyness</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">abs</span><span class="p">(</span><span class="n">austen_avg</span> <span class="o">-</span> <span class="n">cbronte_avg</span><span class="p">)</span>
+<span class="n">ranking</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">argsort</span><span class="p">(</span><span class="n">keyness</span><span class="p">)[::</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span>  <span class="c1"># from highest to lowest; [::-1] reverses order in Python sequences</span>
+
+<span class="c1"># distinctive topics:</span>
+<span class="n">ranking</span><span class="p">[:</span><span class="mi">10</span><span class="p">]</span>
+</pre></div>
+
+	</div>
+</div>
+</div>
+
+<div class="output_wrapper">
+<div class="output">
+
+
+<div class="output_area">
+
+	<div class="prompt"></div>
+
+
+<div class="output_subarea output_text output_error">
+<pre>
+<span class="ansi-red-fg">---------------------------------------------------------------------------</span>
+<span class="ansi-red-fg">NameError</span>                                 Traceback (most recent call last)
+<span class="ansi-green-fg">&lt;ipython-input-11-9aac4f8150b4&gt;</span> in <span class="ansi-cyan-fg">&lt;module&gt;</span>
+<span class="ansi-green-intense-fg ansi-bold">      1</span> austen_indices<span class="ansi-blue-fg">,</span> cbronte_indices <span class="ansi-blue-fg">=</span> <span class="ansi-blue-fg">[</span><span class="ansi-blue-fg">]</span><span class="ansi-blue-fg">,</span> <span class="ansi-blue-fg">[</span><span class="ansi-blue-fg">]</span>
+<span class="ansi-green-fg">----&gt; 2</span><span class="ansi-red-fg"> </span><span class="ansi-green-fg">for</span> index<span class="ansi-blue-fg">,</span> fn <span class="ansi-green-fg">in</span> enumerate<span class="ansi-blue-fg">(</span>sorted<span class="ansi-blue-fg">(</span>set<span class="ansi-blue-fg">(</span>novel_names<span class="ansi-blue-fg">)</span><span class="ansi-blue-fg">)</span><span class="ansi-blue-fg">)</span><span class="ansi-blue-fg">:</span>
+<span class="ansi-green-intense-fg ansi-bold">      3</span>     <span class="ansi-green-fg">if</span> <span class="ansi-blue-fg">&#34;Austen&#34;</span> <span class="ansi-green-fg">in</span> fn<span class="ansi-blue-fg">:</span>
+<span class="ansi-green-intense-fg ansi-bold">      4</span>         austen_indices<span class="ansi-blue-fg">.</span>append<span class="ansi-blue-fg">(</span>index<span class="ansi-blue-fg">)</span>
+<span class="ansi-green-intense-fg ansi-bold">      5</span>     <span class="ansi-green-fg">elif</span> <span class="ansi-blue-fg">&#34;CBronte&#34;</span> <span class="ansi-green-fg">in</span> fn<span class="ansi-blue-fg">:</span>
+
+<span class="ansi-red-fg">NameError</span>: name &#39;novel_names&#39; is not defined</pre>
+</div>
+</div>
+
+</div>
+</div>
+
+</div>
+
+<div class="{} cell border-box-sizing text_cell rendered"><div class="prompt input_prompt">
+</div><div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html">
+<p><p><a id=fnmapreduce href=#fnmapreduce-link><strong>[1]</strong></a> Those familiar with <a href="https://en.wikipedia.org/wiki/MapReduce">MapReduce</a> may recognize the pattern of splitting a dataset into smaller pieces and then (re)ordering them.</p>
+
+</div>
+</div>
+</div>
+ 
+
+
+
+
+					</div>
+
+				</div>
+
+			</div>
+
+			<footer class="footer">
+
+				<p>&copy; Copyright <YEAR>, Built using the minimal jupinx template.</p>
+
+			</footer>
+
+		</div>
+
+		<script src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.1/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+		<script src="/_static/js/base.js"></script>
+
+	</body>
+</html>

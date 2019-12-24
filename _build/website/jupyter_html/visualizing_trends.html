@@ -1,0 +1,607 @@
+<!doctype html>
+<html lang="en">
+	<head>
+		<meta charset="utf-8">
+
+		<title>Visualizing trends &ndash; Documentation</title>
+
+		<meta name="viewport" content="width=device-width, initial-scale=1">
+		<meta name="author" content="">
+		<meta name="keywords" content="">
+		<meta name="description" content="">
+
+		<link rel="stylesheet" href="/_static/css/base.css">
+
+	</head>
+
+	<body>
+
+		<div class="wrapper">
+
+			<header class="header">
+
+				<div class="branding">
+
+					<p class="site-title"><a href="/">Documentation</a></p>
+
+					<p class="sr-only"><a href="#skip">Skip to content</a></p>
+
+				</div>
+
+				<div class="header-tools">
+
+
+					<div class="header-badge" id="executability_status_badge"></div>
+
+
+				</div>
+
+			</header>
+
+			<div class="main">
+
+				<div class="content">
+
+					<div id="skip"></div>
+
+					<div class="document">
+
+<div class="{} cell border-box-sizing text_cell rendered"><div class="prompt input_prompt">
+</div><div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html">
+<p><a id='index-0'></a></p>
+<p><a id='visualizing-trends'></a></p>
+
+</div>
+</div>
+</div>
+
+<div class="{} cell border-box-sizing text_cell rendered"><div class="prompt input_prompt">
+</div><div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html">
+<h1 id="Visualizing-trends">Visualizing trends<a class="anchor-link" href="#Visualizing-trends">&#182;</a></h1><p>Texts often have a sequence. Newspapers and periodicals have volumes.
+Novels have chapters. Personal diaries have dated entries. Visualizations of
+topic models may benefit from incorporating information about where a text falls
+in a sequence.</p>
+<p>As a motivating example, consider Victor Hugo’s <em>Les Misérables</em>. Over 500,000
+words long, the book counts as a lengthy text by any
+standard.[#fn_les<em>mis]</em> The novel comes in five volumes (“Fantine”, “Cosette”,
+“Marius”, “The Idyll in the Rue Plumet and the Epic in the Rue St. Denis”, and
+“Jean Valjean”). And within each volume we have a sequence of chapters. (And
+within each chapter we have a sequence of paragraphs, …). In this section we
+will address how to visualize topic shares in sequence.</p>
+<p>To whet your appetite, consider the rise and fall of a topic associated with
+revolutionary activity in <em>Les Misérables</em>:</p>
+<p>&lt;img src="_static/plot_topics_over_time_series_les_misérables.png" alt="Les Misérables, Topic #35 ("barricade enjolras ...")" style="width:60%;height:60%"&gt;</p>
+<p>(<a href="https://en.wikipedia.org/wiki/Enjolras">Enjolras</a> is the leader of the
+revolutionary <em>Les Amis de l’ABC</em>.)</p>
+<blockquote><p><strong>Note</strong></p>
+<p>Probabilistic models such as topic models often benefit from
+incorporating information about where an individual text falls in a larger
+sequence of texts <a href="references.html#blei-dynamic-2006">[BL06]</a>.</p>
+</blockquote>
+
+</div>
+</div>
+</div>
+
+<div class="{} cell border-box-sizing text_cell rendered"><div class="prompt input_prompt">
+</div><div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html">
+<h2 id="Plotting-trends">Plotting trends<a class="anchor-link" href="#Plotting-trends">&#182;</a></h2><p>As always, we first need to fit a topic model to the corpus. As MALLET has no
+built-in French stopword list we need to provide one. We will use the <a href="http://svn.tartarus.org/snowball/trunk/website/algorithms/french/stop.txt">French
+stopword list</a>
+from the Snowball stemmer package. Additionally, because we are dealing with
+non-English text we need to use an alternate regular expression for
+tokenization. MALLET helpfully suggests <code>--token-regex '[\p{L}\p{M}]+'</code>.</p>
+
+</div>
+</div>
+</div>
+
+<div class="{} cell border-box-sizing text_cell rendered"><div class="prompt input_prompt">
+</div><div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html">
+<div class="highlight"><pre><span></span>mallet-2.0.7/bin/mallet import-dir --input data/hugo-les-misérables-split/ --output /tmp/topic-input-hugo.mallet --keep-sequence --remove-stopwords --stoplist-file data/stopwords/french.txt --token-regex <span class="s1">&#39;[\p{L}\p{M}]+&#39;</span>
+mallet-2.0.7/bin/mallet train-topics --input /tmp/topic-input-hugo.mallet --num-topics <span class="m">50</span> --output-doc-topics /tmp/doc-topics-hugo.txt --output-topic-keys /tmp/topic-keys-hugo.txt --word-topic-counts-file /tmp/word-topic-hugo.txt
+</pre></div>
+
+</div>
+</div>
+</div>
+
+<div class="{} cell border-box-sizing text_cell rendered"><div class="prompt input_prompt">
+</div><div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html">
+<p>As usual, we post-process the MALLET output in order to get a matrix of topic
+proportions. Each row of the matrix holds the topic proportions associated with
+a document.</p>
+
+</div>
+</div>
+</div>
+
+<div class="{} cell border-box-sizing code_cell rendered">
+<div class="input">
+<div class="prompt input_prompt">In&nbsp;[1]:</div>
+<div class="inner_cell">
+	<div class="input_area">
+<div class=" highlight hl-ipython3"><pre><span></span><span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
+<span class="kn">import</span> <span class="nn">itertools</span>
+<span class="kn">import</span> <span class="nn">operator</span>
+<span class="kn">import</span> <span class="nn">os</span>
+
+<span class="k">def</span> <span class="nf">grouper</span><span class="p">(</span><span class="n">n</span><span class="p">,</span> <span class="n">iterable</span><span class="p">,</span> <span class="n">fillvalue</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+    <span class="s2">&quot;Collect data into fixed-length chunks or blocks&quot;</span>
+    <span class="c1"># grouper(3, &#39;ABCDEFG&#39;, &#39;x&#39;) --&gt; ABC DEF Gxx&quot;</span>
+    <span class="n">args</span> <span class="o">=</span> <span class="p">[</span><span class="nb">iter</span><span class="p">(</span><span class="n">iterable</span><span class="p">)]</span> <span class="o">*</span> <span class="n">n</span>
+    <span class="k">return</span> <span class="n">itertools</span><span class="o">.</span><span class="n">zip_longest</span><span class="p">(</span><span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="n">fillvalue</span><span class="o">=</span><span class="n">fillvalue</span><span class="p">)</span>
+
+<span class="n">doctopic_triples</span> <span class="o">=</span> <span class="p">[]</span>
+<span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="s2">&quot;/tmp/doc-topics-hugo.txt&quot;</span><span class="p">)</span> <span class="k">as</span> <span class="n">f</span><span class="p">:</span>
+    <span class="n">f</span><span class="o">.</span><span class="n">readline</span><span class="p">()</span>  <span class="c1"># read one line in order to skip the header</span>
+    <span class="k">for</span> <span class="n">line</span> <span class="ow">in</span> <span class="n">f</span><span class="p">:</span>
+        <span class="n">docnum</span><span class="p">,</span> <span class="n">docname</span><span class="p">,</span> <span class="o">*</span><span class="n">values</span> <span class="o">=</span> <span class="n">line</span><span class="o">.</span><span class="n">rstrip</span><span class="p">()</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s1">&#39;</span><span class="se">\t</span><span class="s1">&#39;</span><span class="p">)</span>
+        <span class="k">for</span> <span class="n">topic</span><span class="p">,</span> <span class="n">share</span> <span class="ow">in</span> <span class="n">grouper</span><span class="p">(</span><span class="mi">2</span><span class="p">,</span> <span class="n">values</span><span class="p">):</span>
+            <span class="n">triple</span> <span class="o">=</span> <span class="p">(</span><span class="n">docname</span><span class="p">,</span> <span class="nb">int</span><span class="p">(</span><span class="n">topic</span><span class="p">),</span> <span class="nb">float</span><span class="p">(</span><span class="n">share</span><span class="p">))</span>
+            <span class="n">doctopic_triples</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">triple</span><span class="p">)</span>
+
+<span class="c1"># sort the triples</span>
+<span class="n">doctopic_triples</span><span class="o">.</span><span class="n">sort</span><span class="p">(</span><span class="n">key</span><span class="o">=</span><span class="n">operator</span><span class="o">.</span><span class="n">itemgetter</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span><span class="mi">1</span><span class="p">))</span>
+<span class="n">docnames</span> <span class="o">=</span> <span class="nb">sorted</span><span class="p">(</span><span class="nb">set</span><span class="p">([</span><span class="n">triple</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="k">for</span> <span class="n">triple</span> <span class="ow">in</span> <span class="n">doctopic_triples</span><span class="p">]))</span>
+<span class="n">docnames_base</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">splitext</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">basename</span><span class="p">(</span><span class="n">n</span><span class="p">))[</span><span class="mi">0</span><span class="p">]</span> <span class="k">for</span> <span class="n">n</span> <span class="ow">in</span> <span class="n">docnames</span><span class="p">])</span>
+<span class="n">num_topics</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">doctopic_triples</span><span class="p">)</span> <span class="o">//</span> <span class="nb">len</span><span class="p">(</span><span class="n">docnames</span><span class="p">)</span>
+
+<span class="n">doctopic</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">empty</span><span class="p">((</span><span class="nb">len</span><span class="p">(</span><span class="n">docnames</span><span class="p">),</span> <span class="n">num_topics</span><span class="p">))</span>
+<span class="k">for</span> <span class="n">i</span><span class="p">,</span> <span class="p">(</span><span class="n">doc_name</span><span class="p">,</span> <span class="n">triples</span><span class="p">)</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">itertools</span><span class="o">.</span><span class="n">groupby</span><span class="p">(</span><span class="n">doctopic_triples</span><span class="p">,</span> <span class="n">key</span><span class="o">=</span><span class="n">operator</span><span class="o">.</span><span class="n">itemgetter</span><span class="p">(</span><span class="mi">0</span><span class="p">))):</span>
+    <span class="n">doctopic</span><span class="p">[</span><span class="n">i</span><span class="p">,</span> <span class="p">:]</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="n">share</span> <span class="k">for</span> <span class="n">_</span><span class="p">,</span> <span class="n">_</span><span class="p">,</span> <span class="n">share</span> <span class="ow">in</span> <span class="n">triples</span><span class="p">])</span>
+
+<span class="n">docnames</span> <span class="o">=</span> <span class="n">docnames_base</span>
+
+<span class="c1"># get the topic words</span>
+<span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="s1">&#39;/tmp/topic-keys-hugo.txt&#39;</span><span class="p">)</span> <span class="k">as</span> <span class="nb">input</span><span class="p">:</span>
+    <span class="n">topic_keys_lines</span> <span class="o">=</span> <span class="nb">input</span><span class="o">.</span><span class="n">readlines</span><span class="p">()</span>
+<span class="n">topic_words</span> <span class="o">=</span> <span class="p">[]</span>
+<span class="k">for</span> <span class="n">line</span> <span class="ow">in</span> <span class="n">topic_keys_lines</span><span class="p">:</span>
+    <span class="n">_</span><span class="p">,</span> <span class="n">_</span><span class="p">,</span> <span class="n">words</span> <span class="o">=</span> <span class="n">line</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s1">&#39;</span><span class="se">\t</span><span class="s1">&#39;</span><span class="p">)</span>  <span class="c1"># tab-separated</span>
+    <span class="n">words</span> <span class="o">=</span> <span class="n">words</span><span class="o">.</span><span class="n">rstrip</span><span class="p">()</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s1">&#39; &#39;</span><span class="p">)</span>  <span class="c1"># remove the trailing &#39;\n&#39;</span>
+    <span class="n">topic_words</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">words</span><span class="p">)</span>
+</pre></div>
+
+	</div>
+</div>
+</div>
+
+<div class="output_wrapper">
+<div class="output">
+
+
+<div class="output_area">
+
+	<div class="prompt"></div>
+
+
+<div class="output_subarea output_text output_error">
+<pre>
+<span class="ansi-red-fg">---------------------------------------------------------------------------</span>
+<span class="ansi-red-fg">FileNotFoundError</span>                         Traceback (most recent call last)
+<span class="ansi-green-fg">&lt;ipython-input-1-a479b48ca15d&gt;</span> in <span class="ansi-cyan-fg">&lt;module&gt;</span>
+<span class="ansi-green-intense-fg ansi-bold">     11</span> 
+<span class="ansi-green-intense-fg ansi-bold">     12</span> doctopic_triples <span class="ansi-blue-fg">=</span> <span class="ansi-blue-fg">[</span><span class="ansi-blue-fg">]</span>
+<span class="ansi-green-fg">---&gt; 13</span><span class="ansi-red-fg"> </span><span class="ansi-green-fg">with</span> open<span class="ansi-blue-fg">(</span><span class="ansi-blue-fg">&#34;/tmp/doc-topics-hugo.txt&#34;</span><span class="ansi-blue-fg">)</span> <span class="ansi-green-fg">as</span> f<span class="ansi-blue-fg">:</span>
+<span class="ansi-green-intense-fg ansi-bold">     14</span>     f<span class="ansi-blue-fg">.</span>readline<span class="ansi-blue-fg">(</span><span class="ansi-blue-fg">)</span>  <span class="ansi-red-fg"># read one line in order to skip the header</span>
+<span class="ansi-green-intense-fg ansi-bold">     15</span>     <span class="ansi-green-fg">for</span> line <span class="ansi-green-fg">in</span> f<span class="ansi-blue-fg">:</span>
+
+<span class="ansi-red-fg">FileNotFoundError</span>: [Errno 2] No such file or directory: &#39;/tmp/doc-topics-hugo.txt&#39;</pre>
+</div>
+</div>
+
+</div>
+</div>
+
+</div>
+
+<div class="{} cell border-box-sizing text_cell rendered"><div class="prompt input_prompt">
+</div><div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html">
+<p>Among the fifty topics there is one topic (#35 using 0-based indexing) that
+jumps out as characteristic of events towards the close of the novel. The words
+most strongly connected with this topic include “barricade”, “fusil”, and
+“cartouches” (“barricade”, “rifle”, and “cartridges”).</p>
+
+</div>
+</div>
+</div>
+
+<div class="{} cell border-box-sizing code_cell rendered">
+<div class="input">
+<div class="prompt input_prompt">In&nbsp;[2]:</div>
+<div class="inner_cell">
+	<div class="input_area">
+<div class=" highlight hl-ipython3"><pre><span></span><span class="s1">&#39;,&#39;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">topic_words</span><span class="p">[</span><span class="mi">35</span><span class="p">])</span>
+</pre></div>
+
+	</div>
+</div>
+</div>
+
+<div class="output_wrapper">
+<div class="output">
+
+
+<div class="output_area">
+
+	<div class="prompt"></div>
+
+
+<div class="output_subarea output_text output_error">
+<pre>
+<span class="ansi-red-fg">---------------------------------------------------------------------------</span>
+<span class="ansi-red-fg">NameError</span>                                 Traceback (most recent call last)
+<span class="ansi-green-fg">&lt;ipython-input-2-b1654199d9a2&gt;</span> in <span class="ansi-cyan-fg">&lt;module&gt;</span>
+<span class="ansi-green-fg">----&gt; 1</span><span class="ansi-red-fg"> </span><span class="ansi-blue-fg">&#39;,&#39;</span><span class="ansi-blue-fg">.</span>join<span class="ansi-blue-fg">(</span>topic_words<span class="ansi-blue-fg">[</span><span class="ansi-cyan-fg">35</span><span class="ansi-blue-fg">]</span><span class="ansi-blue-fg">)</span>
+
+<span class="ansi-red-fg">NameError</span>: name &#39;topic_words&#39; is not defined</pre>
+</div>
+</div>
+
+</div>
+</div>
+
+</div>
+
+<div class="{} cell border-box-sizing text_cell rendered"><div class="prompt input_prompt">
+</div><div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html">
+<p>Because the documents are ordered in a sequence, we can plot the fate, so to
+speak, of this topic over time with the following lines of code:</p>
+
+</div>
+</div>
+</div>
+
+<div class="{} cell border-box-sizing code_cell rendered">
+<div class="input">
+<div class="prompt input_prompt">In&nbsp;[3]:</div>
+<div class="inner_cell">
+	<div class="input_area">
+<div class=" highlight hl-ipython3"><pre><span></span><span class="n">series</span> <span class="o">=</span> <span class="n">doctopic</span><span class="p">[:,</span> <span class="mi">35</span><span class="p">]</span>
+<span class="nd">@savefig</span> <span class="n">plot_topics_over_time_series_simple</span><span class="o">.</span><span class="n">png</span> <span class="n">width</span><span class="o">=</span><span class="mi">7</span><span class="ow">in</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">series</span><span class="p">,</span> <span class="s1">&#39;.&#39;</span><span class="p">)</span>  <span class="c1"># &#39;.&#39; specifies the type of mark to use on the graph</span>
+</pre></div>
+
+	</div>
+</div>
+</div>
+
+<div class="output_wrapper">
+<div class="output">
+
+
+<div class="output_area">
+
+	<div class="prompt"></div>
+
+
+<div class="output_subarea output_text output_error">
+<pre>
+<span class="ansi-cyan-fg">  File </span><span class="ansi-green-fg">&#34;&lt;ipython-input-3-f0f930daa3c5&gt;&#34;</span><span class="ansi-cyan-fg">, line </span><span class="ansi-green-fg">2</span>
+<span class="ansi-red-fg">    @savefig plot_topics_over_time_series_simple.png width=7in</span>
+                                               ^
+<span class="ansi-red-fg">SyntaxError</span><span class="ansi-red-fg">:</span> invalid syntax
+</pre>
+</div>
+</div>
+
+</div>
+</div>
+
+</div>
+
+<div class="{} cell border-box-sizing text_cell rendered"><div class="prompt input_prompt">
+</div><div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html">
+<p>While this visualization communicates the essential information about the
+prevalence of a topic in the corpus, it is not perfect. We can improve it. It
+would, for instance, be useful to include an indication of where the various
+volumes start and end. Another enhancement would add some kind of “smoothing” to
+the time series in order to better communicate the underlying trend.</p>
+<p>A rolling average of the topic shares turns out be a useful form of smoothing in
+this case. We are interested in the prevalence of a topic over time and whether
+a topic disappears completely in one 500-word chunk of text (only to reappear in
+the next) does not interest us. We want to visualize the underlying trend, that
+is, we need some model or heuristic capable of capturing the idea
+that the topic (or any similar feature) has an underlying propensity to appear at
+varying points of the novel and that while this propensity may change over time it
+does not fluctuate wildly. <sup><a href=#fn-lowess id=fn-lowess-link>[2]</a></sup></p>
+<p>Recall that a rolling or moving average of a time series associates with each
+point in the series the average of some fixed number of previous
+observations (including the current observation). This fixed number of
+observations is often
+called a “window”. The idea of a rolling mean (conveniently implemented in
+<code>pandas.rolling_mean()</code>) is effectively communicated visually:</p>
+
+</div>
+</div>
+</div>
+
+<div class="{} cell border-box-sizing code_cell rendered">
+<div class="input">
+<div class="prompt input_prompt">In&nbsp;[4]:</div>
+<div class="inner_cell">
+	<div class="input_area">
+<div class=" highlight hl-ipython3"><pre><span></span><span class="kn">import</span> <span class="nn">pandas</span> <span class="k">as</span> <span class="nn">pd</span>
+
+<span class="n">z</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span>  <span class="mf">3.</span><span class="p">,</span>   <span class="mf">2.</span><span class="p">,</span>   <span class="mf">3.</span><span class="p">,</span>   <span class="mf">6.</span><span class="p">,</span>   <span class="mf">2.</span><span class="p">,</span>   <span class="mf">3.</span><span class="p">,</span>   <span class="mf">1.</span><span class="p">,</span>   <span class="mf">3.</span><span class="p">,</span>   <span class="mf">8.</span><span class="p">,</span>   <span class="mf">3.</span><span class="p">,</span>   <span class="mf">5.</span><span class="p">,</span>
+               <span class="mf">8.</span><span class="p">,</span>   <span class="mf">7.</span><span class="p">,</span>   <span class="mf">8.</span><span class="p">,</span>   <span class="mf">7.</span><span class="p">,</span>   <span class="mf">6.</span><span class="p">,</span>   <span class="mf">8.</span><span class="p">,</span>   <span class="mf">7.</span><span class="p">,</span>   <span class="mf">7.</span><span class="p">,</span>   <span class="mf">5.</span><span class="p">,</span>   <span class="mf">8.</span><span class="p">,</span>   <span class="mf">6.</span><span class="p">,</span>
+              <span class="mf">11.</span><span class="p">,</span>   <span class="mf">6.</span><span class="p">,</span>   <span class="mf">7.</span><span class="p">,</span>   <span class="mf">8.</span><span class="p">,</span>   <span class="mf">8.</span><span class="p">,</span>   <span class="mf">6.</span><span class="p">,</span>   <span class="mf">9.</span><span class="p">,</span>  <span class="mf">15.</span><span class="p">,</span>  <span class="mf">13.</span><span class="p">,</span>  <span class="mf">10.</span><span class="p">,</span>   <span class="mf">9.</span><span class="p">])</span>
+<span class="n">pd</span><span class="o">.</span><span class="n">rolling_mean</span><span class="p">(</span><span class="n">z</span><span class="p">,</span> <span class="mi">3</span><span class="p">)</span>
+</pre></div>
+
+	</div>
+</div>
+</div>
+
+<div class="output_wrapper">
+<div class="output">
+
+
+<div class="output_area">
+
+	<div class="prompt"></div>
+
+
+<div class="output_subarea output_text output_error">
+<pre>
+<span class="ansi-red-fg">---------------------------------------------------------------------------</span>
+<span class="ansi-red-fg">AttributeError</span>                            Traceback (most recent call last)
+<span class="ansi-green-fg">&lt;ipython-input-4-66072b6dd667&gt;</span> in <span class="ansi-cyan-fg">&lt;module&gt;</span>
+<span class="ansi-green-intense-fg ansi-bold">      4</span>                <span class="ansi-cyan-fg">8.</span><span class="ansi-blue-fg">,</span>   <span class="ansi-cyan-fg">7.</span><span class="ansi-blue-fg">,</span>   <span class="ansi-cyan-fg">8.</span><span class="ansi-blue-fg">,</span>   <span class="ansi-cyan-fg">7.</span><span class="ansi-blue-fg">,</span>   <span class="ansi-cyan-fg">6.</span><span class="ansi-blue-fg">,</span>   <span class="ansi-cyan-fg">8.</span><span class="ansi-blue-fg">,</span>   <span class="ansi-cyan-fg">7.</span><span class="ansi-blue-fg">,</span>   <span class="ansi-cyan-fg">7.</span><span class="ansi-blue-fg">,</span>   <span class="ansi-cyan-fg">5.</span><span class="ansi-blue-fg">,</span>   <span class="ansi-cyan-fg">8.</span><span class="ansi-blue-fg">,</span>   <span class="ansi-cyan-fg">6.</span><span class="ansi-blue-fg">,</span>
+<span class="ansi-green-intense-fg ansi-bold">      5</span>               11.,   6.,   7.,   8.,   8.,   6.,   9.,  15.,  13.,  10.,   9.])
+<span class="ansi-green-fg">----&gt; 6</span><span class="ansi-red-fg"> </span>pd<span class="ansi-blue-fg">.</span>rolling_mean<span class="ansi-blue-fg">(</span>z<span class="ansi-blue-fg">,</span> <span class="ansi-cyan-fg">3</span><span class="ansi-blue-fg">)</span>
+
+<span class="ansi-red-fg">AttributeError</span>: module &#39;pandas&#39; has no attribute &#39;rolling_mean&#39;</pre>
+</div>
+</div>
+
+</div>
+</div>
+
+</div>
+
+<div class="{} cell border-box-sizing code_cell rendered">
+<div class="input">
+<div class="prompt input_prompt">In&nbsp;[5]:</div>
+<div class="inner_cell">
+	<div class="input_area">
+<div class=" highlight hl-ipython3"><pre><span></span><span class="n">plt</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">z</span><span class="p">,</span> <span class="s1">&#39;.&#39;</span><span class="p">,</span> <span class="n">alpha</span><span class="o">=</span><span class="mf">0.5</span><span class="p">)</span>
+
+<span class="nd">@savefig</span> <span class="n">plot_topics_over_time_rolling_mean</span><span class="o">.</span><span class="n">png</span> <span class="n">width</span><span class="o">=</span><span class="mi">5</span><span class="ow">in</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">pd</span><span class="o">.</span><span class="n">rolling_mean</span><span class="p">(</span><span class="n">z</span><span class="p">,</span> <span class="mi">5</span><span class="p">),</span> <span class="s1">&#39;-&#39;</span><span class="p">,</span> <span class="n">linewidth</span><span class="o">=</span><span class="mi">2</span><span class="p">)</span>
+</pre></div>
+
+	</div>
+</div>
+</div>
+
+<div class="output_wrapper">
+<div class="output">
+
+
+<div class="output_area">
+
+	<div class="prompt"></div>
+
+
+<div class="output_subarea output_text output_error">
+<pre>
+<span class="ansi-cyan-fg">  File </span><span class="ansi-green-fg">&#34;&lt;ipython-input-5-9aae106c98ae&gt;&#34;</span><span class="ansi-cyan-fg">, line </span><span class="ansi-green-fg">3</span>
+<span class="ansi-red-fg">    @savefig plot_topics_over_time_rolling_mean.png width=5in</span>
+                                              ^
+<span class="ansi-red-fg">SyntaxError</span><span class="ansi-red-fg">:</span> invalid syntax
+</pre>
+</div>
+</div>
+
+</div>
+</div>
+
+</div>
+
+<div class="{} cell border-box-sizing text_cell rendered"><div class="prompt input_prompt">
+</div><div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html">
+<p>After making these two improvements—marking the volume boundaries and adding
+a trend line based on a rolling average—the time series for our topic does
+a better job of orienting us in the novel and communicating the points in the
+novel where the topic appears:</p>
+
+</div>
+</div>
+</div>
+
+<div class="{} cell border-box-sizing code_cell rendered">
+<div class="input">
+<div class="prompt input_prompt">In&nbsp;[6]:</div>
+<div class="inner_cell">
+	<div class="input_area">
+<div class=" highlight hl-ipython3"><pre><span></span><span class="kn">import</span> <span class="nn">pandas</span> <span class="k">as</span> <span class="nn">pd</span>
+
+<span class="c1"># the values on the x-axis (xs) are simply a sequence of integers</span>
+<span class="c1"># corresponding to the texts (also the rows in the document topic matrix)</span>
+<span class="n">xs</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">arange</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">series</span><span class="p">))</span>
+
+<span class="n">series_smooth</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">rolling_mean</span><span class="p">(</span><span class="n">series</span><span class="p">,</span> <span class="mi">15</span><span class="p">)</span>  <span class="c1"># 15 seems to work well here</span>
+
+<span class="c1"># now we need to calculate at what index each volume starts</span>
+<span class="c1"># there are many ways to do this, two methods are shown below</span>
+<span class="c1"># method #1</span>
+<span class="n">volume_names</span> <span class="o">=</span> <span class="p">[</span><span class="s2">&quot;tome-1-fantine&quot;</span><span class="p">,</span> <span class="s2">&quot;tome-2-cosette&quot;</span><span class="p">,</span> <span class="s2">&quot;tome-3-marius&quot;</span><span class="p">,</span> <span class="s2">&quot;tome-4&quot;</span><span class="p">,</span> <span class="s2">&quot;tome-5-jean-valjean&quot;</span><span class="p">]</span>
+<span class="n">volume_indexes</span> <span class="o">=</span> <span class="p">[]</span>
+<span class="k">for</span> <span class="n">volname</span> <span class="ow">in</span> <span class="n">volume_names</span><span class="p">:</span>
+    <span class="k">for</span> <span class="n">i</span><span class="p">,</span> <span class="n">docname</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">docnames</span><span class="p">):</span>
+        <span class="k">if</span> <span class="n">volname</span> <span class="ow">in</span> <span class="n">docname</span><span class="p">:</span>
+            <span class="n">volume_indexes</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">i</span><span class="p">)</span>
+            <span class="k">break</span>
+
+<span class="nd">@suppress</span>
+<span class="n">volume_indexes_prev</span> <span class="o">=</span> <span class="n">volume_indexes</span>
+
+<span class="c1"># method #2, use NumPy functions</span>
+<span class="n">volume_indexes</span> <span class="o">=</span> <span class="p">[]</span>
+<span class="k">for</span> <span class="n">volname</span> <span class="ow">in</span> <span class="n">volume_names</span><span class="p">:</span>
+    <span class="n">volume_indexes</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">min</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">nonzero</span><span class="p">([</span><span class="n">volname</span> <span class="ow">in</span> <span class="n">docname</span> <span class="k">for</span> <span class="n">docname</span> <span class="ow">in</span> <span class="n">docnames</span><span class="p">])))</span>
+
+<span class="nd">@suppress</span>
+<span class="k">assert</span> <span class="n">volume_indexes</span> <span class="o">==</span> <span class="n">volume_indexes_prev</span>
+
+<span class="c1"># now we can assemble the plot</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">series</span><span class="p">,</span> <span class="s1">&#39;.&#39;</span><span class="p">,</span> <span class="n">alpha</span><span class="o">=</span><span class="mf">0.3</span><span class="p">)</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">series_smooth</span><span class="p">,</span> <span class="s1">&#39;-&#39;</span><span class="p">,</span> <span class="n">linewidth</span><span class="o">=</span><span class="mi">2</span><span class="p">)</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">vlines</span><span class="p">(</span><span class="n">volume_indexes</span><span class="p">,</span> <span class="n">ymin</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">ymax</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">max</span><span class="p">(</span><span class="n">series</span><span class="p">))</span>
+<span class="n">text_xs</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">volume_indexes</span><span class="p">)</span> <span class="o">+</span> <span class="n">np</span><span class="o">.</span><span class="n">diff</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">volume_indexes</span> <span class="o">+</span> <span class="p">[</span><span class="nb">max</span><span class="p">(</span><span class="n">xs</span><span class="p">)]))</span><span class="o">/</span><span class="mi">2</span>
+<span class="n">text_ys</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">repeat</span><span class="p">(</span><span class="nb">max</span><span class="p">(</span><span class="n">series</span><span class="p">),</span> <span class="nb">len</span><span class="p">(</span><span class="n">volume_names</span><span class="p">))</span> <span class="o">-</span> <span class="mf">0.05</span>
+<span class="k">for</span> <span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="n">s</span> <span class="ow">in</span> <span class="nb">zip</span><span class="p">(</span><span class="n">text_xs</span><span class="p">,</span> <span class="n">text_ys</span><span class="p">,</span> <span class="n">volume_names</span><span class="p">):</span>
+    <span class="n">plt</span><span class="o">.</span><span class="n">text</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="n">s</span><span class="p">,</span> <span class="n">horizontalalignment</span><span class="o">=</span><span class="s1">&#39;center&#39;</span><span class="p">)</span>
+
+<span class="n">plt</span><span class="o">.</span><span class="n">title</span><span class="p">(</span><span class="s1">&#39;Les Misérables, Topic #35 (barricade enjolras ...)&#39;</span><span class="p">)</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">ylabel</span><span class="p">(</span><span class="s2">&quot;Topic share&quot;</span><span class="p">)</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">xlabel</span><span class="p">(</span><span class="s2">&quot;Novel segment&quot;</span><span class="p">)</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">ylim</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="nb">max</span><span class="p">(</span><span class="n">series</span><span class="p">))</span>
+
+<span class="nd">@savefig</span> <span class="n">plot_topics_over_time_series_les_misérables</span><span class="o">.</span><span class="n">png</span> <span class="n">width</span><span class="o">=</span><span class="mi">7</span><span class="ow">in</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">tight_layout</span><span class="p">()</span>
+</pre></div>
+
+	</div>
+</div>
+</div>
+
+<div class="output_wrapper">
+<div class="output">
+
+
+<div class="output_area">
+
+	<div class="prompt"></div>
+
+
+<div class="output_subarea output_text output_error">
+<pre>
+<span class="ansi-cyan-fg">  File </span><span class="ansi-green-fg">&#34;&lt;ipython-input-6-d5d19b8d7c91&gt;&#34;</span><span class="ansi-cyan-fg">, line </span><span class="ansi-green-fg">21</span>
+<span class="ansi-red-fg">    volume_indexes_prev = volume_indexes</span>
+                      ^
+<span class="ansi-red-fg">SyntaxError</span><span class="ansi-red-fg">:</span> invalid syntax
+</pre>
+</div>
+</div>
+
+</div>
+</div>
+
+</div>
+
+<div class="{} cell border-box-sizing text_cell rendered"><div class="prompt input_prompt">
+</div><div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html">
+<p>There are of many other topics that appear in our fit of the corpus. Looping
+over the topics and saving an image for each topic is straightforward:</p>
+
+</div>
+</div>
+</div>
+
+<div class="{} cell border-box-sizing code_cell rendered">
+<div class="input">
+<div class="prompt input_prompt">In&nbsp;[7]:</div>
+<div class="inner_cell">
+	<div class="input_area">
+<div class=" highlight hl-ipython3"><pre><span></span><span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">num_topics</span><span class="p">):</span>
+    <span class="n">plt</span><span class="o">.</span><span class="n">clf</span><span class="p">()</span>  <span class="c1"># clears the current plot</span>
+    <span class="n">series</span> <span class="o">=</span> <span class="n">doctopic</span><span class="p">[:,</span> <span class="n">i</span><span class="p">]</span>
+    <span class="n">xs</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">arange</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">series</span><span class="p">))</span>
+    <span class="n">series_smooth</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">rolling_mean</span><span class="p">(</span><span class="n">series</span><span class="p">,</span> <span class="mi">15</span><span class="p">)</span>
+    <span class="n">plt</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">series</span><span class="p">,</span> <span class="s1">&#39;.&#39;</span><span class="p">)</span>
+    <span class="n">plt</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">series_smooth</span><span class="p">,</span> <span class="s1">&#39;-&#39;</span><span class="p">,</span> <span class="n">linewidth</span><span class="o">=</span><span class="mi">2</span><span class="p">)</span>
+    <span class="n">plt</span><span class="o">.</span><span class="n">title</span><span class="p">(</span><span class="s2">&quot;Topic </span><span class="si">{}</span><span class="s2">: </span><span class="si">{}</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">i</span><span class="p">,</span> <span class="s1">&#39;,&#39;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">topic_words</span><span class="p">[</span><span class="n">i</span><span class="p">])))</span>
+    <span class="n">savefig_fn</span> <span class="o">=</span> <span class="s2">&quot;/tmp/hugo-topic</span><span class="si">{}</span><span class="s2">.pdf&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">i</span><span class="p">)</span>
+    <span class="n">plt</span><span class="o">.</span><span class="n">savefig</span><span class="p">(</span><span class="n">savefig_fn</span><span class="p">,</span> <span class="nb">format</span><span class="o">=</span><span class="s1">&#39;pdf&#39;</span><span class="p">)</span>
+</pre></div>
+
+	</div>
+</div>
+</div>
+
+<div class="output_wrapper">
+<div class="output">
+
+
+<div class="output_area">
+
+	<div class="prompt"></div>
+
+
+<div class="output_subarea output_text output_error">
+<pre>
+<span class="ansi-red-fg">---------------------------------------------------------------------------</span>
+<span class="ansi-red-fg">NameError</span>                                 Traceback (most recent call last)
+<span class="ansi-green-fg">&lt;ipython-input-7-2cb85d7e1331&gt;</span> in <span class="ansi-cyan-fg">&lt;module&gt;</span>
+<span class="ansi-green-fg">----&gt; 1</span><span class="ansi-red-fg"> </span><span class="ansi-green-fg">for</span> i <span class="ansi-green-fg">in</span> range<span class="ansi-blue-fg">(</span>num_topics<span class="ansi-blue-fg">)</span><span class="ansi-blue-fg">:</span>
+<span class="ansi-green-intense-fg ansi-bold">      2</span>     plt<span class="ansi-blue-fg">.</span>clf<span class="ansi-blue-fg">(</span><span class="ansi-blue-fg">)</span>  <span class="ansi-red-fg"># clears the current plot</span>
+<span class="ansi-green-intense-fg ansi-bold">      3</span>     series <span class="ansi-blue-fg">=</span> doctopic<span class="ansi-blue-fg">[</span><span class="ansi-blue-fg">:</span><span class="ansi-blue-fg">,</span> i<span class="ansi-blue-fg">]</span>
+<span class="ansi-green-intense-fg ansi-bold">      4</span>     xs <span class="ansi-blue-fg">=</span> np<span class="ansi-blue-fg">.</span>arange<span class="ansi-blue-fg">(</span>len<span class="ansi-blue-fg">(</span>series<span class="ansi-blue-fg">)</span><span class="ansi-blue-fg">)</span>
+<span class="ansi-green-intense-fg ansi-bold">      5</span>     series_smooth <span class="ansi-blue-fg">=</span> pd<span class="ansi-blue-fg">.</span>rolling_mean<span class="ansi-blue-fg">(</span>series<span class="ansi-blue-fg">,</span> <span class="ansi-cyan-fg">15</span><span class="ansi-blue-fg">)</span>
+
+<span class="ansi-red-fg">NameError</span>: name &#39;num_topics&#39; is not defined</pre>
+</div>
+</div>
+
+</div>
+</div>
+
+</div>
+
+<div class="{} cell border-box-sizing text_cell rendered"><div class="prompt input_prompt">
+</div><div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html">
+<p><p><a id=fn-les-mis href=#fn-les-mis-link><strong>[1]</strong></a> The text of Les Misérables has been used in a variety of
+(interactive) visualization projects, including <a href="http://bost.ocks.org/mike/miserables/">Les Misérables
+Co-occurrence</a> and <a href="http://neoformix.com/2013/NovelViews.html">Novel Views:
+Les Miserables</a>.</p>
+<p><p><a id=fn-lowess href=#fn-lowess-link><strong>[2]</strong></a> For generic smoothing those accustomed to using R will be
+familiar with the function <code>loess()</code> which implements the most common form
+of scatterplot smoothing. In Python a similar function
+(<code>statsmodels.nonparametric.lowess()</code>) is available in the <code>statsmodels</code>
+package. While we might be tempted to use such a function to communicate
+visually the basic trend, we will be better served if we think of the
+sequence of topic shares as a proper time series rather than (merely)
+a sequence of dependant and independent variables suitable for visualization
+in a scatter plot.</p>
+
+</div>
+</div>
+</div>
+ 
+
+
+
+
+					</div>
+
+				</div>
+
+			</div>
+
+			<footer class="footer">
+
+				<p>&copy; Copyright <YEAR>, Built using the minimal jupinx template.</p>
+
+			</footer>
+
+		</div>
+
+		<script src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.1/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+		<script src="/_static/js/base.js"></script>
+
+	</body>
+</html>
